@@ -1077,12 +1077,12 @@ ml_win32_get_default_language (void)
     case LANG_SAAMI: /* actually Northern Sami */ l = "se"; sl = "NO"; break;
     case LANG_SANSKRIT: l = "sa"; sl = "IN"; break;
     case LANG_SINDHI: l = "sd";
-      switch (sub)
-	{
-	case SUBLANG_SINDHI_PAKISTAN: sl = "PK"; break;
-	case SUBLANG_SINDHI_AFGHANISTAN: sl = "AF"; break;
-	}
-      break;
+	if (sub == SUBLANG_SINDHI_PAKISTAN)
+		sl = "PK";
+	else
+		sl = "AF";
+
+	break;
     case LANG_SINHALESE: l = "si"; sl = "LK"; break;
     case LANG_SLOVAK: l = "sk"; sl = "SK"; break;
     case LANG_SLOVENIAN: l = "sl"; sl = "SI"; break;
@@ -1197,14 +1197,9 @@ ml_win32_get_default_language (void)
 
 #endif /* WIN32 */
 
-size_t 
-ml_iconv (iconv_t cd,
-          const char    **inbuf,
-          size_t  *inbytes_left,
-          char    **outbuf,
-          size_t  *outbytes_left)
+size_t ml_iconv (iconv_t cd, const char **inbuf, size_t *inbytes_left, char **outbuf, size_t *outbytes_left)
 {
-    return iconv (cd, inbuf, inbytes_left, outbuf, outbytes_left);
+	return iconv (cd, inbuf, inbytes_left, outbuf, outbytes_left);
 }
 
 #ifndef EILSEQ

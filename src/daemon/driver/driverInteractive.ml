@@ -1346,13 +1346,13 @@ let old_print_search buf o results =
                     | Field_Bitrate -> cbitrate := get_tag_value t
                     | Field_Format -> cformat := get_tag_value t
                     | _ -> ())) r.result_tags;
-
+			(* Search results: Hash Check *)
               if use_html_mods o then
                 Printf.bprintf buf "\\<td class=\\\"sr ar\\\"\\>%s\\</td\\>
 			\\<td class=\\\"sr ar\\\"\\>%s\\</td\\>
 			\\<td class=\\\"sr ar\\\"\\>%s\\</td\\>
-			\\<td class=\\\"sr\\\"\\>\\<a href=\\\"http://bitzi.com/lookup/ed2k:%s\\\"\\>BI\\</a\\>\\</td\\>
-			\\<td class=\\\"sr\\\"\\>\\<a href=\\\"http://www.filedonkey.com/url/%s\\\"\\>FD\\</a\\>\\</td\\>
+			\\<td class=\\\"sr\\\"\\>\\<a href=\\\"http://ed2k.shortypower.org/?hash=%s\\\"\\>SP\\</a\\>\\</td\\>
+			\\<td class=\\\"sr\\\"\\>\\<a href=\\\"http://edk.peerates.net/hashreport?h=%s\\\"\\>PR\\</a\\>\\</td\\>
 			\\<td class=\\\"sr ar\\\"\\>%s\\</td\\>
 			\\<td class=\\\"sr ar\\\"\\>%s\\</td\\>
 			\\<td class=\\\"sr ar\\\"\\>%s\\</td\\>"
@@ -2490,6 +2490,11 @@ let print_upstats o list server =
 	  (Filename.basename impl.impl_shared_codedname)
 	  impl.impl_shared_size impl.impl_shared_id in
 
+	(* Transfers - Uploads:
+		on mouse over file, opens window:
+		1) Filename
+		2) magic
+		3) server list*)
 	Printf.bprintf buf "\\<tr class=\\\"dl-%d\\\"" (html_mods_cntr ());
 	(if !!html_mods_use_js_tooltips then
 	   Printf.bprintf buf " onMouseOver=\\\"mOvr(this);setTimeout('popLayer(\\\\\'%s<br>%s%s\\\\\')',%d);setTimeout('hideLayer()',%d);return true;\\\" onMouseOut=\\\"mOut(this);hideLayer();setTimeout('hideLayer()',%d)\\\"\\>"
@@ -2515,27 +2520,35 @@ let print_upstats o list server =
 		!!html_mods_js_tooltips_timeout
 		!!html_mods_js_tooltips_wait
 	 else Printf.bprintf buf " onMouseOver=\\\"mOvr(this);return true;\\\" onMouseOut=\\\"mOut(this);\\\"\\>");
-
+	 
+	(* Transfers - Uploads:
+	Reqs - Total - UPratio - P - Filename - Stats - Publ - Status *)
 	let uploaded = Int64.to_float impl.impl_shared_uploaded in
 	let size = Int64.to_float impl.impl_shared_size in
 	html_mods_td buf [
+		(* Total file requests *)
 	  ("", "sr ar", Printf.sprintf "%d" impl.impl_shared_requests);
+		(* Total bytes sent *)
 	  ("", "sr ar", size_of_int64 impl.impl_shared_uploaded);
+		(* Upload Ratio *)
 	  ("", "sr ar", Printf.sprintf "%5.1f" ( if size < 1.0 then 0.0 else (uploaded *. 100.) /. size));
+		(* Preview upload *)
 	  ("", "sr", Printf.sprintf "\\<a href=\\\"preview_upload?q=%d\\\"\\>P\\</a\\>" impl.impl_shared_num);
+		(* File name *)
 	  ("", "sr", (if impl.impl_shared_id = Md4.null then
 		        (shorten (Filename.basename impl.impl_shared_codedname) !!max_name_len)
 		      else
 			Printf.sprintf "\\<a href=\\\"%s\\\"\\>%s\\</a\\>"
 			  ed2k (shorten (Filename.basename impl.impl_shared_codedname) !!max_name_len)));
+		(* Statistic links *)
 	  ("", "sr", (if impl.impl_shared_id = Md4.null then "" else
-			Printf.sprintf "\\<a href=\\\"http://tothbenedek.hu/ed2kstats/ed2k?hash=%s\\\"\\>%s\\</a\\>
-\\<a href=\\\"http://ed2k.titanesel.ws/ed2k.php?hash=%s\\\"\\>%s\\</a\\>
-\\<a href=\\\"http://bitzi.com/lookup/ed2k:%s\\\"\\>%s\\</a\\>"
-                      (Md4.to_string impl.impl_shared_id) "T1"
-                      (Md4.to_string impl.impl_shared_id) "T2"
-                      (Md4.to_string impl.impl_shared_id) "B"));
+			Printf.sprintf "\\<a href=\\\"http://edk.peerates.net/hashreport?h=%s\\\"\\>%s\\</a\\>
+\\<a href=\\\"http://ed2k.shortypower.org/?hash=%s\\\"\\>%s\\</a\\>"
+                      (Md4.to_string impl.impl_shared_id) "PR"
+                      (Md4.to_string impl.impl_shared_id) "SP"));
+		(* Published on servers *)
 	  ("", "sr ar", Printf.sprintf "%d" published);
+		(* Shared status *)
 	  ("", "sr", shared_state (as_shared impl) o);
         ];
 	Printf.bprintf buf "\\</tr\\>\n";

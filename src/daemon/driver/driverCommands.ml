@@ -1697,14 +1697,14 @@ let _ =
 
         if use_html_mods o then
           html_mods_commands buf "commandsTable" "commands" (!custom_commands @ [
-            ("bu bbig", "Visit FileHeaven",
-             "parent.frames[_getFrameByName('output')].location.href='http://www.fileheaven.org/'", "FileHeaven");
+            ("bu bbig", "Visit Peerates",
+             "parent.frames[_getFrameByName('output')].location.href='http://edk.peerates.net/'", "Peerates");
             ("bu bbig", "Visit FileDonkey",
-             "parent.frames[_getFrameByName('output')].location.href='http://www.filedonkey.com/'", "FileDonkey");
-            ("bu bbig", "Visit Bitzi",
+             "parent.frames[_getFrameByName('output')].location.href='http://ed2k.shortypower.org/'", "Shortypower");
+            (* old inactive: ("bu bbig", "Visit Bitzi",
              "parent.frames[_getFrameByName('output')].location.href='http://www.fileheaven.org/'", "Bitzi");
             ("bu bbig", "Visit eMugle",
-             "parent.frames[_getFrameByName('output')].location.href='http://www.emugle.com/'", "eMugle");
+             "parent.frames[_getFrameByName('output')].location.href='http://www.emugle.com/'", "eMugle");*)
           ]);
         ""
     ), ":\t\t\tview custom queries";

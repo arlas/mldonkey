@@ -1343,9 +1343,10 @@ let _ =
      in
 
       tr ();
+	  (* Downloads, click on file; Info - Fake check*)
       html_mods_td buf [
         ("Fake check links", "sr br", "Fakecheck");
-        ("", "sr", Printf.sprintf "\\<a target=\\\"_blank\\\" href=\\\"http://bitzi.com/lookup/urn:ed2k:%s\\\"\\>[Bitzi-Bitpedia]\\</a\\> \\<a target=\\\"_blank\\\" href=\\\"http://www.filedonkey.com/url/%s\\\"\\>[FileDonkey]\\</a\\>"
+        ("", "sr", Printf.sprintf "\\<a target=\\\"_blank\\\" href=\\\"http://edk.peerates.net/hashreport?h=%s\\\"\\>[Peerates]\\</a\\> \\<a target=\\\"_blank\\\" href=\\\"http://ed2k.shortypower.org/?hash=%s\\\"\\>[Shortypower]\\</a\\>"
             (Md4.to_string file.file_md4) (Md4.to_string file.file_md4)
         ) ];
 
@@ -1360,7 +1361,8 @@ let _ =
       ) file.file_comments;
 
       tr ();
-      html_mods_td buf [
+	  (* Downloads, click on file; Info - File history, no sites available anymore? *)
+      (*html_mods_td buf [
         ("File History Links", "sr br", "File History");
         ("","sr", Printf.sprintf
 "\\<a target=\\\"_blank\\\" href=\\\"http://tothbenedek.hu/ed2kstats/ed2k?hash=%s\\\"\\>Toth File History\\</a\\>
@@ -1368,7 +1370,7 @@ let _ =
             (Md4.to_string file.file_md4) (Md4.to_string file.file_md4)
 	)
        ];
-      tr ();
+      tr ();*)
       let ed2k = file_print_ed2k_link (file_best_name file) (file_size file) file.file_md4 in
       html_mods_td buf [
         ("ed2k link", "sr br", "ed2k link");

@@ -794,7 +794,7 @@ void tiger_tree_string(char *s, size_t len, size_t pos, size_t block_size, char 
 {
   if(block_size == BLOCK_SIZE){
     size_t length = (len - pos > BLOCK_SIZE) ? BLOCK_SIZE : len - pos;
-    tiger_hash(0, s+pos, length, digest);
+    tiger_hash(0, s+pos, length, (unsigned char *)digest);
   } else {    
     if(pos+block_size/2 >=len){
       tiger_tree_string(s, len, pos, block_size/2, digest);
@@ -803,17 +803,13 @@ void tiger_tree_string(char *s, size_t len, size_t pos, size_t block_size, char 
       char *digests = digests_prefixed+1;
       tiger_tree_string(s, len, pos, block_size/2, digests);
       tiger_tree_string(s, len, pos+block_size/2, block_size/2, digests+DIGEST_LEN);
-      tiger_hash(1,digests, 2*DIGEST_LEN, digest);
+      tiger_hash(1,digests, 2*DIGEST_LEN, (unsigned char *)digest);
     }
   }
 }
 
 /**************************************************************************
-
-
                       OCaml stubs (copied from md4_c.c)
- 
-
 ***************************************************************************/
 
 #include "md4.h"
@@ -827,24 +823,24 @@ OFF_T tiger_block_size(OFF_T len)
 
 value tigertree_unsafe_string(value digest_v, value string_v, value len_v)
 {
-  unsigned char *digest = String_val(digest_v);
-  unsigned char *string = String_val(string_v);
-  long len = Long_val(len_v);
+	char *digest = String_val(digest_v);
+	char *string = String_val(string_v);
+	long len = Long_val(len_v);
 
-  tiger_tree_string (string, len, 0, tiger_block_size(len), digest);
+	tiger_tree_string (string, len, 0, tiger_block_size(len), digest);
  
-  return Val_unit;
+	return Val_unit;
 }
 
 value tiger_unsafe_string(value digest_v, value string_v, value len_v)
 {
-  unsigned char *digest = String_val(digest_v);
-  unsigned char *string = String_val(string_v);
-  long len = Long_val(len_v);
+	unsigned char *digest = (unsigned char *)String_val(digest_v);
+	unsigned char *string = (unsigned char *)String_val(string_v);
+	long len = Long_val(len_v);
 
-  static_tiger ((word64*)string, len, (word64*) digest);  
-  swap_digest(digest);
-  
-  return Val_unit;
+	static_tiger ((word64*)string, len, (word64*) digest);  
+	swap_digest(digest);
+
+	return Val_unit;
 }
 

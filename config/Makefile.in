@@ -124,7 +124,7 @@ LIBS_flags += -ccopt "$(LDFLAGS) $(CPPFLAGS)"
 CCLIB += $(LIBS)
 
 ifeq ("$(OS_FILES2)", "mingw")
-  CCLIB += -lws2_32 -lgdi32 -luser32 -ladvapi32 -lwsock32 -limm32 -lshell32 -lole32 resfile.o
+  CCLIB += -lpthread -lstdc++ -lws2_32 -lgdi32 -luser32 -ladvapi32 -lwsock32 -limm32 -lshell32 -lole32 resfile.o
 endif
 
 ifeq ("$(OS_FILES2)", "cygwin")
@@ -301,7 +301,7 @@ Makefile: config/Makefile.in
 MAIN_SRCS=$(COMMON)/commonMain.ml
 
 ifeq ("$(DONKEY_SUI)", "yes")
-  CRYPTOPP_LIBS_flags += -cc '$(CXX) $(CXXFLAGS)' -ccopt '$(CRYPTOPPFLAGS)'
+  CRYPTOPP_LIBS_flags += -cc 'c:/cygwin/bin/i686-w64-mingw32-g++ $(CXXFLAGS)' -ccopt '$(CRYPTOPPFLAGS)'
   DONKEY_SRCS += $(LIB)/CryptoPP.cc $(LIB)/CryptoPP_stubs.c $(SRC_DONKEY)/donkeySui1.ml $(SRC_DONKEY)/donkeySui.ml
 else
   DONKEY_SRCS += $(SRC_DONKEY)/donkeySui2.ml $(SRC_DONKEY)/donkeySui.ml

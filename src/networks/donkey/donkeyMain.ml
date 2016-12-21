@@ -22,7 +22,7 @@ open Options
 
 open BasicSocket
 open TcpBufferedSocket
-  
+
 open CommonDownloads
 open CommonNetwork
 open CommonInteractive
@@ -32,14 +32,14 @@ open CommonComplexOptions
 open CommonTypes
 open CommonOptions
 open CommonGlobals
-  
+
 open DonkeyMftp
 open DonkeyProtoCom
 open DonkeyServers
 open DonkeyComplexOptions
 open DonkeyOneFile
 open DonkeyFiles
-open DonkeyTypes  
+open DonkeyTypes
 open DonkeyGlobals
 open DonkeyClient
 open DonkeyThieves

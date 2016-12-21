@@ -316,25 +316,22 @@ void fst_hash_string (unsigned char *fth, unsigned char *file, int64_t filesize)
   fth[19] = (smallhash >> 24) & 0xff;
 }
 
-
-
-
 #include "caml/fail.h"
 
 value fst_hash_file_ml(value digest, value filename, value filesize)
 {
-  if(fst_hash_file(String_val(digest), String_val(filename), 
-        Int64_val(filesize))) return Val_unit;
-  failwith("Exception during FST computation");
+	if (fst_hash_file((unsigned char*) String_val(digest), String_val(filename), Int64_val(filesize)))
+		return Val_unit;
+	failwith("Exception during FST computation");
 }
 
 value fst_hash_string_ml(value digest, value s, value size)
 {
-  fst_hash_string(String_val(digest), String_val(s), Int_val(size));
-  return Val_unit;
+	fst_hash_string((unsigned char*)String_val(digest), (unsigned char*)String_val(s), Int_val(size));
+	return Val_unit;
 }
 
 value fst_hash_checksum_ml(value digest)
 {
-  return Val_int(fst_hash_checksum(String_val(digest)));
+	return Val_int(fst_hash_checksum((unsigned char*)String_val(digest)));
 }

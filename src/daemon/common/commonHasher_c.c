@@ -63,7 +63,7 @@ static void HASH_NAME##_unsafe64_fd_direct (OS_FD fd, OFF_T pos, OFF_T len, \
   while (len!=0){ \
     size_t max_nread = HASH_BUFFER_LEN > len ? len : HASH_BUFFER_LEN; \
  \
-    nread = os_read (fd, local_hash_buffer, max_nread); \
+    nread = os_read (fd, (char*)local_hash_buffer, max_nread); \
  \
     if(nread <= 0) { \
         unix_error(errno, "HASH_NAME##unsafe64_fd_direct: Read", Nothing); \
@@ -108,7 +108,7 @@ static void tiger_tree_fd(OS_FD fd, size_t len, OFF_T pos,
       toread -= nread;
     }
 
-    tiger_hash(0, s, length, digest);
+    tiger_hash(0, s, length, (unsigned char *)digest);
   } else {    
     if(pos+block_size/2 >=len){
       tiger_tree_fd(fd, len, pos, block_size/2, digest);
@@ -117,7 +117,7 @@ static void tiger_tree_fd(OS_FD fd, size_t len, OFF_T pos,
       char *digests = digests_prefixed+1;
       tiger_tree_fd(fd, len, pos, block_size/2, digests);
       tiger_tree_fd(fd, len, pos+block_size/2, block_size/2, digests+DIGEST_LEN);
-      tiger_hash(1,digests, 2*DIGEST_LEN, digest);
+      tiger_hash(1,digests, 2*DIGEST_LEN, (unsigned char *)digest);
     }
   }
 }

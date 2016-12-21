@@ -17,6 +17,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 *)
 
+(* Bitzi doesn't work anymore, deprecated? *)
 
 open Int64ops
 open Printf2

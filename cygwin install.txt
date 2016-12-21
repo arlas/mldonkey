@@ -1,0 +1,543 @@
+Installazione Windows 7 32 bit
+
+1) Setup Cygwin and install:
+
+	automake
+	bison
+	curl
+	flexdll
+	gettext-devel
+	git
+	libintl-devel
+	libreadline-devel
+	libtool
+	libX11-devel
+	make
+	m4
+	mingw64-i686-binutils
+	mingw64-i686-gcc-core
+	mingw64-i686-gcc-fortran
+	mingw64-i686-gcc-g++
+	mingw64-i686-gmp
+	mingw64-i686-openssl
+	mingw64-i686-pkg-config
+	mingw64-i686-sqlite3
+	/* for 64 bit:
+	mingw64-x86_64-gcc-core
+	mingw64-x86_64-gmp
+	mingw64-x86_64-openssl
+	mingw64-x86_64-pkg-config
+	mingw64-x86_64-sqlite3
+	*/
+	nano
+	patch
+	pkg-config
+	rlwrap
+	rsync
+	unzip
+	wget
+
+	nano c:/cygwin/etc/fstab
+	/////append the following line.
+	/usr/i686-w64-mingw32/sys-root/mingw /mingw none bind
+	c:/users/alas /alas none bind
+
+////meglio non copiarli!
+////cp /usr/bin/i686-w64-mingw32-g++.exe /usr/i686-w64-mingw32/bin/g++.exe
+////cp /usr/bin/i686-w64-mingw32-gcc.exe /usr/i686-w64-mingw32/bin/gcc.exe
+////cp /usr/bin/i686-w64-mingw32-cpp.exe /usr/i686-w64-mingw32/bin/cpp.exe
+
+	nano ~/.bashrc
+	export PATH=/mingw/bin:/usr/i686-w64-mingw32/bin:/usr/local/bin:/usr/bin:/usr/lib/gcc/i686-w64-mingw32/5.4.0
+	export CC=/usr/bin/i686-w64-mingw32-gcc
+	export PKG_CONFIG_PATH=/mingw/lib/pkgconfig
+
+
+	export CXX=/usr/bin/i686-w64-mingw32-g++
+//////
+set PATH=/mingw/bin;%PATH%
+-fwin32/Makefile.gcc
+//////
+1a) per compilare con mingw: i686-w64-mingw32-gcc
+i686-w64-mingw32-g++
+-static-libgcc and -static-libstdc++
+i686-w64-mingw32-gcc -static-libstdc++
+
+i686-w64-mingw32-cpp
+i686-w64-mingw32-g++ -static -static-libgcc -static-libstdc++ helloworld.cpp
+
+2) istallare OPAM per windows 32 bit CYGWIN:
+	
+	https://github.com/fdopen/opam-repository-mingw
+	
+	wget https://dl.dropboxusercontent.com/s/eo4igttab8ipyle/opam32.tar.xz
+	tar -xf 'opam32.tar.xz'
+	bash opam32/install.sh
+	opam init default 'https://github.com/fdopen/opam-repository-mingw.git' --comp 4.03.0+mingw32 --switch 4.03.0+mingw32
+
+
+
+	opam install depext-cygwinports
+	opam install zarith batteries stdint fileutils sqlite3 yojson
+	opam install camlp4
+	opam depext foobar
+
+	/* inserire ~/.bashrc*/
+	export CAML_LD_LIBRARY_PATH=$HOME/.opam/system/lib/stublibs:/cygdrive/c/OCaml/lib/stublibs
+	export MANPATH=$HOME/.opam/system/man:$MANPATH
+	export PATH=$HOME/.opam/system/bin:/usr/x86_64-w64-mingw32/sys-root/mingw/bin/:$PATH
+	export CAMLP4LIB=C:/OCaml/lib/camlp4
+
+
+
+3) mldonkey:
+
+	./configure
+
+	./configure --build=i686-w64-mingw32 --prefix=/mingw --disable-fasttrack
+
+	./configure --build=i686-w64-mingw32
+
+
+https://sourceforge.net/projects/mldonkey/files/mldonkey/3.1.5/mldonkey-3.1.5.tar.bz2/download
+
+
+----------------------nano ~/.bashrc
+cp /usr/bin/i686-w64-mingw32-g++.exe /usr/i686-w64-mingw32/bin/g++.exe
+cp /usr/bin/i686-w64-mingw32-gcc.exe /usr/i686-w64-mingw32/bin/gcc.exe
+cp /usr/bin/i686-w64-mingw32-cpp.exe /usr/i686-w64-mingw32/bin/cpp.exe
+export PATH=$HOME/.opam/4.03.0+mingw32/bin:/usr/i686-w64-mingw32/bin:/usr/local/bin:/usr/bin:/lib/gcc/i686-w64-mingw32/5.4.0:/usr/i686-w64-mingw32/sys-root/mingw/bin:$PATH
+export CC=/usr/bin/i686-w64-mingw32-gcc
+export PKG_CONFIG_PATH=/mingw/lib/pkgconfig
+export CYGWIN='winsymlinks:native'
+
+
+/////
+cd /cygdrive/c/users/alas/documents/prova/zlib-1.2.8
+
+export PATH=/mingw/bin:/usr/i686-w64-mingw32/bin:/usr/local/bin:/usr/bin:/lib/gcc/i686-w64-mingw32/5.4.0
+//////
+
+
+COMPILE ZLIB
+
+	wget http://zlib.net/zlib-1.2.8.tar.gz
+	tar xzvf zlib-1.2.8.tar.gz
+	cd zlib-1.2.8
+
+	/////Cambiare con
+	nano win32/Makefile.gcc
+	///CC = $(PREFIX)gcc
+	///CC=/usr/bin/i686-w64-mingw32-gcc
+	///RC = $(PREFIX)windres
+	///RC = i686-w64-mingw32-windres
+
+	make -fwin32/Makefile.gcc
+	cp -iv zlib1.dll /mingw/bin
+	cp -iv zconf.h zlib.h /mingw/include
+	cp -iv libz.a /mingw/lib
+	cp -iv libz.dll.a /mingw/lib
+
+COMPILE BZIP2
+	wget http://bzip.org/1.0.6/bzip2-1.0.6.tar.gz
+	cd bzip2-1.0.6
+
+	///////Change line 78 of bzlib.h to read:
+	#ifdef _WIN32
+	#if defined(_WIN32) && !defined(__MINGW32__)
+
+
+	///////cambiare con
+	nano Makefile
+	CC=gcc
+	CC=/usr/bin/i686-w64-mingw32-gcc
+
+	make
+	cp bzlib.h /mingw/include/
+	cp libbz2.a /mingw/lib
+
+COMPILE LIBICONV
+
+	wget http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz
+
+	tar xvf libiconv-1.14.tar.gz
+	cd libiconv-1.14
+
+	./configure --build=i686-w64-mingw32 --prefix=/mingw --enable-static
+	////export RC=i686-w64-mingw32-windres
+	nano lib/Makefile
+	////change
+	////RC=i686-w64-mingw32-windres
+	nano src/Makefile
+	////WINDRES = i686-w64-mingw32-windres
+	make
+	make install
+
+
+--------------
+	git://git.sv.gnu.org/libiconv.git
+	cd libinconv-l
+
+	libtoolize --force
+	aclocal
+	autoheader
+	automake --force-missing --add-missing
+	autoconf
+
+COMPILE JPEG
+	wget http://www.ijg.org/files/jpegsrc.v9b.tar.gz
+	cd jpeg-9b
+	./configure --build=i686-w64-mingw32 --prefix=/mingw
+	make
+	make install
+
+COMPILE LIBPNG
+	wget ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng16/libpng-1.6.26.tar.gz
+	cd libpng-1.6.26
+	./configure --build=i686-w64-mingw32 --prefix=/mingw
+	make
+	make install
+
+COMPILE FREETYPE? (https://lists.nongnu.org/archive/html/freetype/2015-11/msg00034.html)
+	/*
+	wget https://download.savannah.gnu.org/releases/freetype/freetype-2.7.tar.gz
+	tar xvf freetype-2.7.tar.gz
+	cd freetype-2.7
+	./configure --build=i686-w64-mingw32 --prefix=/mingw
+	make
+	////if error could not open... for writing?
+	//// open with nano builds/exports.mk
+	////U2W := `cygpath -w %`
+	////
+	////$(EXPORTS_LIST): $(APINAMES_EXE) $(PUBLIC_HEADERS)
+          $(subst /,$(SEP),$(APINAMES_EXE)) \
+          -o$(patsubst %,$(U2W),$@ $(APINAMES_OPTIONS) $(PUBLIC_HEADERS))
+          @echo TT_New_Context >> $(EXPORTS_LIST)
+          @echo TT_RunIns >> $(EXPORTS_LIST)
+
+	*/
+	make install
+
+///////i686-w64-mingw32-gcc
+[funaho ~/freetype-2.2.1]% cd src/tools
+[funaho ~/freetype-2.2.1/src/tools]% gcc apinames.c -o apinames
+[funaho ~/freetype-2.2.1/src/tools]% cp apinames ../../objs
+[funaho ~/freetype-2.2.1/src/tools]% cd ../..
+[funaho ~/freetype-2.2.1]% make
+/////////
+
+COMPILE GD Graphics Library?
+	wget https://bitbucket.org/libgd/gd-libgd/downloads/libgd-2.1.1.tar.gz
+	tar xvf libgd-2.1.1.tar.gz
+	cd libgd-2.1.1
+	./configure --build=i686-w64-mingw32 --prefix=/mingw LIBS="-lbz2 -ljpeg -lws2_32 -liconv"
+
+	nano Makefile
+	DEFS = -DHAVE_CONFIG_H -DBGDWIN32
+
+	/////////////nano src/gd.h??
+	////////////////dos2unix /mingw/lib/libfreetype.la
+
+	make
+	make install
+
+	https://github.com/libgd/libgd/releases/download/gd-2.2.3/libgd-2.2.3.tar.gz
+	tar xvf libgd-2.2.3.tar.gz
+	cd libgd-2.2.3
+	//some fixes to do to nano src/gdft.c, download latest from GIT https://github.com/libgd/libgd.git
+	///// libgd 2.3.0 dev
+	libtoolize --force
+	aclocal
+	autoheader
+	automake --force-missing --add-missing
+	autoconf
+
+	oooooppure : cmake CMakeLists.txt
+	./configure --build=i686-w64-mingw32 --prefix=/mingw LIBS="-lbz2 -ljpeg -lws2_32 -liconv"
+	make
+	make install
+	//// OR: ricordarmi che non ho modificato il DEFS nel 2.3.0 dev. Latest commit 5ebbd50  on 23 Jul
+	copy src/gdft.c
+	make
+	make install
+
+-----------
+   Support for Zlib:                 yes
+   Support for PNG library:          yes
+   Support for JPEG library:         yes
+   Support for WebP library:         no
+   Support for TIFF library:         no
+   Support for Freetype 2.x library: yes
+   Support for Fontconfig library:   no
+   Support for Xpm library:          no
+   Support for liq library:          no
+   Support for complext text:        no
+   Support for pthreads:             yes
+-----------------
+
+
+	C:/cygwin/usr/i686-w64-mingw32/sys-root/mingw/lib
+	dos2unix libmagic.la
+	dos2unix libgd.la
+
+--------------------
+	./boostrap.sh
+	./configure --build=i686-w64-mingw32 --prefix=/mingw LIBS="-lbz2 -ljpeg -lws2_32 -liconv"
+	//////////-DBGDWIN32 funziona?
+	make
+	make check funzionano
+COMPILE REGEX
+	wget https://ftp.gnu.org/old-gnu/regex/regex-0.12.tar.gz
+	tar xvf regex-0.12.tar.gz
+	cd regex-0.12
+	i686-w64-mingw32-gcc -DSTDC_HEADERS -DHAVE_STRING_H=1 -I. -c regex.c
+	ar ru libregex.a regex.o
+	cp -iv libregex.a /mingw/lib
+	cp -iv libregex.a /mingw/lib/libgnurx.a
+	cp -iv regex.h /mingw/include
+
+DOWNLOAD FILE command - libmagic
+	////
+	wget ftp://ftp.astron.com/pub/file/file-5.29.tar.gz
+	tar xvf file-5.29.tar.gz
+	////oppure:
+	https://github.com/file/file.git
+	////
+
+	./configure --build=i686-w64-mingw32 --prefix=/mingw
+	nano config.h and add the following lines:
+	#define WIN32 1
+	#define MAGIC "magic"
+#define WIN32 1
+#ifndef MAGIC
+#define MAGIC "magic"
+#endif
+
+	make
+	make install
+COMPILE FLEXDLL(? better download it)
+	https://github.com/alainfrisch/flexdll.git
+	//////Flexdll is required to compile ocaml
+
+COMPILE OCAML
+	//////(download old flexdll-0.27 http://cfile235.uf.daum.net/attach/1342F64E4F124CFB307636)
+
+	wget http://alain.frisch.fr/flexdll/flexdll-bin-0.35.zip
+	extract to /mingw/bin
+
+	wget http://caml.inria.fr/pub/distrib/ocaml-4.03/ocaml-4.03.0.tar.gz
+	tar xvf ocaml-4.03.0.tar.gz
+	cd ocaml-4.03.0
+
+	cd ocaml-4.04.0
+	cp config/m-nt.h config/m.h
+	cp config/s-nt.h config/s.h
+	cp config/Makefile.mingw config/Makefile
+
+	//////nano config/Makefile
+	//////PREFIX=C:/ocamlmgw
+
+	make -f Makefile.nt world
+	make -f Makefile.nt bootstrap
+	make -f Makefile.nt opt
+	make -f Makefile.nt opt.opt
+	make -f Makefile.nt install
+
+	nano ~/.bashrc
+	/cygdrive/c/ocamlmgw/bin
+
+	export CAMLLIB=/mingw/lib
+	export OCAMLLIB=/mingw/lib
+	export CAMLP4LIB=/mingw/lib/camlp4
+
+make -f Makefile.nt flexdll world bootstrap opt opt.opt install
+
+COMPILE OCAMLBUILD
+	https://github.com/ocaml/ocamlbuild.git
+	cd ocamlbuild-l
+	make configure
+	make
+	make install
+
+	wget http://github.com/ocaml/ocamlbuild/archive/0.9.3.tar.gz
+COMPILE CAMLP4
+	https://github.com/ocaml/camlp4.git
+
+	./configure
+	make all
+	make install
+ 
+	./configure --bindir=/cygdrive/c/ocamlmgw/bin --libdir=/cygdrive/c/ocamlmgw/lib --pkgdir=/cygdrive/c/ocamlmgw/lib
+	nano myocamlbuild.ml
+	nano makefile
+	nano config.sh
+	nano build/camlp4-bootstrap.sh
+	nano build/camlp4-byte-only.sh
+	nano build/camlp4-targets.sh
+	nano build/install.sh
+
+	BUG IN MKDIR!!!!! creare le cartelle
+	_build/camlp4/boot
+	_build/camlp4/Camlp4
+	_build/camlp4/Camlp4/Struct/Grammar
+
+
+	export CAMLP4LIB=C:/ocamlmgw/lib/camlp4
+
+COMPILE MLDONKEY
+	nano Makefile
+	CCLIB += -lpthread ...
+	//////////CCLIB += -lpthread -lstdc++ -lws2_32 -lgdi32 -luser32 -ladvapi32 -lwsock32 -limm32 -lshell32 -lole32 resfile.o
+	////////// rimuovere anche crypto??
+	./configure --build=i686-w64-mingw32 --prefix=/mingw --disable-fasttrack
+
+	serve?
+	export CXX=/usr/bin/i686-w64-mingw32-g++
+
+
+
+
+
+
+
+
+	////////////// AGGIUNGERE -lpthread !!!!
+libtoolize --force
+	aclocal
+	autoheader
+	automake --force-missing --add-missing
+	autoconf
+///////////////
+	dos2unix /mingw/bin/gdlib-config
+	./configure --build=i686-w64-mingw32 --prefix=/mingw --disable-fasttrack
+	make
+	nano Makefile 
+	/////////change ->#
+	#CRYPTOPP_LIBS_flags += -cc '$(CXX) $(CXXFLAGS)' -ccopt '$(CRYPTOPPFLAGS)'
+	add : -lstdc++
+	///////////change $(CXX) with c:/cygwin/bin/i686-w64-mingw32-gcc
+	///////////CCLIB += -lstdc++
+
+///////////////////////////////////////
+ $(OCAMLOPT)			-linkall -o	$@	\
+ocamlopt.opt -inline 10 -w -3	-linkall -o	mlnet	\
+	
+$(MLNET_OBJS)					$(LIBS_opt)	$(LIBS_flags) \
+bigarray.cmxa unix.cmxa str.cmxa nums.cmxa	-ccopt		" -I/mingw/include"
+$(NO_LIBS_flags) $(NO_LIBS_opt) \
+				\
+$(GD_LIBS_flags) $(GD_LIBS_opt) \
+				\
+$(CRYPTOPP_LIBS_flags) $(CRYPTOPP_LIBS_opt) \
+-cc 'CC -g -O2' -ccopt '-fno-omit-frame-pointer -mno-omit-leaf-frame-pointer'  \
+$(MAGIC_LIBS_flags) $(MAGIC_LIBS_opt) \
+  \
+$(BITSTRING_LIBS_flags) $(BITSTRING_LIBS_opt) \
+  \
+$(UPNP_NATPMP_LIBS_flags) $(UPNP_NATPMP_LIBS_opt) \
+  \
+-cclib "$(CCLIB) $(NO_CCLIB) $(GD_CCLIB) $(CRYPTOPP_CCLIB) $(MAGIC_CCLIB) $(BITSTRING_CCLIB) $(UPNP_NATPMP_CCLIB)" \
+-cclib "-lcharset -lz  /mingw/lib/libiconv.a -lws2_32 -lgdi32 -luser32 -ladvapi32 -lwsock32 -limm32 -lshell32 -lole32 resfile.o -lbz2      " \
+
+-I build $(MLNET_CMXAS) $(MLNET_CMXS)
+-I build    build/extlib.cmxa    build/cdk.cmxa    build/bitstring.cmxa    build/magic.cmxa    build/common.cmxa    build/client.cmxa    build/core.cmxa    build/driver.cmxa    src/daemon/common/commonMain.cmx
+
+
+ocamlopt.opt -inline 10 -w -3 -linkall -o mlnet \
+     bigarray.cmxa unix.cmxa str.cmxa nums.cmxa -ccopt " -I/mingw/include" \
+  \
+  \
+-ccopt '-fno-omit-frame-pointer -mno-omit-leaf-frame-pointer'  \
+  \
+  \
+  \
+-cclib "-lcharset -lz  /mingw/lib/libiconv.a -lws2_32 -lgdi32 -luser32 -ladvapi32 -lwsock32 -limm32 -lshell32 -lole32 resfile.o -lbz2      " \
+-I build    build/extlib.cmxa    build/cdk.cmxa    build/bitstring.cmxa    build/magic.cmxa    build/common.cmxa    build/client.cmxa    build/core.cmxa    build/driver.cmxa    src/daemon/common/commonMain.cmx
+
+
+
+ocamlopt.opt -inline 10 -w -3 -linkall -o mlnet \
+     bigarray.cmxa unix.cmxa str.cmxa nums.cmxa -ccopt " -I/mingw/include" \
+  \
+  \
+-cc 'c:/cygwin/bin/i686-w64-mingw32-g++ -g -O2' -ccopt '-fno-omit-frame-pointer -mno-omit-leaf-frame-pointer'  \
+  \
+  \
+  \
+-cclib "-lcharset -lz  /mingw/lib/libiconv.a -lstdc++ -lws2_32 -lgdi32 -luser32 -ladvapi32 -lwsock32 -limm32 -lshell32 -lole32 resfile.o -lbz2      " \
+-I build    build/extlib.cmxa    build/cdk.cmxa    build/bitstring.cmxa    build/magic.cmxa    build/common.cmxa    build/client.cmxa    build/core.cmxa    build/driver.cmxa    src/daemon/common/commonMain.cmx
+
+
+ocamlopt.opt -inline 10 -w -3 -linkall -o mlnet \
+     bigarray.cmxa unix.cmxa str.cmxa nums.cmxa -ccopt " -I/mingw/include" \
+  \
+  \
+  \
+  \
+  \
+  \
+-cclib "-lcharset -lz  /mingw/lib/libiconv.a -liconv -lstdc++ -lpthread -lws2_32 -lgdi32 -luser32 -ladvapi32 -lwsock32 -limm32 -lshell32 -lole32 resfile.o -lbz2      " \
+-I build    build/extlib.cmxa    build/cdk.cmxa    build/bitstring.cmxa    build/magic.cmxa    build/common.cmxa    build/client.cmxa    build/core.cmxa    build/driver.cmxa    src/daemon/common/commonMain.cmx
+
+////////////////////////////////////
+
+	export OCAML_SRC=~/ocaml-4.04.0
+
+i686-w64-mingw32-g++ -g0 -O3 -o mlnet.exe -Wl,--subsystem,windows -L/lib/gcc/i686-w64-mingw32/4.5.3
+ -L/mingw/lib src/daemon/common/commonMain.o build/driver.a build/core.a build/client.a build/common.a
+ build/magic.a build/bitstring.a build/cdk.a build/extlib.a /mingw/lib/nums.a /mingw/lib/str.a
+ /mingw/lib/unix.a /mingw/lib/bigarray.a /mingw/lib/stdlib.a src/utils/cdk/gdstubs.o src/networks/direct_connect/che3_c.o
+ src/utils/lib/CryptoPP.o src/utils/lib/CryptoPP_stubs.o src/utils/net/upnp_stubs.o src/daemon/common/commonHasher_c.o
+ src/utils/lib/magiclib_stub.o src/utils/bitstring/bitstring_c.o src/utils/cdk/zlibstubs.o src/utils/cdk/heap_c.o
+ src/config/mingw/os_stubs_c.o src/utils/lib/fst_hash.o src/utils/lib/md4_comp.o src/utils/lib/md4_c.o
+ src/utils/lib/charsetstubs.o src/utils/lib/md5_c.o src/utils/lib/sha1_c.o src/utils/lib/tiger.o src/utils/lib/stubs_c.o
+ -lnums -lcamlstr -lunix -lbigarray -lgdi32 -luser32 -ladvapi32 -limm32 -lshell32 -lole32 resfile.o -lpthread -lmagic -lgd -ljpeg -lfreetype -lpng -lz -lbz2 -lws2_32 -lshlwapi /mingw/lib/libasmrun.a /mingw/lib/libcharset.dll.a /mingw/lib/libiconv.dll.a
+
+
+
+/*Things to remember
+
+Add /usr/i686-w64-mingw32/sys-root/mingw/bin (or /usr/x86_64-w64-mingw32/sys-root/mingw/bin) to your $PATH, if you use depext-cygwinports
+
+Consider to use windows symlinks inside cygwin: export CYGWIN='winsymlinks:native'. Otherwise ocamlbuild and many build and test scripts will create symlinks, that are only understood by cygwin tools, but not by the OCaml compiler and other native windows programs. (Usually only adminstrators are allowed to create symlinks. But you can change the default settings, see this post for details)
+*/
+
+/*If you agree, OPAM will modify:
+
+  - C:/cygwin/home/Alas!/.bash_profile (or a file you specify) to set the right
+environment
+    variables and to load the auto-completion scripts for your shell (bash)
+    on startup. Specifically, it checks for and appends the following line:
+
+    . '/home/Alas!/.opam/opam-init/init.sh' > /dev/null 2> /dev/null || true
+
+
+  - ~/.ocamlinit to ensure that non-system installations of `ocamlfind`
+    (i.e. those installed by OPAM) will work correctly when running the
+    OCaml toplevel. It does this by adding $OCAML_TOPLEVEL_PATH to the list
+    of include directories.
+
+If you choose to not configure your system now, you can either configure
+OPAM manually (instructions will be displayed) or launch the automatic setup
+later by running:
+
+   opam config setup -a
+
+
+Do you want OPAM to modify C:/cygwin/home/Alas!/.bash_profile and ~/.ocamlinit?
+(default is 'no', use 'f' to name a file other than
+C:/cygwin/home/Alas!/.bash_profile)
+    [N/y/f] y
+
+User configuration:
+  Generating ~/.ocamlinit.
+  Updating C:/cygwin/home/Alas!/.bash_profile.
+Global configuration:
+  Updating C:/cygwin/home/Alas!/.opam/opam-init/init.sh
+  Updating C:/cygwin/home/Alas!/.opam/opam-init/init.zsh
+  Updating C:/cygwin/home/Alas!/.opam/opam-init/init.csh
+  Updating C:/cygwin/home/Alas!/.opam/opam-init/init.fish
+# To setup the new switch in the current shell, you need to run:
+eval `opam config env`
+
+*/

@@ -153,8 +153,8 @@ let () =
   lprintf_nl "MLDonkey is working in %s" file_basedir;
   if not (Sys.file_exists file_basedir) ||
 	 not (Sys.file_exists (Filename.concat file_basedir "downloads.ini")) then begin
-    lprint_newline ();
-    lprintf_nl "creating new MLDonkey base directory in %s\n" file_basedir;
+    lprintf_nl "ini files not found, initializing:";
+    lprintf_nl "creating new MLDonkey base directory in %s" file_basedir;
     created_new_base_directory := Some file_basedir
   end;
   (try
@@ -185,7 +185,7 @@ let () =
     if not (Unix32.os_supported ()) then begin
       lprintf_nl "WARNING: MLDonkey is not supported on %s" uname;
       if Autoconf.windows then
-        lprintf_nl "WARNING: MLDonkey is only supported on Windows NT/2000/XP/Server 2003."
+        lprintf_nl "WARNING: MLDonkey is only supported on Windows NT/2000/XP/7/Server 2003."
     end;
 
   if (String2.starts_with (Filename.basename Sys.argv.(0)) "mlnet")
@@ -415,9 +415,6 @@ let security_section = file_section downloads_ini ["Security"]
 let other_section = file_section downloads_ini ["Other"]
   "Other options"
 
-
-
-
 (*************************************************************************)
 (*                                                                       *)
 (*                         Main section                                  *)
@@ -429,9 +426,6 @@ let current_section = main_section
 let global_login = define_option current_section ["client_name"]
   "small name of client"
     string_option (new_name ())
-
-
-
 
 (*************************************************************************)
 (*                                                                       *)

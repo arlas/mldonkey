@@ -20,11 +20,7 @@
 #include "../../../config/config.h"
 
 /*******************************************************************
-
-
                          MINGW specific
-
-
 *******************************************************************/
 
 #ifdef __MINGW32__
@@ -55,7 +51,7 @@ typedef HANDLE OS_FD;
 typedef SOCKET OS_SOCKET;
 typedef unsigned int uint;
 extern void win32_maperr(unsigned long errcode);
-unsigned char * utf8_to_utf16(const char * str);
+unsigned char * utf8_to_utf16(const unsigned char * str);
 
 /*******************************************************************
 
@@ -83,11 +79,7 @@ typedef int OS_SOCKET;
 #endif  /* __MINGW32__ */
 
 /*******************************************************************
-
-
                          COMMON used 
-
-
 *******************************************************************/
 
 #include <caml/config.h>
@@ -144,8 +136,6 @@ typedef off_t OFF_T;
 #define SEEK_END 2
 #endif
 
-
-
 #define Nothing ((value) 0)
 
 extern void unix_error (int errcode, char * cmdname, value arg) Noreturn;
@@ -164,5 +154,3 @@ extern int os_fsync(OS_FD fd);
 
 #define HASH_BUFFER_LEN 131072
 extern unsigned char hash_buffer[HASH_BUFFER_LEN];
-
-

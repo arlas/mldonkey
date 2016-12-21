@@ -21,7 +21,8 @@
 
 #include <string.h> 
 #include <ctype.h>
-
+#include <pthread.h>
+#include <iconv.h>
 
 #ifdef __MORPHOS__
 #include <inttypes.h>
@@ -36,18 +37,14 @@
 #include <sys/param.h>
 #endif
 
+#ifndef lseek
 #define lseek XXXXXXXXX
+#endif
 #define read XXXXXXXXX
 #define ftruncate XXXXXXXXX
 
-
-
 /*******************************************************************
-
-
                          ml_select
-
-
 *******************************************************************/
 
 #define FD_TASK_FD 0
@@ -494,11 +491,7 @@ value ml_ints_of_string(value s_v)
 }
 
 /*******************************************************************
-
-
                      hashes
-
-
 *******************************************************************/
 
 unsigned char hash_buffer[HASH_BUFFER_LEN];
@@ -509,7 +502,7 @@ value HASH_NAME##_unsafe64_fd (value digest_v, value fd_v, value pos_v, value le
   OS_FD fd = Fd_val(fd_v); \
   OFF_T pos = Int64_val(pos_v); \
   OFF_T len = Int64_val(len_v); \
-  unsigned char *digest = String_val(digest_v); \
+  unsigned char *digest = (unsigned char*)String_val(digest_v); \
   HASH_CONTEXT context; \
   ssize_t nread; \
  \
@@ -519,7 +512,7 @@ value HASH_NAME##_unsafe64_fd (value digest_v, value fd_v, value pos_v, value le
   while (len!=0){ \
     size_t max_nread = HASH_BUFFER_LEN > len ? len : HASH_BUFFER_LEN; \
  \
-    nread = os_read (fd, hash_buffer, max_nread); \
+    nread = os_read (fd, (char*)hash_buffer, max_nread); \
  \
     if(nread < 0) { \
       unix_error(errno, "md4_safe_fd: Read", Nothing); \
@@ -541,8 +534,8 @@ value HASH_NAME##_unsafe64_fd (value digest_v, value fd_v, value pos_v, value le
 \
 value HASH_NAME##_unsafe_string(value digest_v, value string_v, value len_v) \
 { \
-  unsigned char *digest = String_val(digest_v); \
-  unsigned char *string = String_val(string_v); \
+  unsigned char *digest = (unsigned char*)String_val(digest_v); \
+  unsigned char *string = (unsigned char*)String_val(string_v); \
   long len = Long_val(len_v); \
   HASH_CONTEXT context; \
  \
@@ -556,7 +549,7 @@ value HASH_NAME##_unsafe_string(value digest_v, value string_v, value len_v) \
 value HASH_NAME##_unsafe_file (value digest_v, value filename_v, value file_size) \
 { \
   char *filename  = String_val(filename_v); \
-  unsigned char *digest = String_val(digest_v); \
+  unsigned char *digest = (unsigned char*)(digest_v); \
   FILE *file; \
   HASH_CONTEXT context; \
   size_t len; \
@@ -614,7 +607,7 @@ static void tiger_tree_fd(OS_FD fd, OFF_T len, OFF_T pos, OFF_T block_size, char
       toread -= nread;
     }
 
-    tiger_hash(0, s, length, digest);
+    tiger_hash(0, s, length, (unsigned char*)digest);
   } else {    
     if(pos+block_size/2 >=len){
       tiger_tree_fd(fd, len, pos, block_size/2, digest);
@@ -623,7 +616,7 @@ static void tiger_tree_fd(OS_FD fd, OFF_T len, OFF_T pos, OFF_T block_size, char
       char *digests = digests_prefixed+1;
       tiger_tree_fd(fd, len, pos, block_size/2, digests);
       tiger_tree_fd(fd, len, pos+block_size/2, block_size/2, digests+DIGEST_LEN);
-      tiger_hash(1,digests, 2*DIGEST_LEN, digest);
+      tiger_hash(1,digests, 2*DIGEST_LEN, (unsigned char*)digest);
     }
   }
 }
@@ -633,22 +626,18 @@ value tigertree_unsafe64_fd (value digest_v, value fd_v, value pos_v, value len_
   OS_FD fd = Fd_val(fd_v);
   OFF_T pos = Int64_val(pos_v);
   OFF_T len = Int64_val(len_v);
-  unsigned char *digest = String_val(digest_v);
+  unsigned char *digest = (unsigned char*)String_val(digest_v);
 /*  int nread; */
 
   os_lseek(fd, pos, SEEK_SET);
 
-  tiger_tree_fd(fd, len, 0, tiger_block_size(len), digest);
+  tiger_tree_fd(fd, len, 0, tiger_block_size(len), (char*)digest);
 
   return Val_unit;
 }
 
 /*******************************************************************
-
-
                      setlcnumeric
-
-
 *******************************************************************/
 
 #include <locale.h>
@@ -660,11 +649,7 @@ value ml_setlcnumeric(value no)
 }
 
 /*******************************************************************
-
-
           Asynchronous resolution of DNS names in threads         
-
-
 *******************************************************************/
 
 /*
@@ -925,11 +910,7 @@ value ml_has_pthread(value unit)
 #endif  /* !defined(HAVE_PTHREAD) || (!(HAS_GETHOSTBYNAME_R || GETHOSTBYNAME_IS_REENTRANT) && !defined(HAS_SIGWAIT)) */
 
 /*******************************************************************
-
-
                          statfs
-
-
 *******************************************************************/
 
 #if defined(__MINGW32__)
@@ -959,16 +940,103 @@ struct statfs {
    unsigned __int64    f_spare[6]; /* spare for later */
 };
 
+unsigned char *utf8_to_utf16(const unsigned char *path)
+{
+	//char dest_str[100];
+	//char *out = dest_str;
+	printf( "Call [utf8_to_utf16]-> %s <-\n", path);
+
+	char *inbuf = (char *)path;
+
+	//size_t outbytes = sizeof dest_str;
+
+	iconv_t cd = iconv_open("UTF-16", "UTF-8");
+
+	if (cd == (iconv_t)-1)
+	{
+		printf("!%s: iconv_open failed: %d\n", __func__, errno);
+		return (unsigned char *)inbuf;//(unsigned char *)"";
+	}
+
+	size_t inbytesleft = strlen( (const char*)path);//sizeof path;//strlen( (const char*)path);
+	if (inbytesleft == 0)
+	{
+		printf("!%s: empty string\n", __func__);
+		iconv_close(cd);
+		return (unsigned char *)inbuf;//(unsigned char *)"";
+	}
+
+	size_t utf16_buf_len = 2* inbytesleft;// sufficient in many cases, i.e. if the input string is ASCII
+	char **utf16 = malloc(utf16_buf_len);
+
+	printf( "Call utf8 len -> %d <- utf16 len -> %d <-\n", inbytesleft, utf16_buf_len);
+
+	if (!*utf16)
+	{
+		printf("!%s: malloc failed\n", __func__);
+		iconv_close(cd);
+		return (unsigned char *)inbuf;
+	}
+
+	//char prova[] = "prova";
+	//char *inptr = prova;
+	//inbytesleft = sizeof prova;
+	printf("inbuf = %s ;\n", inbuf);// "prova"
+	printf("inbytesleft = %d ;\n", inbytesleft); //"6"
+
+	size_t outbytesleft = 2*inbytesleft+2;//utf16_buf_len;	
+	char dest_str[outbytesleft];
+	char *outbuf = dest_str;//*utf16;
+	printf("outbuf = %s ;\n", outbuf);
+
+	printf("outbytesleft: %d \n", outbytesleft);
+	
+	size_t nchars = iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
+	printf("after iconv:\n");
+	printf("inbytesleft = %d ;\n", inbytesleft);
+	printf("outbytesleft: %d \n", outbytesleft);
+	printf("dest_str size: %d \n", sizeof dest_str);
+	printf("dest_str1: %s ;\n", dest_str);
+	dest_str[sizeof dest_str - outbytesleft] = 0;
+	printf("%d - %s -\n", (int)nchars, dest_str);
+	printf("dest_str2: %s ;\n", dest_str);
+	printf("outbuf: %s ;\n", outbuf );
+	printf("size of outbuf: %d \n", sizeof outbuf );
+	printf("strlen of outbuf: %d \n", strlen( outbuf) );
+	//printf("type of outbuf: %s", typeof outbuf );
+
+	//printf("outbuf2: %s \n", outbuf);
+	//printf("prova");
+	//printf("outbytesleft: %d \n", outbytesleft);
+
+	if (nchars == (size_t)-1)
+	{
+		printf("!%s: iconv failed: %d\n", __func__, errno);
+		free(*utf16);
+		iconv_close(cd);
+		return (unsigned char *)inbuf;
+	}
+
+	iconv_close(cd);
+	//*utf16_len = utf16_buf_len - outbytesleft;
+
+	return (unsigned char *)outbuf;
+}
+
 static int statfs (const unsigned char *path, struct statfs *buf)
-  {
+{
+	//printf( "statfcall" );
+	//non funziona?
+	//utf8_to_utf16(path);
+
     HINSTANCE h;
     FARPROC f;
     int retval = 0;
     WCHAR tmp [MAX_PATH], resolved_path [MAX_PATH];
-    WCHAR * wpath = (WCHAR *)utf8_to_utf16(path);
+    WCHAR * wpath = (WCHAR *)/*utf8_to_utf16*/(path);
     realpath(wpath, resolved_path);
     free(wpath);
-    if (!resolved_path)
+    if (resolved_path == NULL)
       retval = - 1;
     else
       {
@@ -999,7 +1067,7 @@ static int statfs (const unsigned char *path, struct statfs *buf)
             DWORD sectors_per_cluster, bytes_per_sector;
             if (h) FreeLibrary (h);
             if (!GetDiskFreeSpaceW (resolved_path, &sectors_per_cluster,
-                   &bytes_per_sector, &buf -> f_bavail, &buf -> f_blocks))
+                   &bytes_per_sector, (LPDWORD) &buf -> f_bavail, (LPDWORD)&buf -> f_blocks))
               {
                 errno = ENOENT;
                 retval = - 1;
@@ -1017,7 +1085,7 @@ static int statfs (const unsigned char *path, struct statfs *buf)
 
     /* get the FS volume information */
     if (wcsspn (L":", resolved_path) > 0) resolved_path [3] = '\0'; /* we want only the root */    
-    if (GetVolumeInformationW (resolved_path, NULL, 0, &buf -> f_fsid, &buf -> f_namelen, NULL, tmp, MAX_PATH))
+    if (GetVolumeInformationW (resolved_path, NULL, 0, (LPDWORD) &buf -> f_fsid, (LPDWORD) &buf -> f_namelen, NULL, tmp, MAX_PATH))
     /* http://msdn.microsoft.com/library/default.asp?url=/library/en-us/fileio/fs/getvolumeinformation.asp */
      {
      	if (_wcsicmp (L"NTFS", tmp) == 0)
@@ -1062,7 +1130,7 @@ statfs_statfs (value pathv)
 {
   CAMLparam1 (pathv);
   CAMLlocal1 (bufv);
-  const unsigned char *path = String_val (pathv);
+  const unsigned char *path = (unsigned char*)String_val (pathv);
   struct statfs buf;
   if (statfs (path, &buf) == -1)
     raise_constant(*(value *)caml_named_value("error"));
@@ -1162,12 +1230,8 @@ statfs_statfs (value pathv)
 #endif  /* defined(__MINGW32__) */
 
 /*******************************************************************
-
-
                          external_start
                          external_exit
-
-
 *******************************************************************/
 
 #if defined(__MINGW32__)
@@ -1197,7 +1261,7 @@ external_start (void)
 #endif  /* defined(__MINGW32__) */
 
 #if defined(HAVE_PTHREAD) && defined(PTW32_STATIC_LIB)
-	pthread_win32_process_attach_np();
+	/*pthread_win32_process_attach_np();*/
 #endif
 	return Val_unit;
 
@@ -1221,7 +1285,7 @@ external_exit (void)
 #endif  /* defined(__MINGW32__) */
 
 #if defined(HAVE_PTHREAD) && defined(PTW32_STATIC_LIB)
-	pthread_win32_process_detach_np();
+	/*pthread_win32_process_detach_np();*/
 #endif
 
 #if defined(HAVE_CRYPTOPP)
