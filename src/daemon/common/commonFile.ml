@@ -724,22 +724,26 @@ let file_print file o =
         ( Str, "srh br", "File Info", "Info" ) ;
         ( Str, "srh", "Value", "Value" ) ];
 
+		(* Downloads, click on file; 1) "[#] Network" *)
       Printf.bprintf buf "\\<tr class=\\\"dl-%d\\\"\\>" (html_mods_cntr ());
       html_mods_td buf [
         ("File number/Network", "sr br", "[#] Network");
         ("", "sr", Printf.sprintf "[%d] %s" (file_num file) n.network_name) ];
 
+		(* Downloads, click on file; 2) "DLed/size" *)
       Printf.bprintf buf "\\</tr\\>\\<tr class=\\\"dl-%d\\\"\\>" (html_mods_cntr ());
       html_mods_td buf [
         ("Downloaded/Total size", "sr br", "DLed/Size");
         ("", "sr", Printf.sprintf "%s bytes of %s bytes"
             (Int64.to_string info.G.file_downloaded) (Int64.to_string info.G.file_size) ) ];
 
+		(* Downloads, click on file; 3) "Prority" *)
       Printf.bprintf buf "\\</tr\\>\\<tr class=\\\"dl-%d\\\"\\>" (html_mods_cntr ());
       html_mods_td buf [
         ("File priority", "sr br", "Priority");
         ("", "sr", Printf.sprintf "%d" (file_priority file)) ];
 
+		(* Downloads, click on file; 4) "User" *)
       Printf.bprintf buf "\\</tr\\>\\<tr class=\\\"dl-%d\\\"\\>" (html_mods_cntr ());
       if user2_is_admin o.conn_user.ui_user then
         let optionlist = ref "" in
@@ -771,6 +775,7 @@ parent.fstatus.location.href='submit?q=chown+'+v+'+%d';
       else
         html_mods_td buf [("File owner", "sr br", "User"); ("", "sr", (file_owner file).user_name)];
 
+		(* Downloads, click on file; 5) "Group" *)
       Printf.bprintf buf "\\</tr\\>\\<tr class=\\\"dl-%d\\\"\\>" (html_mods_cntr ());
       if user2_allow_file_admin file o.conn_user.ui_user &&
          (file_owner file).user_groups <> [] then begin
@@ -812,16 +817,19 @@ parent.fstatus.location.href='submit?q=chgrp+'+v+'+%d';
           Some group -> Printf.sprintf "%s" group.group_name
         | None -> "None"))];
 
+		(* Downloads, click on file; 6) "DL strategy" *)
       Printf.bprintf buf "\\</tr\\>\\<tr class=\\\"dl-%d\\\"\\>" (html_mods_cntr ());
       html_mods_td buf [
         ("Download strategy", "sr br", "DL strategy");
         ("", "sr", file_print_download_order file) ];
 
+		(* Downloads, click on file; 7) "Sources" *)
       Printf.bprintf buf "\\</tr\\>\\<tr class=\\\"dl-%d\\\"\\>" (html_mods_cntr ());
       html_mods_td buf [
         ("Number of file sources", "sr br", "Sources");
         ("", "sr", Printf.sprintf "%d" (List.length srcs)) ];
 
+		(* Downloads, click on file; 8) "Chunks" *)
       Printf.bprintf buf "\\</tr\\>\\<tr class=\\\"dl-%d\\\"\\>" (html_mods_cntr ());
 
       begin match info.G.file_chunks with 
@@ -829,7 +837,6 @@ parent.fstatus.location.href='submit?q=chgrp+'+v+'+%d';
       | Some chunks ->
         let tt = "Total = Missing + Partial + Complete + Verified" in
         let summary = chunks_counts chunks in
-
 	  html_mods_td buf [
             (tt, "sr br", "Chunks");
             (tt, "sr", 
@@ -840,6 +847,7 @@ parent.fstatus.location.href='submit?q=chgrp+'+v+'+%d';
             ) ]
       end;
 
+	  (* Downloads, click on file; 9) "Chunk size" *)
       Printf.bprintf buf "\\</tr\\>\\<tr class=\\\"dl-%d\\\"\\>" (html_mods_cntr ());
       html_mods_td buf [
         ("Chunk size", "sr br", "Chunk size");
@@ -847,6 +855,18 @@ parent.fstatus.location.href='submit?q=chgrp+'+v+'+%d';
           Some v -> String.concat " " (List.map (fun v -> Printf.sprintf "%Ld" v) v)
         | None -> "unknown"))];
 
+		(* Downloads, click on file; 10) "Md4" *)
+      Printf.bprintf buf "\\</tr\\>\\<tr class=\\\"dl-%d\\\"\\>" (html_mods_cntr ());
+      html_mods_td buf [
+        ("Md4 hash (emule)", "sr br", "Md4");
+        ("", "sr", Printf.sprintf "%s" (Md4.to_string info.G.file_md4))];
+		
+		(* Downloads, click on file; 11) "Uid" *)
+      Printf.bprintf buf "\\</tr\\>\\<tr class=\\\"dl-%d\\\"\\>" (html_mods_cntr ());
+      html_mods_td buf [
+        ("Uid hash (bittorrent)", "sr br", "Uid");
+        ("", "sr", Printf.sprintf "%s" (string_of_uids info.G.file_uids))];
+		
       (match file_magic file with
         Some magic ->
 	    Printf.bprintf buf "\\</tr\\>\\<tr class=\\\"dl-%d\\\"\\>" (html_mods_cntr ());

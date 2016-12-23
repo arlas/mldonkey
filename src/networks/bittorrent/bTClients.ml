@@ -141,14 +141,14 @@ let talk_to_udp_tracker host port args file t need_sources =
     BasicSocket.set_wtimeout (sock socket) 60.;
     BasicSocket.set_rtimeout (sock socket) 60.;
     let txn = Random.int32 Int32.max_int in
-(*     lprintf_nl "udpt txn %ld for %s" txn host; *)
+     (*lprintf_nl "udpt txn %ld for %s" txn host;*)
     write socket false (connect_request txn) ip port;
     set_reader begin fun () ->
       let p = read socket in
       let conn = connect_response p.udp_content txn in
 (*       lprintf_nl "udpt connection_id %Ld for %s" conn host; *)
       let txn = Random.int32 Int32.max_int in
-(*       lprintf_nl "udpt txn' %ld for host %s" txn host; *)
+      (*lprintf_nl "udpt txn' %ld for host %s" txn host;*)
       let int s = Int64.of_string (List.assoc s args) in
       let req = announce_request conn txn
         ~info_hash:(List.assoc "info_hash" args) 
@@ -160,6 +160,7 @@ let talk_to_udp_tracker host port args file t need_sources =
          | "stopped" -> 3l
          | "" -> 0l
          | s -> lprintf_nl "udpt event %s? for %s" s host; 0l)
+		 (*~key:(Random.int32 Int32.max_int)*)
         ~ip:(if !!force_client_ip then (Int64.to_int32 (Ip.to_int64 !!set_client_ip)) else 0l)
         ~numwant:(if need_sources then try Int32.of_string (List.assoc "numwant" args) with _ -> -1l else 0l)
         (int_of_string (List.assoc "port" args))
@@ -174,6 +175,7 @@ let talk_to_udp_tracker host port args file t need_sources =
         t.tracker_min_interval <- 600;
         if need_sources then t.tracker_last_clients_num <- 0;
 
+		(*lprintf_nl "udpt txn' %ld , content %s" txn p.udp_content;*)
         let (interval,clients) = announce_response p.udp_content txn in
         if !verbose_msg_servers then
           lprintf_nl "udpt got interval %ld clients %d for host %s" interval (List.length clients) host;
@@ -781,7 +783,8 @@ and update_client_bitmap c =
   let file = c.client_file in
   
   let swarmer = match file.file_swarmer with
-      None -> assert false
+    | None -> lprintf_nl "update_client_bitmap swarmer = none, file name: %s" (file.file_name);
+	assert false
     | Some swarmer -> swarmer 
   in
   
@@ -1149,6 +1152,7 @@ and client_to_client c sock msg =
         (* Note: a bitfield must only be sent after the handshake and before everything else: NOT here *)
 
     | Have n ->
+		(* TODO: verify a possible index out of bounds error *)
         (* A client can send a "Have" without sending a Bitfield *)
         if not c.client_file.file_metadata_downloading then
         begin

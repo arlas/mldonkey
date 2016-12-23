@@ -623,7 +623,7 @@ let output_bitmatch _loc bs cases =
 	     * be known at runtime) but we may be able to directly access
 	     * the bytes in the string.
 	     *)
-	  | P.Int, Some 8, Some field_byte_offset, _, _ ->
+	  | P.Int, Some 8, Some field_byte_offset, _, signed ->
 	      let extract_fn = int_extract_const 8 endian signed in
 
               (* The fast-path code when everything is aligned. *)
@@ -631,13 +631,13 @@ let output_bitmatch _loc bs cases =
 		<:expr<
                   let o =
 		    ($lid:original_off$ lsr 3) + $`int:field_byte_offset$ in
-                  Char.code (String.unsafe_get $lid:data$ o)              
+                  Bitstring.char_code (String.unsafe_get $lid:data$ o)              
                 >> in
 
               <:expr<
 		if $lid:len$ >= 8 then (
                   let v =
-                    if $lid:off_aligned$ then
+                    if not $`bool:signed$ && $lid:off_aligned$ then
                       $fastpath$
                     else
                       $extract_fn$ $lid:data$ $lid:off$ $lid:len$ 8 in
@@ -666,17 +666,9 @@ let output_bitmatch _loc bs cases =
 		  | 16 ->
 		      <:expr< Bitstring.$lid:name$ $lid:data$ o >>
 		  | 32 ->
-		      <:expr<
-			(* must allocate a new zero each time *)
-			let zero = Int32.of_int 0 in
-			Bitstring.$lid:name$ $lid:data$ o zero
-		      >>
+		      <:expr< Bitstring.$lid:name$ $lid:data$ o >>
 		  | 64 ->
-		      <:expr<
-			(* must allocate a new zero each time *)
-			let zero = Int64.of_int 0 in
-			Bitstring.$lid:name$ $lid:data$ o zero
-		      >>
+		      <:expr< Bitstring.$lid:name$ $lid:data$ o >>
 		  | _ -> assert false in
 		<:expr<
 		  (* Starting offset within the string. *)
@@ -989,7 +981,8 @@ let output_bitmatch _loc bs cases =
 	match bind with
 	| Some name ->
 	    <:expr<
-	      let $lid:name$ = ($lid:data$, $lid:off$, $lid:len$) in
+	      let $lid:name$ = ($lid:data$,
+                                $lid:original_off$, $lid:original_len$) in
 	      $inner$
 	      >>
 	| None -> inner in
@@ -1053,6 +1046,7 @@ let expand_named_pattern _loc name =
 
 (* Add named patterns from a file.  See the documentation on the
  * directory search path in bitstring_persistent.mli
+
 let load_patterns_from_file _loc filename =
   let chan =
     if Filename.is_relative filename && Filename.is_implicit filename then (
@@ -1060,7 +1054,7 @@ let load_patterns_from_file _loc filename =
       try open_in filename
       with _ ->
 	(* Try OCaml library directory. *)
-	try open_in (Filename.concat Bitstring_config.ocamllibdir filename)
+	try open_in (Filename.concat ocamllibdir filename)
 	with exn -> Loc.raise _loc exn
     ) else (
       try open_in filename
@@ -1085,7 +1079,7 @@ let load_patterns_from_file _loc filename =
 	add_named_pattern _loc name patt
     | _, P.Constructor _ -> () (* just ignore these for now *)
   ) names
- *)
+*)
 
 EXTEND Gram
   GLOBAL: expr str_item;
@@ -1123,6 +1117,10 @@ EXTEND Gram
       fields = LIST0 patt_field SEP ";";
       "}" ->
 	List.concat fields
+    | "{";
+      "_";
+      "}" ->
+	[]
     ]
   ];
 
@@ -1182,11 +1180,11 @@ EXTEND Gram
 	add_named_pattern _loc name fields;
         (* The statement disappears, but we still need a str_item so ... *)
         <:str_item< >>
-    (*
+	(*
     | "open"; "bitmatch"; filename = STRING ->
 	load_patterns_from_file _loc filename;
 	<:str_item< >>
-    *)
+	*)
     ]
   ];
 

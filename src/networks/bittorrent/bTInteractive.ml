@@ -332,8 +332,11 @@ let op_file_print file o =
     emit_tds ((desc, "sr br", text) :: l)
   in
 
+  (* Downloads, click on file; 11) "Filename" *)
   emit (_s"Filename") file.file_name;
+  (* Downloads, click on file; 12) "Hash" *)
   emit (_s"Hash") ~desc:(_s"Torrent metadata hash") (Sha1.to_hexa file.file_id);
+  (* Downloads, click on file; 13) "Torrent search" arlas TODO: update sites *)
   emit (_s"Torrent search") ~desc:(_s"Search for similar torrent files") (Printf.sprintf
     "\\<a target=\\\"_blank\\\" href=\\\"http://isohunt.com/%s\\\"\\>IsoHunt\\</a\\>" file.file_name);
 

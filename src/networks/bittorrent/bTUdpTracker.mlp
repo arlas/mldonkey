@@ -27,21 +27,34 @@ let connect_response s exp_txn =
 (** announce *)
 let announce_request conn txn ~info_hash ~peer_id (downloaded,left,uploaded) event ?(ip=0l) ?(key=0l) ~numwant port =
   of_bits (BITSTRING {
-    conn : 64 ;
-    1l : 32 ;
-    txn : 32 ;
-    info_hash : 20 * 8 : string;
-    peer_id : 20 * 8 : string;
-    downloaded : 64 ;
-    left : 64 ;
-    uploaded : 64 ;
-    event : 32 ;
-    0l : 32 ; (* ip *)
-    key : 32 ; (* key *)
-    numwant : 32 ; (* numwant *)
-    port : 16 })
-
+    conn : 64 ; (* The connection id acquired from establishing the connection. *)
+    1l : 32 ; (* Action: connect = 0; announce = 1; scrape = 2; error = 3 (only in server replies) *)
+    txn : 32 ; (* Randomized by client. *)
+    info_hash : 20 * 8 : string; (* The info-hash of the torrent you want announce yourself in. *)
+    peer_id : 20 * 8 : string; (* Your peer id. *)
+    downloaded : 64 ; (* The number of byte you've downloaded in this session. *)
+    left : 64 ; (* The number of bytes you have left to download until you're finished. *)
+    uploaded : 64 ; (* The number of bytes you have uploaded in this session. *)
+    event : 32 ; (* The event 0: none; 1: completed; 2: started; 3: stopped *)
+    0l : 32 ; (* Your ip address. Set to 0 if you want the tracker to use the sender of this udp packet. *)
+    key : 32 ; (* A unique key that is randomized by the client. *)
+    numwant : 32 ; (* The maximum number of peers you want in the reply. Use -1 for default. *)
+    port : 16 (* The port you're listening on. *) })
+ (* uint16_t	extensions *)
+ 
 (** announce response *)
+(* size	name			description
+int32_t	action			The action this is a reply to. Should in this case be 1 for announce. If 3 (for error) see errors. See actions.
+int32_t	transaction_id	Must match the transaction_id sent in the announce request.
+int32_t	interval		the number of seconds you should wait until reannouncing yourself.
+int32_t	leechers		The number of peers in the swarm that has not finished downloading.
+int32_t	seeders			The number of peers in the swarm that has finished downloading and are seeding.
+The rest of the server reply is a variable number of the following structure:
+
+size		name	description
+int32_t		ip		The ip of a peer in the swarm.
+uint16_t	port	The peer's listen port.
+*)
 let announce_response s exp_txn =
   let rec clients rest l =
     bitmatch rest with
@@ -49,7 +62,8 @@ let announce_response s exp_txn =
     | { } -> l
   in
   bitmatch bits s with
-  | { 1l : 32 ; txn : 32 ; interval : 32 ; leechers : 32 ; seeders : 32 ;
+  (* 1: announce response *)
+  | { 1l : 32 ; txn : 32; interval : 32 ; leechers : 32 ; seeders : 32 ;
       rest : -1 : bitstring } -> 
         if txn = exp_txn then 
           (interval,clients rest []) 

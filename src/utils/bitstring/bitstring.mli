@@ -702,6 +702,12 @@ val equals : bitstring -> bitstring -> bool
     semantically equal.  It is the same as calling [compare] and
     testing if the result is [0], but usually more efficient. *)
 
+val is_zeroes_bitstring : bitstring -> bool
+(** Tests if the bitstring is all zero bits (cf. {!zeroes_bitstring}) *)
+
+val is_ones_bitstring : bitstring -> bool
+(** Tests if the bitstring is all one bits (cf. {!ones_bitstring}). *)
+
 (** {3 Bitstring manipulation} *)
 
 val bitstring_length : bitstring -> int
@@ -935,13 +941,23 @@ val extract_bit : string -> int -> int -> int -> bool
 
 val extract_char_unsigned : string -> int -> int -> int -> int
 
+val extract_char_signed : string -> int -> int -> int -> int
+
 val extract_int_be_unsigned : string -> int -> int -> int -> int
+
+val extract_int_be_signed : string -> int -> int -> int -> int
 
 val extract_int_le_unsigned : string -> int -> int -> int -> int
 
+val extract_int_le_signed : string -> int -> int -> int -> int
+
 val extract_int_ne_unsigned : string -> int -> int -> int -> int
 
+val extract_int_ne_signed : string -> int -> int -> int -> int
+
 val extract_int_ee_unsigned : endian -> string -> int -> int -> int -> int
+
+val extract_int_ee_signed : endian -> string -> int -> int -> int -> int
 
 val extract_int32_be_unsigned : string -> int -> int -> int -> int32
 
@@ -985,17 +1001,17 @@ external extract_fastpath_int24_le_signed : string -> int -> int = "ocaml_bitstr
 external extract_fastpath_int24_ne_signed : string -> int -> int = "ocaml_bitstring_extract_fastpath_int24_ne_signed" "noalloc"
 *)
 
-external extract_fastpath_int32_be_unsigned : string -> int -> int32 -> int32 = "ocaml_bitstring_extract_fastpath_int32_be_unsigned" "noalloc"
+external extract_fastpath_int32_be_unsigned : string -> int -> int32 = "ocaml_bitstring_extract_fastpath_int32_be_unsigned"
 
-external extract_fastpath_int32_le_unsigned : string -> int -> int32 -> int32 = "ocaml_bitstring_extract_fastpath_int32_le_unsigned" "noalloc"
+external extract_fastpath_int32_le_unsigned : string -> int -> int32 = "ocaml_bitstring_extract_fastpath_int32_le_unsigned"
 
-external extract_fastpath_int32_ne_unsigned : string -> int -> int32 -> int32 = "ocaml_bitstring_extract_fastpath_int32_ne_unsigned" "noalloc"
+external extract_fastpath_int32_ne_unsigned : string -> int -> int32 = "ocaml_bitstring_extract_fastpath_int32_ne_unsigned"
 
-external extract_fastpath_int32_be_signed : string -> int -> int32 -> int32 = "ocaml_bitstring_extract_fastpath_int32_be_signed" "noalloc"
+external extract_fastpath_int32_be_signed : string -> int -> int32 = "ocaml_bitstring_extract_fastpath_int32_be_signed"
 
-external extract_fastpath_int32_le_signed : string -> int -> int32 -> int32 = "ocaml_bitstring_extract_fastpath_int32_le_signed" "noalloc"
+external extract_fastpath_int32_le_signed : string -> int -> int32 = "ocaml_bitstring_extract_fastpath_int32_le_signed"
 
-external extract_fastpath_int32_ne_signed : string -> int -> int32 -> int32 = "ocaml_bitstring_extract_fastpath_int32_ne_signed" "noalloc"
+external extract_fastpath_int32_ne_signed : string -> int -> int32 = "ocaml_bitstring_extract_fastpath_int32_ne_signed"
 
 (*
 external extract_fastpath_int40_be_unsigned : string -> int -> int64 -> int64 = "ocaml_bitstring_extract_fastpath_int40_be_unsigned" "noalloc"
@@ -1035,22 +1051,24 @@ external extract_fastpath_int56_le_signed : string -> int -> int64 -> int64 = "o
 external extract_fastpath_int56_ne_signed : string -> int -> int64 -> int64 = "ocaml_bitstring_extract_fastpath_int56_ne_signed" "noalloc"
 *)
 
-external extract_fastpath_int64_be_unsigned : string -> int -> int64 -> int64 = "ocaml_bitstring_extract_fastpath_int64_be_unsigned" "noalloc"
+external extract_fastpath_int64_be_unsigned : string -> int -> int64 = "ocaml_bitstring_extract_fastpath_int64_be_unsigned"
 
-external extract_fastpath_int64_le_unsigned : string -> int -> int64 -> int64 = "ocaml_bitstring_extract_fastpath_int64_le_unsigned" "noalloc"
+external extract_fastpath_int64_le_unsigned : string -> int -> int64 = "ocaml_bitstring_extract_fastpath_int64_le_unsigned"
 
-external extract_fastpath_int64_ne_unsigned : string -> int -> int64 -> int64 = "ocaml_bitstring_extract_fastpath_int64_ne_unsigned" "noalloc"
+external extract_fastpath_int64_ne_unsigned : string -> int -> int64 = "ocaml_bitstring_extract_fastpath_int64_ne_unsigned"
 
-external extract_fastpath_int64_be_signed : string -> int -> int64 -> int64 = "ocaml_bitstring_extract_fastpath_int64_be_signed" "noalloc"
+external extract_fastpath_int64_be_signed : string -> int -> int64 = "ocaml_bitstring_extract_fastpath_int64_be_signed"
 
-external extract_fastpath_int64_le_signed : string -> int -> int64 -> int64 = "ocaml_bitstring_extract_fastpath_int64_le_signed" "noalloc"
+external extract_fastpath_int64_le_signed : string -> int -> int64 = "ocaml_bitstring_extract_fastpath_int64_le_signed"
 
-external extract_fastpath_int64_ne_signed : string -> int -> int64 -> int64 = "ocaml_bitstring_extract_fastpath_int64_ne_signed" "noalloc"
+external extract_fastpath_int64_ne_signed : string -> int -> int64 = "ocaml_bitstring_extract_fastpath_int64_ne_signed"
 
 (* 'construct' functions are used in BITSTRING constructors. *)
 val construct_bit : Buffer.t -> bool -> int -> exn -> unit
 
 val construct_char_unsigned : Buffer.t -> int -> int -> exn -> unit
+
+val construct_char_signed : Buffer.t -> int -> int -> exn -> unit
 
 val construct_int_be_unsigned : Buffer.t -> int -> int -> exn -> unit
 
@@ -1059,6 +1077,14 @@ val construct_int_le_unsigned : Buffer.t -> int -> int -> exn -> unit
 val construct_int_ne_unsigned : Buffer.t -> int -> int -> exn -> unit
 
 val construct_int_ee_unsigned : endian -> Buffer.t -> int -> int -> exn -> unit
+
+val construct_int_be_signed : Buffer.t -> int -> int -> exn -> unit
+
+val construct_int_le_signed : Buffer.t -> int -> int -> exn -> unit
+
+val construct_int_ne_signed : Buffer.t -> int -> int -> exn -> unit
+
+val construct_int_ee_signed : endian -> Buffer.t -> int -> int -> exn -> unit
 
 val construct_int32_be_unsigned : Buffer.t -> int32 -> int -> exn -> unit
 
@@ -1079,3 +1105,7 @@ val construct_int64_ee_unsigned : endian -> Buffer.t -> int64 -> int -> exn -> u
 val construct_string : Buffer.t -> string -> unit
 
 val construct_bitstring : Buffer.t -> bitstring -> unit
+
+(* Alias of functions shadowed by Core. *)
+val char_code : char -> int
+val int32_of_int : int -> int32
