@@ -2,6 +2,7 @@
   http://www.bittorrent.org/beps/bep_0015.html *)
 
 open Bitstring
+open BTTypes
 
 let of_bits = string_of_bitstring
 let bits = bitstring_of_string
@@ -19,10 +20,9 @@ let connect_request txn =
 (** connect response with connection_id for future use *)
 let connect_response s exp_txn =
   bitmatch bits s with
-  | { 0l : 32 ; txn : 32 ; conn_id : 64 } -> 
-    if txn = exp_txn then conn_id else fail "error connect_response txn %ld expected %ld" txn exp_txn
+  | { 0l : 32; txn : 32 : check (txn = exp_txn); conn_id : 64 } -> conn_id
   | { :error_response } -> fail "error connect_response txn %ld : %s" txn msg
-  | { }  -> fail "error connect_response (expected txn %ld) : %s" exp_txn (AnyEndian.dump_hex_s s)
+  | { _ }  -> fail "error connect_response (expected txn %ld) : %s" exp_txn (AnyEndian.dump_hex_s s)
 
 (** announce *)
 let announce_request conn txn ~info_hash ~peer_id (downloaded,left,uploaded) event ?(ip=0l) ?(key=0l) ~numwant port =
@@ -55,19 +55,18 @@ size		name	description
 int32_t		ip		The ip of a peer in the swarm.
 uint16_t	port	The peer's listen port.
 *)
-let announce_response s exp_txn =
+let announce_response s exp_txn tracker_info =
   let rec clients rest l =
     bitmatch rest with
     | { ip : 32 ; port : 16 ; rest : -1 : bitstring } -> clients rest ((ip,port)::l)
-    | { } -> l
+    | { _ } -> l
   in
   bitmatch bits s with
   (* 1: announce response *)
-  | { 1l : 32 ; txn : 32; interval : 32 ; leechers : 32 ; seeders : 32 ;
-      rest : -1 : bitstring } -> 
-        if txn = exp_txn then 
-          (interval,clients rest []) 
-        else
-          fail "error announce_response txn %ld expected %ld" txn exp_txn
+  | { 1l : 32; txn : 32 : check (txn = exp_txn); interval : 32; leechers : 32; seeders : 32;
+      rest : -1 : bitstring } ->
+			tracker_info.tracker_torrent_complete <- Int32.to_int seeders;
+			tracker_info.tracker_torrent_incomplete <- Int32.to_int leechers;
+			(interval,clients rest [])
   | { :error_response } -> fail "error announce_response txn %ld : %s" txn msg
-  | { } -> fail "error announce_response (expected txn %ld) : %s" exp_txn (AnyEndian.dump_hex_s s)
+  | { _ } -> fail "error announce_response (expected txn %ld) : %s" exp_txn (AnyEndian.dump_hex_s s)

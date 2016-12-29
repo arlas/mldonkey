@@ -177,7 +177,9 @@ let talk_to_udp_tracker host port args file t need_sources =
         if need_sources then t.tracker_last_clients_num <- 0;
 
 		(*lprintf_nl "udpt txn' %ld , content %s" txn p.udp_content;*)
-        let (interval,clients) = announce_response p.udp_content txn in
+		(* arlas: we send tracker to update  leechers/seeders info
+		* TODO: should use tracker_torrent_total_clients_count here? *)
+        let (interval,clients) = announce_response p.udp_content txn t in
         if !verbose_msg_servers then
           lprintf_nl "udpt got interval %ld clients %d for host %s" interval (List.length clients) host;
         if interval > 0l then

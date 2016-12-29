@@ -336,9 +336,9 @@ let op_file_print file o =
   emit (_s"Filename") file.file_name;
   (* Downloads, click on file; 12) "Hash" *)
   emit (_s"Hash") ~desc:(_s"Torrent metadata hash") (Sha1.to_hexa file.file_id);
-  (* Downloads, click on file; 13) "Torrent search" arlas TODO: update sites *)
-  emit (_s"Torrent search") ~desc:(_s"Search for similar torrent files") (Printf.sprintf
-    "\\<a target=\\\"_blank\\\" href=\\\"http://isohunt.com/%s\\\"\\>IsoHunt\\</a\\>" file.file_name);
+  (* Downloads, click on file; 13) "Torrent search" arlas TODO: update sites - bitsnoop ?*)
+  (*emit (_s"Torrent search") ~desc:(_s"Search for similar torrent files") (Printf.sprintf
+    "\\<a target=\\\"_blank\\\" href=\\\"http://isohunt.com/%s\\\"\\>IsoHunt\\</a\\>" file.file_name);*)
 
   let tracker_header_printed = ref false in
   List.iter (fun tracker ->
@@ -349,13 +349,13 @@ let op_file_print file o =
       else
       match tracker.tracker_status with
       | Disabled s | Disabled_mld s ->
-         Printf.sprintf "\\<font color=\\\"red\\\"\\>disabled: %s\\<br\\>\\--error: %s\\</font\\>"
-           tracker_url s
+         Printf.sprintf "\\<font color=\\\"red\\\"\\>disabled: %s (seeders: %d; leechers: %d)\\<br\\>\\--error: %s\\</font\\>"
+           tracker_url tracker.tracker_torrent_complete tracker.tracker_torrent_incomplete s
       | Disabled_failure (i,s) -> 
-         Printf.sprintf "\\<font color=\\\"red\\\"\\>disabled: %s\\<br\\>\\--error: %s (try %d)\\</font\\>"
-           tracker_url s i
+         Printf.sprintf "\\<font color=\\\"red\\\"\\>disabled: %s (seeders: %d; leechers: %d)\\<br\\>\\--error: %s (try %d)\\</font\\>"
+           tracker_url tracker.tracker_torrent_complete tracker.tracker_torrent_incomplete s i
       | _ ->
-         Printf.sprintf "enabled: %s" tracker_url
+         Printf.sprintf "enabled: %s (seeders: %d; leechers: %d)" tracker_url tracker.tracker_torrent_complete tracker.tracker_torrent_incomplete
     in
     let text = if not !tracker_header_printed then _s"Tracker(s)" else "" in
     emit text tracker_text;
