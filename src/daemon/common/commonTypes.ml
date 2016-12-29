@@ -205,7 +205,12 @@ module Uid : sig
       (fun uid -> string_to_value (to_string uid))
   end
 
-(* TODO group settings: xt.1 xt.2 .. *)
+(* TODO group settings: xt.1 xt.2 .. 
+*	Multiple files and their URNs, names and hashes in
+*	the Magnet link can be included by adding a count
+*	number preceded by a dot (".") to each link parameter.
+*	magnet:?xt.1=[ URN of the first file]&xt.2=[ URN of the second file]
+*)
 let parse_magnet_url url =
   let url = Url.of_string url in
   if url.Url.short_file = "magnet:" then
@@ -215,13 +220,30 @@ let parse_magnet_url url =
     let trackers = ref [] in
     let each k v =
       match String2.split k '.' with
-      | "xt"::_ -> uids := Uid.of_string v :: !uids
-      | "xl"::_ -> size := Some (Int64.of_string v) (* exact length *)
-      | "dn"::_ -> name := Url.decode v
-      | "as"::_ -> () (* acceptable source *)
-      | "xs"::_ -> () (* eXtra source *)
-      | "mt"::_ -> () (* manifest topic: url or urn, see http://rakjar.de/gnuticles/MAGMA-Specsv22.txt *)
-      | "kt"::_ -> () (* keywords topic *)
+	  (* Direct Connect and G2:
+	  *		xt=urn:tree:tiger:[ TTH Hash (Base32) ]
+	  * gnutella and G2
+	  *		xt=urn:sha1:[ SHA-1 Hash (Base32) ]
+	  * gnutella and G2
+	  *		xt=urn:bitprint:[ SHA-1 Hash (Base32) ].[ TTH Hash (Base32) ]
+	  * eDonkey2000.
+	  *		xt=urn:ed2k:[ ED2K Hash (Hex) ]
+	  * eDonkey2000
+	  *		xt=urn:aich:[ aich Hash (Base32) ]
+	  * FastTrack
+	  *		xt=urn:kzhash:[ Kazaa Hash (Hex) ]
+	  * BitTorrent
+	  *		xt=urn:btih:[ BitTorrent Info Hash (Hex) ]
+	  * G2
+	  *		xt=urn:md5:[ MD5 Hash (Hex) ]
+	  *)
+      | "xt"::_ -> uids := Uid.of_string v :: !uids (* eXact Topic *)
+      | "xl"::_ -> size := Some (Int64.of_string v) (* eXact Length *)
+      | "dn"::_ -> name := Url.decode v (* Display Name *)
+      | "as"::_ -> () (* Acceptable Source *)
+      | "xs"::_ -> () (* eXact source *)
+      | "mt"::_ -> () (* Manifest Topic: url or urn, see http://rakjar.de/gnuticles/MAGMA-Specsv22.txt *)
+      | "kt"::_ -> () (* Keyword Topic *)
       | "tr"::_ -> trackers := Url.decode v :: !trackers
       | "x"::_ -> () (* extensions *)
 (*

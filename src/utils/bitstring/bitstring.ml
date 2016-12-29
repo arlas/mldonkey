@@ -27,7 +27,6 @@ open Printf
 let debug = ref false
 let version = "2.0.2"
 let package = "ocaml-bitstring"
-let ocamllibdir = "@OCAMLLIB@"
 
 type endian = BigEndian | LittleEndian | NativeEndian
 

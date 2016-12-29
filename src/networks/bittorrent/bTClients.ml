@@ -55,6 +55,7 @@ open CommonSwarming
 open CommonGlobals
 open CommonDownloads
 
+open Bencode
 open BTRate
 open BTTypes
 open BTProtocol
@@ -1363,21 +1364,35 @@ and client_to_client c sock msg =
                   |_ -> () ;
               end;
               match !msgtype with
-                  1L ->
-                    let last_piece_index = (Int64.div file.file_metadata_size 16384L) in
+                  1L -> (* data *)
+					(* arlas Todo: maybe we should update the file, and not remove it *)
+					let last_piece_index = (Int64.div file.file_metadata_size 16384L) in
+					let first_tracker = List.hd(file.file_trackers) in
+					(*creates a string with d string e that contains tracker information*)
+					let be_ann_track = Bencode.encode (Dictionary ["announce", String (show_tracker_url first_tracker.tracker_url);
+									(* announce-list is a list of lists *)
+									"announce-list", List
+									(List.map (fun t ->
+									List ( String (show_tracker_url t.tracker_url) :: []))
+									file.file_trackers);
+									]) in
+					(* need to remove last e to concatenate with metadata *)
+					(*let leng = (String.length be_ann_track) - 1 in*)
+					let ann_string = String.sub be_ann_track 0 ((String.length be_ann_track) - 1) in
                     if !verbose_msg_clients then
                       lprintf_file_nl (as_file file) "handling metadata piece %Ld of %Ld"
                         file.file_metadata_piece
                         last_piece_index;
-                        (* store the metadata piece in memory *)
-                    file.file_metadata_chunks.(1 + (Int64.to_int file.file_metadata_piece)) <- payload;
-                        (* possibly write metadata to disk *)
+						(* store the metadata piece in memory *)
+						(*lprintf_file_nl (as_file file) "trackers: %s" ann_string;*)
+					file.file_metadata_chunks.(1 + (Int64.to_int file.file_metadata_piece)) <- payload;
+					(* possibly write metadata to disk *)
                     if file.file_metadata_piece >=
                       (Int64.div file.file_metadata_size 16384L) then begin
                         if !verbose_msg_clients then
                           lprintf_file_nl (as_file file) "this was the last piece";
-                            (* here we should simply delete the current download, and wait for mld to pick up the new torrent file *)
-                            (* the entire payload is currently in the array, TODO *)
+						(* here we should simply delete the current download, and wait for mld to pick up the new torrent file *)
+						(* the entire payload is currently in the array, TODO *)
                         let newtorrentfile = (Printf.sprintf "%s/BT-%s.torrent"
                                                       (Filename2.temp_dir_name ())
                                                       (Sha1.to_string file.file_id)) in
@@ -1387,10 +1402,11 @@ and client_to_client c sock msg =
                           (* the ee is so we can use the same method to find the
                              start of the payload for the real payloads as well as the synthetic ones
                              *)
-                          file.file_metadata_chunks.(0) <- "eed4:info";
-                          file.file_metadata_chunks.(2 + Int64.to_int last_piece_index) <- "eee";
+                          file.file_metadata_chunks.(0) <- (Printf.sprintf "ee%s4:info" ann_string)(*"eed4:info"*); (* start of torrent file *)
+                          file.file_metadata_chunks.(2 + Int64.to_int last_piece_index) <- "eee"; (* end of torrent file *)
                           try
                             Array.iteri (fun index chunk ->
+							(* file_metadata_chunks contains surplus "ee" for this: *)
                             (* regexp ee is a fugly way to find the end of the 1st dict before the real payload *)
                               let metaindex = (2 + (Str.search_forward  (Str.regexp_string "ee") chunk 0 )) in
                               let chunklength = ((String.length chunk) - metaindex) in
