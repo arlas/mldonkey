@@ -859,6 +859,7 @@ let http_error_no_gd img_type =
       | false -> lprintf_nl "Warning: GD support disabled"; true)
 let any_ip = Ip.of_inet_addr Unix.inet_addr_any
 
+(* GUI header *)
 let html_open_page buf t r open_body =
   Buffer.reset buf;
   http_add_html_header r;
@@ -1358,7 +1359,8 @@ let http_handler o t r =
 
             let list = List2.tail_map file_info (user2_filter_files !!files o.conn_user.ui_user) in
             DriverInteractive.display_file_list b o list;
-            html_open_page buf t r true;
+			(* body tag added in driverInteractive *)
+            html_open_page buf t r false;
             Buffer.add_string buf (html_escaped (Buffer.contents b))
 
         | "submit" ->

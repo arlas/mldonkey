@@ -446,16 +446,17 @@ let stalled file =
   | FilePaused | FileQueued -> true
   | _ -> false
 
-
+(* "Transfers" page, ref http://127.0.0.1:4080/files should be rewritten.*)
 let print_file_html_form buf files =
 
 
-  Printf.bprintf buf "
+  Printf.bprintf buf "\\<body\\>\\
 \\<script language=JavaScript\\>\\<!--
 function pauseAll(x){for(i=0;i\\<document.selectForm.elements.length;i++){var j=document.selectForm.elements[i];if (j.name==\\\"pause\\\") {j.checked=x;}}}
 function resumeAll(x){for(i=0;i\\<document.selectForm.elements.length;i++){var j=document.selectForm.elements[i];if (j.name==\\\"resume\\\") {j.checked=x;}}}
 function cancelAll(x){for(i=0;i\\<document.selectForm.elements.length;i++){var j=document.selectForm.elements[i];if (j.name==\\\"cancel\\\") {j.checked=x;}}}
-  function clearAll(x){for(i=0;i\\<document.selectForm.elements.length;i++){var j=document.selectForm.elements[i];if (j.type==\\\"checkbox\\\") {j.checked=x;}}}//--\\>\\</script\\>
+function clearAll(x){for(i=0;i\\<document.selectForm.elements.length;i++){var j=document.selectForm.elements[i];if (j.type==\\\"checkbox\\\") {j.checked=x;}}}
+function uncheck(name,x){for(i=0;i\\<document.selectForm.elements.length;i++){var j=document.selectForm.elements[i];if (j.name==name && j.value==x) {j.checked=false; break;}}}//--\\>\\</script\\>
   ";
 
   Printf.bprintf buf "\\<form name=selectForm action=\\\"files\\\"\\>";
@@ -508,20 +509,15 @@ function cancelAll(x){for(i=0;i\\<document.selectForm.elements.length;i++){var j
               file.file_num
             (net_name file)
           );
-
+			(* checkboxes P - R - C *)
           (if downloading file then
               Printf.sprintf
-                "\\<input name=pause type=checkbox value=%d\\> R
-                \\<input name=cancel type=checkbox value=%d\\>"
-                file.file_num
-                file.file_num
+                "\\<input name=pause type=checkbox value=%d onclick=\\\"uncheck(cancel,%d);\\\"\\> DL \\<input name=cancel type=checkbox value=%d onclick=\\\"uncheck(pause,%d);\\\"\\>"
+                file.file_num file.file_num file.file_num file.file_num
             else
               Printf.sprintf
-                "P
-              \\<input name=resume type=checkbox value=%d\\>
-                \\<input name=cancel type=checkbox value=%d\\>"
-                file.file_num
-                file.file_num);
+                "P \\<input name=resume type=checkbox value=%d onclick=\\\"uncheck(cancel,%d);\\\"\\> \\<input name=cancel type=checkbox value=%d onclick=\\\"uncheck(resume,%d);\\\"\\>"
+                file.file_num file.file_num file.file_num file.file_num);
 
           ( let size = Int64.to_float file.file_size in
             let downloaded = Int64.to_float file.file_downloaded in
@@ -592,12 +588,17 @@ let print_file_html_mods buf guifiles =
 
 	) guifiles;
 
-  Printf.bprintf buf "\\</pre\\>
-\\<script language=JavaScript\\>\\<!--
-function pauseAll(x){for(i=0;i\\<document.selectForm.elements.length;i++){var j=document.selectForm.elements[i];if (j.name==\\\"pause\\\") {j.checked=x;}}}
-function resumeAll(x){for(i=0;i\\<document.selectForm.elements.length;i++){var j=document.selectForm.elements[i];if (j.name==\\\"resume\\\") {j.checked=x;}}}
-function cancelAll(x){for(i=0;i\\<document.selectForm.elements.length;i++){var j=document.selectForm.elements[i];if (j.name==\\\"cancel\\\") {j.checked=x;}}}
-function clearAll(x){for(i=0;i\\<document.selectForm.elements.length;i++){var j=document.selectForm.elements[i];if (j.type==\\\"checkbox\\\") {j.checked=x;}}}
+	(* GUI "Transfers" page, ref http://127.0.0.1:4080/files *)
+  Printf.bprintf buf "\\<body onload=\\\"load();\\\"\\>\\
+  \\</pre\\>
+\\<script type=\\\"text/javascript\\\"\\>\\<!--
+function uncheck(){if (this.name == \\\"resume\\\" || this.name == \\\"pause\\\") document.querySelectorAll(\\\".checkbox[value='\\\"+this.value+\\\"']\\\")[1].checked = false; else document.querySelectorAll(\\\".checkbox[value='\\\"+this.value+\\\"']\\\")[0].checked = false;}
+function load(){var checkb = document.getElementsByClassName(\\\"checkbox\\\");for(i=0;i\\<checkb.length;i++){checkb[i].addEventListener (\\\"click\\\", uncheck, false);}
+var checkbig = document.getElementsByClassName(\\\"bigbutton\\\");document.querySelectorAll(\\\".bigbutton[id='clear']\\\")[0].addEventListener (\\\"click\\\", clearAll, false);document.querySelectorAll(\\\".bigbutton[id='pause']\\\")[0].addEventListener (\\\"click\\\", pauseAll, false);document.querySelectorAll(\\\".bigbutton[id='resume']\\\")[0].addEventListener (\\\"click\\\", resumeAll, false);}
+function pauseAll(){var checkb = document.getElementsByClassName(\\\"checkbox\\\");for (i=0;i\\<checkb.length;i++){if (checkb[i].name==\\\"pause\\\") checkb[i].checked=true; else checkb[i].checked=false;}}
+function resumeAll(){var checkb = document.getElementsByClassName(\\\"checkbox\\\");for (i=0;i\\<checkb.length;i++){if (checkb[i].name==\\\"resume\\\") checkb[i].checked=true; else checkb[i].checked=false;}}
+function clearAll(){var checkb = document.getElementsByClassName(\\\"checkbox\\\");for (i=0;i\\<checkb.length;i++){checkb[i].checked=false;}}
+
 function submitPriority(num,cp,sel) {
 	// 2 line workaround for mozilla mouseout bug:
 	var row = sel.parentNode.parentNode.parentNode;
@@ -637,17 +638,15 @@ if !!html_mods_use_js_tooltips then Printf.bprintf buf
 \\<table class=main cellspacing=0 cellpadding=0\\>
 
 \\<tr\\>\\<td\\>
-
 \\<table cellspacing=0  cellpadding=0  width=100%%\\>\\<tr\\>
 \\<td %s class=downloaded width=100%%\\>Total(%d): %s/%s @ %.1f KB/s\\</td\\>%s
-
-\\<td class=big\\>\\<input class=bigbutton type=\\\"button\\\" value=\\\"Pause all\\\" onclick=\\\"pauseAll(true);\\\"\\>\\</td\\>
-\\<td class=big\\>\\<input class=bigbutton type=\\\"button\\\" value=\\\"Resume all\\\" onclick=\\\"resumeAll(true);\\\"\\>\\</td\\>
-\\<td class=big\\>\\<input class=bigbutton type=\\\"button\\\" value=\\\"Clear all\\\" onclick=\\\"clearAll(false);\\\"\\>\\</td\\>
+\\<td class=big\\>\\<input class=bigbutton type=\\\"button\\\" value=\\\"Pause all\\\" id=pause\\>\\</td\\>
+\\<td class=big\\>\\<input class=bigbutton type=\\\"button\\\" value=\\\"Resume all\\\" id=resume\\>\\</td\\>
+\\<td class=big\\>\\<input class=bigbutton type=\\\"button\\\" value=\\\"Clear all\\\" id=clear\\>\\</td\\>
 \\<td class=\\\"big pr\\\"\\>\\<input class=bigbutton type=submit value='Submit changes'\\>\\</td\\>
 \\</tr\\>\\</table\\>
-
 \\</td\\>\\</tr\\>
+
 \\<tr\\>\\<td\\>
 
 \\<table width=\\\"100%%\\\" class=\\\"downloaders\\\" cellspacing=0 cellpadding=0\\>\\<tr\\>
@@ -748,18 +747,17 @@ let ctd fn td = Printf.sprintf "\\<td onClick=\\\"location.href='submit?q=vd+%d'
 			!!html_mods_js_tooltips_wait
        else Printf.sprintf " onMouseOver=\\\"mOvr(this);return true;\\\" onMouseOut=\\\"mOut(this);\\\"\\>");
 
-	(if downloading file then
+		(* P - R - C *)
+		(if downloading file then
               Printf.sprintf "\\<td class=\\\"dl al np\\\"\\>\\<input class=checkbox name=pause type=checkbox value=%d\\>\\</td\\>
-                \\<td class=\\\"dl al np\\\"\\>R\\</td\\>
+                \\<td class=\\\"dl al np\\\"\\>DL\\</td\\>
                 \\<td class=\\\"dl al brs\\\"\\>\\<input class=checkbox name=cancel type=checkbox value=%d\\>\\</td\\>"
-                file.file_num
-                file.file_num		
+                file.file_num file.file_num
             else
               Printf.sprintf "\\<td class=\\\"dl al np\\\"\\>P\\</td\\>
                 \\<td class=\\\"dl al np\\\"\\>\\<input class=checkbox name=resume type=checkbox value=%d\\>\\</td\\>
                 \\<td class=\\\"dl al brs\\\"\\>\\<input class=checkbox name=cancel type=checkbox value=%d\\>\\</td\\>"
-                file.file_num
-                file.file_num);
+                file.file_num file.file_num);
 
 	  Printf.sprintf "\\<td onClick=\\\"location.href='files?%s=%d';return true;\\\" class=\\\"dl al brs\\\"\\>\\%s\\</td\\>"
 	    (if file.file_release then "norelease" else "release")

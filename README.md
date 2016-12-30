@@ -182,11 +182,91 @@ make
 make install
 ```
 ### 8) Installing GD Graphics Library
+(still have some problems crosscompiling this)
 ```
 ./bootstrap.sh
 ./configure --build=i686-w64-mingw32 --prefix=/mingw LIBS="-lbz2 -ljpeg -lws2_32 -liconv"
 ```
 execute
 ```
+make
+```
+
+### 9) Installing REGEX
+```
+wget https://ftp.gnu.org/old-gnu/regex/regex-0.12.tar.gz
+tar xzvf regex-0.12.tar.gz
+cd regex-0.12
+i686-w64-mingw32-gcc -DSTDC_HEADERS -DHAVE_STRING_H=1 -I. -c regex.c
+ar ru libregex.a regex.o
+cp -iv libregex.a /mingw/lib
+cp -iv libregex.a /mingw/lib/libgnurx.a
+cp -iv regex.h /mingw/include
+```
+
+### 10) Installing FILE - libmagic
+latest source on github: https://github.com/file/file.git
+
+```
+./configure --build=i686-w64-mingw32 --prefix=/mingw
+nano config.h
+```
+add the following lines:
+```
+#define WIN32 1
+#ifndef MAGIC
+#define MAGIC "magic"
+#endif
+```
+execute
+```
+make
+make install
+```
+
+### 11) Installing OCAML
+latest source on github: https://github.com/ocaml/ocaml.git
+execute (will install in **C:/ocamlmgw** )
+```
+cp config/m-nt.h config/m.h
+cp config/s-nt.h config/s.h
+cp config/Makefile.mingw config/Makefile
+make -f Makefile.nt flexdll world bootstrap opt opt.opt install
+```
+
+### 12) Installing OCAMLBUILD
+that's necessary only on certain OCAML versions (?)
+latest sources on github: https://github.com/ocaml/ocamlbuild.git
+```
+make configure
+make
+make install
+```
+
+### 13) Installing CAMLP4
+latest sources on github: https://github.com/ocaml/camlp4.git
+```
+./configure
+make all
+make install
+nano ~/.bashrc
+```
+append:
+```
+export CAMLP4LIB=C:/ocamlmgw/lib/camlp4
+```
+
+### 14) Compile MLDONKEY
+```
+./configure --build=i686-w64-mingw32 --prefix=/mingw --disable-fasttrack
+make depend
+make
+```
+
+windres should be changed in i686-w64-mingw32-windres -o resfile.o config/mldonkey.rc
+
+### recompile MLDONKEY
+```
+make clean
 make
 ```
