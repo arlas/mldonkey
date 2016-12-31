@@ -969,7 +969,7 @@ let web_common_header_mods0 = define_option message_section ["web_common_header_
     string_option
 ("
 <!-- Main Table -->
-<FORM name=cmdFormular action=submit target=output>
+<form name=cmdFormular action=btnsubmit target=output>
 <TABLE BORDER=0 cellspacing=1 cellpadding=0 width=\"100%\"><TR>
 <TD width=85><TABLE class=commands cellSpacing=0 cellPadding=0 width=\"100%\">
 <TBODY><TR><TD class=\"bu bbigm\" title=\" " ^ _s "Transfers Tab" ^ " \"
@@ -1009,11 +1009,11 @@ onclick=\"dllink();\">" ^ _s
 <TD noWrap width=\"100%\" title=\" " ^ _s "Input mldonkey commands here" ^ " \">
 <TABLE cellSpacing=0 cellpadding=0 width=\"100%\"><TBODY><TR>
 <TD style=\"height: 1%; padding: 0px; border: 0px; padding-left: 5px;\" title=\" " ^ _s "Input mldonkey command here" ^ " \">
-<INPUT class=\"txt2\" style=\"WIDTH: 99%;\" name=q>
+<INPUT class=\"txt2\" type=text style=\"WIDTH: 99%;\" id=inputbox name=q>
 </TD></TR></TBODY></TABLE></TD><TD noWrap>
 <TABLE class=commands cellSpacing=0 cellPadding=0 width=\"100%\"><TBODY><TR>
 <TD class=\"bu bbigm\" style=\"padding-top: 0px; padding-bottom: 0px;\" title=\" " ^ _s "Input Command" ^ " \">
-<INPUT class=\"but2\" type=submit value=\" " ^ _s "Input" ^ " \">
+<INPUT class=\"but2\" type=button onclick=\"submitForm();\" value=\" " ^ _s "Input" ^ " \">
 </TD></TR></TBODY></TABLE>
 </TD>
 </TR></TABLE>
@@ -1021,6 +1021,14 @@ onclick=\"dllink();\">" ^ _s
 
 <!-- set focus -->
 <script type=\"text/javascript\">
+document.getElementById('inputbox').addEventListener('keypress', function(event) {
+	if (event.which == 13 ||event.keyCode == 13) {
+		event.preventDefault();
+		var f = document.forms[\"cmdFormular\"].elements['q'];
+		if (f.value.length > 0){mSub('output',encodeURIComponent(f.value));f.value = \"\";}
+	}});
+function submitForm() {var f = document.forms[\"cmdFormular\"].elements['q']; if (f.value.length > 0){mSub('output',encodeURIComponent(f.value));f.value = \"\";}};
+
 document.forms['cmdFormular'].elements['q'].focus();
 </script>
 
