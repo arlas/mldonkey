@@ -824,7 +824,7 @@ external extract_fastpath_int64_ne_signed : string -> int -> int64 = "ocaml_bits
 (*----------------------------------------------------------------------*)
 (* Constructor functions. *)
 
-module Buffer = struct
+module BS_Buffer = struct
   type t = {
     buf : Buffer.t;
     mutable len : int;			(* Length in bits. *)
@@ -932,16 +932,16 @@ end
 
 (* Construct a single bit. *)
 let construct_bit buf b _ _ =
-  Buffer.add_bit buf b
+  BS_Buffer.add_bit buf b
 
 (* Construct a field, flen = [2..8]. *)
 let construct_char_unsigned buf v flen exn =
   let max_val = 1 lsl flen in
   if v < 0 || v >= max_val then raise exn;
   if flen = 8 then
-    Buffer.add_byte buf v
+    BS_Buffer.add_byte buf v
   else
-    Buffer._add_bits buf v flen
+    BS_Buffer._add_bits buf v flen
 
 let construct_char_signed buf v flen exn =
   let max_val = 1 lsl flen 
@@ -949,14 +949,14 @@ let construct_char_signed buf v flen exn =
     if v < min_val || v >= max_val then
 	raise exn;
     if flen = 8 then
-      Buffer.add_byte buf (if v >= 0 then v else 256 + v)
+      BS_Buffer.add_byte buf (if v >= 0 then v else 256 + v)
     else 
-      Buffer._add_bits buf v flen
+      BS_Buffer._add_bits buf v flen
 
 (* Construct a field of up to 31 bits. *)
 let construct_int check_func map_func buf v flen exn =
   if not (check_func v flen) then raise exn;
-  map_func (Buffer._add_bits buf) (Buffer.add_byte buf) v flen
+  map_func (BS_Buffer._add_bits buf) (BS_Buffer.add_byte buf) v flen
 
 let construct_int_be_unsigned =
   construct_int I.range_unsigned I.map_bytes_be
@@ -992,23 +992,23 @@ let construct_int_ee_signed = function
 
 (* Construct a field of exactly 32 bits. *)
 let construct_int32_be_unsigned buf v flen _ =
-  Buffer.add_byte buf
+  BS_Buffer.add_byte buf
     (Int32.to_int (Int32.shift_right_logical v 24));
-  Buffer.add_byte buf
+  BS_Buffer.add_byte buf
     (Int32.to_int ((Int32.logand (Int32.shift_right_logical v 16) 0xff_l)));
-  Buffer.add_byte buf
+  BS_Buffer.add_byte buf
     (Int32.to_int ((Int32.logand (Int32.shift_right_logical v 8) 0xff_l)));
-  Buffer.add_byte buf
+  BS_Buffer.add_byte buf
     (Int32.to_int (Int32.logand v 0xff_l))
 
 let construct_int32_le_unsigned buf v flen _ =
-  Buffer.add_byte buf
+  BS_Buffer.add_byte buf
     (Int32.to_int (Int32.logand v 0xff_l));
-  Buffer.add_byte buf
+  BS_Buffer.add_byte buf
     (Int32.to_int ((Int32.logand (Int32.shift_right_logical v 8) 0xff_l)));
-  Buffer.add_byte buf
+  BS_Buffer.add_byte buf
     (Int32.to_int ((Int32.logand (Int32.shift_right_logical v 16) 0xff_l)));
-  Buffer.add_byte buf
+  BS_Buffer.add_byte buf
     (Int32.to_int (Int32.shift_right_logical v 24))
 
 let construct_int32_ne_unsigned =
@@ -1026,14 +1026,14 @@ let construct_int64_be_unsigned buf v flen exn =
   (* Check value is within range. *)
   if not (I64.range_unsigned v flen) then raise exn;
   (* Add the bytes. *)
-  I64.map_bytes_be (Buffer._add_bits buf) (Buffer.add_byte buf) v flen
+  I64.map_bytes_be (BS_Buffer._add_bits buf) (BS_Buffer.add_byte buf) v flen
 
 (* Construct a field of up to 64 bits. *)
 let construct_int64_le_unsigned buf v flen exn =
   (* Check value is within range. *)
   if not (I64.range_unsigned v flen) then raise exn;
   (* Add the bytes. *)
-  I64.map_bytes_le (Buffer._add_bits buf) (Buffer.add_byte buf) v flen
+  I64.map_bytes_le (BS_Buffer._add_bits buf) (BS_Buffer.add_byte buf) v flen
 
 let construct_int64_ne_unsigned =
   if nativeendian = BigEndian
@@ -1050,7 +1050,7 @@ let construct_int64_ee_unsigned = function
  *)
 let construct_string buf str =
   let len = String.length str in
-  Buffer.add_bits buf str (len lsl 3)
+  BS_Buffer.add_bits buf str (len lsl 3)
 
 (* Construct from a bitstring. *)
 let construct_bitstring buf (data, off, len) =
@@ -1064,7 +1064,7 @@ let construct_bitstring buf (data, off, len) =
     else (
       let b = extract_bit data off len 1
       and off = off + 1 and len = len - 1 in
-      Buffer.add_bit buf b;
+      BS_Buffer.add_bit buf b;
       loop off len (blen-1)
     )
   in
@@ -1078,13 +1078,13 @@ let construct_bitstring buf (data, off, len) =
     if off = 0 then data
     else String.sub data off (String.length data - off) in
 
-  Buffer.add_bits buf data len
+  BS_Buffer.add_bits buf data len
 
 (* Concatenate bitstrings. *)
 let concat bs =
-  let buf = Buffer.create () in
+  let buf = BS_Buffer.create () in
   List.iter (construct_bitstring buf) bs;
-  Buffer.contents buf
+  BS_Buffer.contents buf
 
 (*----------------------------------------------------------------------*)
 (* Extract a string from a bitstring. *)

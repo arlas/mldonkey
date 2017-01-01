@@ -867,7 +867,7 @@ val hexdump_bitstring : out_channel -> bitstring -> unit
 
 (** {3 Bitstring buffer} *)
 
-module Buffer : sig
+module BS_Buffer : sig
   type t
   val create : unit -> t
   val contents : t -> bitstring
@@ -1064,47 +1064,47 @@ external extract_fastpath_int64_le_signed : string -> int -> int64 = "ocaml_bits
 external extract_fastpath_int64_ne_signed : string -> int -> int64 = "ocaml_bitstring_extract_fastpath_int64_ne_signed"
 
 (* 'construct' functions are used in BITSTRING constructors. *)
-val construct_bit : Buffer.t -> bool -> int -> exn -> unit
+val construct_bit : BS_Buffer.t -> bool -> int -> exn -> unit
 
-val construct_char_unsigned : Buffer.t -> int -> int -> exn -> unit
+val construct_char_unsigned : BS_Buffer.t -> int -> int -> exn -> unit
 
-val construct_char_signed : Buffer.t -> int -> int -> exn -> unit
+val construct_char_signed : BS_Buffer.t -> int -> int -> exn -> unit
 
-val construct_int_be_unsigned : Buffer.t -> int -> int -> exn -> unit
+val construct_int_be_unsigned : BS_Buffer.t -> int -> int -> exn -> unit
 
-val construct_int_le_unsigned : Buffer.t -> int -> int -> exn -> unit
+val construct_int_le_unsigned : BS_Buffer.t -> int -> int -> exn -> unit
 
-val construct_int_ne_unsigned : Buffer.t -> int -> int -> exn -> unit
+val construct_int_ne_unsigned : BS_Buffer.t -> int -> int -> exn -> unit
 
-val construct_int_ee_unsigned : endian -> Buffer.t -> int -> int -> exn -> unit
+val construct_int_ee_unsigned : endian -> BS_Buffer.t -> int -> int -> exn -> unit
 
-val construct_int_be_signed : Buffer.t -> int -> int -> exn -> unit
+val construct_int_be_signed : BS_Buffer.t -> int -> int -> exn -> unit
 
-val construct_int_le_signed : Buffer.t -> int -> int -> exn -> unit
+val construct_int_le_signed : BS_Buffer.t -> int -> int -> exn -> unit
 
-val construct_int_ne_signed : Buffer.t -> int -> int -> exn -> unit
+val construct_int_ne_signed : BS_Buffer.t -> int -> int -> exn -> unit
 
-val construct_int_ee_signed : endian -> Buffer.t -> int -> int -> exn -> unit
+val construct_int_ee_signed : endian -> BS_Buffer.t -> int -> int -> exn -> unit
 
-val construct_int32_be_unsigned : Buffer.t -> int32 -> int -> exn -> unit
+val construct_int32_be_unsigned : BS_Buffer.t -> int32 -> int -> exn -> unit
 
-val construct_int32_le_unsigned : Buffer.t -> int32 -> int -> exn -> unit
+val construct_int32_le_unsigned : BS_Buffer.t -> int32 -> int -> exn -> unit
 
-val construct_int32_ne_unsigned : Buffer.t -> int32 -> int -> exn -> unit
+val construct_int32_ne_unsigned : BS_Buffer.t -> int32 -> int -> exn -> unit
 
-val construct_int32_ee_unsigned : endian -> Buffer.t -> int32 -> int -> exn -> unit
+val construct_int32_ee_unsigned : endian -> BS_Buffer.t -> int32 -> int -> exn -> unit
 
-val construct_int64_be_unsigned : Buffer.t -> int64 -> int -> exn -> unit
+val construct_int64_be_unsigned : BS_Buffer.t -> int64 -> int -> exn -> unit
 
-val construct_int64_le_unsigned : Buffer.t -> int64 -> int -> exn -> unit
+val construct_int64_le_unsigned : BS_Buffer.t -> int64 -> int -> exn -> unit
 
-val construct_int64_ne_unsigned : Buffer.t -> int64 -> int -> exn -> unit
+val construct_int64_ne_unsigned : BS_Buffer.t -> int64 -> int -> exn -> unit
 
-val construct_int64_ee_unsigned : endian -> Buffer.t -> int64 -> int -> exn -> unit
+val construct_int64_ee_unsigned : endian -> BS_Buffer.t -> int64 -> int -> exn -> unit
 
-val construct_string : Buffer.t -> string -> unit
+val construct_string : BS_Buffer.t -> string -> unit
 
-val construct_bitstring : Buffer.t -> bitstring -> unit
+val construct_bitstring : BS_Buffer.t -> bitstring -> unit
 
 (* Alias of functions shadowed by Core. *)
 val char_code : char -> int

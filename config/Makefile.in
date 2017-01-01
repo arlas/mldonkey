@@ -86,7 +86,7 @@ SRC_SOULSEEK=src/networks/soulseek
 SRC_DIRECTCONNECT=src/networks/direct_connect
 SRC_FILETP=src/networks/fileTP
 
-SUBDIRS=$(EXTLIB) $(CDK) $(BITSTRING) $(LIB) $(RSS) $(XML) $(NET) tools \
+SUBDIRS=$(EXTLIB) $(BITSTRING) $(CDK) $(LIB) $(RSS) $(XML) $(NET) tools \
    $(COMMON) $(DRIVER) $(MP3) src/config/$(OS_FILES)
 
 INCLUDES += $(foreach file, $(SUBDIRS), -I $(file)) -I +camlp4
@@ -592,9 +592,9 @@ BITSTRING_CMXA=bitstring.cmxa
 BITSTRING_CMA=bitstring.cma
 endif
 MLNET_SRCS+= $(MAIN_SRCS)
-MLNET_CMXA=extlib.cmxa $(CDK_CMXA) $(BITSTRING_CMXA) magic.cmxa common.cmxa client.cmxa core.cmxa driver.cmxa
+MLNET_CMXA=extlib.cmxa $(BITSTRING_CMXA) $(CDK_CMXA) magic.cmxa common.cmxa client.cmxa core.cmxa driver.cmxa
 
-TESTS_CMXA=extlib.cmxa $(CDK_CMXA) $(BITSTRING_CMXA) magic.cmxa common.cmxa client.cmxa core.cmxa
+TESTS_CMXA=extlib.cmxa $(BITSTRING_CMXA) $(CDK_CMXA) magic.cmxa common.cmxa client.cmxa core.cmxa
 TESTS_SRCS=tools/tests.ml
 
 ifeq ("$(GUI)", "newgui2")
@@ -1556,7 +1556,7 @@ PA_ZOG: pa_zog.cma
 endif
 
 resfile.o:
-	windres -o resfile.o config/mldonkey.rc
+	i686-w64-mingw32-windres -o resfile.o config/mldonkey.rc
 
 depend:   $(RESFILE) \
 	$(PA_ZOG) $(LIB)/http_lexer.ml $(TMPSOURCES)
