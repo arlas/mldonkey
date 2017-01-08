@@ -100,7 +100,7 @@ let rec dollar_escape o with_frames s =
       else
       if c = '$' then true else
         (Buffer.add_char b c; false)) s
-
+  
 let eval auth cmd o =
   let buf = o.conn_buf in
   let cmd =
@@ -162,6 +162,80 @@ let eval auth cmd o =
                 List.iter (fun (cmd, help) -> Printf.bprintf buf "$r%s$n %s\n" cmd help) list
           ) list;
         end
+	| ["prova"] ->
+		let module H = Http_client in
+		let r = {
+			H.basic_request with
+			H.req_url = Url.of_string "http://coppersurfer.tk/";(*"http://coppersurfer.tk/";*)
+			(*H.req_proxy = !CommonOptions.http_proxy;*)
+			H.req_max_retry = 10;
+			H.req_user_agent = get_user_agent ();(*"Wget/1.18";*)
+			(*H.req_accept = "text/html";*)
+			H.req_save = true;
+			(*H.req_headers = ("Accept-Encoding", "identity") :: ("Host", "coppersurfer.tk") :: [];*)
+			} in
+		if o.conn_output = HTML then
+			begin
+				lprintf_nl "test page download 2...";
+				Buffer.add_string buf "\\<div class=\\\"cs\\\"\\>";
+				html_mods_table_header buf "helpTable" "results" [];
+				Buffer.add_string buf "\\<tr\\>";
+				html_mods_td buf [
+                 ("", "srh", "Prova:");
+                 ("", "srh", ""); ];
+				Buffer.add_string buf "\\</tr\\>\\<tr class=\\\"dl-1\\\"\\>";
+				html_mods_td buf [
+				("", "sr", "$bProva1:$n");
+				("", "sr", ""); ];
+				Buffer.add_string buf "\\</tr\\>\\<tr class=\\\"dl-2\\\"\\>";
+				html_mods_td buf [
+                 ("", "sr", "$r\\<a href=\\\"submit?q=prova\\\"\\>test\\</a\\>$n");
+                 ("", "sr", "<-spiegazione"); ];
+				Buffer.add_string buf "\\</tr\\>\\</table\\>\\</div\\>\\</div\\>\n";
+				lprintf_nl "test page download 3...";
+				H.wget_string r
+    (fun answer ->
+	let split = Str.split (Str.regexp "[ \n\r\x0c\t]+") in
+	(*let python_split x = String.split_on_chars ~on:[ ' ' ; '\t' ; '\n' ; '\r' ] x |> List.filter ~f:(fun x -> x <> "") in*)
+	let trackers_start = (16 +(Str.search_forward  (Str.regexp_string "textarea") answer 0 )) in
+	let trackers_end = (Str.search_forward  (Str.regexp_string "</textarea") answer trackers_start ) in
+	(*lprintf_nl "start: %d; end: %d" trackers_start trackers_end;*)
+	(*lprintf_nl "%s" (String.sub answer trackers_start (trackers_end - trackers_start) );*)
+	List.iter (lprintf_nl "%s") (split (String.sub answer trackers_start (trackers_end - trackers_start)))
+	)
+    (fun _ _ -> ())
+				(*H.wget r (fun file ->
+        if !verbose then lprintf_nl "test parsing...";
+        Unix2.tryopen_read file (fun cin ->
+          try
+			let textarea_place = ref false in
+            while true do
+              let line = input_line cin in
+			  let trackers_start = (Str.search_forward  (Str.regexp_string "textarea") line 0 ) in
+			  let trackers_end = (Str.search_forward  (Str.regexp_string "/textarea") line 0 ) in
+			  begin
+			  (*if trackers_start > 0 then begin textarea_place := true end;
+			  if trackers_end > 0 then begin textarea_place := false; raise End_of_file; end;
+			  if !textarea_place then begin *)lprintf_nl "%s" (line); (*end;*)
+			  lprintf_nl "start: %d end: %d" trackers_start trackers_end
+			  end
+                (*try
+                  let ip = Ip.of_string line in*)
+                  begin
+                    (*set_client_ip =:= ip;
+                    last_high_id := !!set_client_ip;*)
+					if not !textarea_place then lprintf_nl "%s" (cin)
+                  end
+                (*with e -> lprintf_nl "test IP discovery parse error: %s" (Printexc2.to_string e)*)
+            done
+          with End_of_file -> ())
+      );*)
+			end
+		else
+			Buffer.add_string  buf
+			"TEST commands are:
+
+$bServers:$n";
 
     | ["help"] | ["?"] | ["man"] ->
           let module M = CommonMessages in
@@ -299,7 +373,7 @@ Use '$rhelp command$n' or '$r? command$n' for help on a command.
           (try
              let command = List.assoc one !!alias_commands in
              match String2.split command ' ' with
-                 []   -> raise Not_found (* can't happen *)
+               | []   -> raise Not_found (* can't happen *)
                | [a]  -> a, two
                | a::b -> a, (b @ two)
            with
@@ -311,7 +385,7 @@ Use '$rhelp command$n' or '$r? command$n' for help on a command.
       if cmd = "auth" then
         let user, pass =
           match args with
-            [] -> failwith "Usage: auth <user> <password>"
+          |  [] -> failwith "Usage: auth <user> <password>"
           | [s1] -> (admin_user ()).CommonTypes.user_name, s1
           | user :: pass :: _ -> user, pass
         in
@@ -322,7 +396,7 @@ Use '$rhelp command$n' or '$r? command$n' for help on a command.
             let module M = CommonMessages in
             Buffer.add_string buf M.full_access;
             (match DriverInteractive.real_startup_message () with
-               Some s -> Buffer.add_string buf ("\n" ^ s);
+             |  Some s -> Buffer.add_string buf ("\n" ^ s);
              | None -> ());
           end else
         let module M = CommonMessages in

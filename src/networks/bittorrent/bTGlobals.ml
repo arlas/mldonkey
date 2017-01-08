@@ -249,6 +249,13 @@ let can_handle_tracker = function
   | `Udp _ -> true
   | `Other _ -> false
 
+  (* function set_trackers "file" "tracker url list"
+  *  if doesn't match with another tracker it will add to file_trackers
+  *  check that two urls doesn't match removing "tracker."
+  * like udp://zer0day.to:1337 and udp://tracker.zer0day.to:1337
+  * should remove the oldest ( in this case the one without "tracker." )
+  * sub string 6 e substring 14 check
+  *)
 let set_trackers file file_trackers =
   List.iter (fun url ->
         let url = make_tracker_url url in

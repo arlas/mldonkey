@@ -1381,6 +1381,40 @@ let commands =
        _s ""
     ), _s ":\t\t\t\tstops all bittorrent downloads, use this if you want to make sure that the stop signal actually\n\t\t\t\t\tgets to the tracker when shutting mlnet down, but you have to wait till the stops get to the\n\t\t\t\t\ttracker and not wait too long, so mldonkey reconnects to the tracker :)";
 
+	"update_tracker", "Network/Bittorrent", Arg_none (fun o ->
+		let module H = Http_client in
+		let r = {
+			H.basic_request with
+			H.req_url = Url.of_string "http://coppersurfer.tk/";
+			H.req_max_retry = 10;
+			H.req_user_agent = get_user_agent ();
+			(*H.req_save = true;*)
+			} in
+		H.wget_string r
+    (fun answer ->
+	let split = Str.split (Str.regexp "[ \n\r\x0c\t]+") in
+	(*let python_split x = String.split_on_chars ~on:[ ' ' ; '\t' ; '\n' ; '\r' ] x |> List.filter ~f:(fun x -> x <> "") in*)
+	let trackers_start = (16 +(Str.search_forward  (Str.regexp_string "textarea") answer 0 )) in
+	let trackers_end = (Str.search_forward  (Str.regexp_string "</textarea") answer trackers_start ) in
+	(*lprintf_nl "start: %d; end: %d" trackers_start trackers_end;*)
+	(*lprintf_nl "%s" (String.sub answer trackers_start (trackers_end - trackers_start) );*)
+	let trackers_list = (split (String.sub answer trackers_start (trackers_end - trackers_start))) in
+	(*List.iter (lprintf_nl "%s") (split (String.sub answer trackers_start (trackers_end - trackers_start)))*)
+	Hashtbl.iter (fun _ file ->
+		lprintf_file_nl (as_file file) "updating trackers for file %d" (file_num file);
+		set_trackers file trackers_list
+		) files_by_uid;
+	)
+    (fun _ _ -> ());
+		(*try*)
+		(*Hashtbl.iter (fun _ file ->
+		lprintf_file_nl (as_file file) "update test for file %d" (file_num file);
+		) files_by_uid;*)
+		(*with
+		| _ -> lprintf_nl  "error updating trackers.";*)
+       _s ""
+    ), _s ":\t\t\t\tupdates trackers on all bittorrent downloads";
+	
     "tracker", "Network/Bittorrent", Arg_multiple (fun args o ->
         try
           let num = ref "" in

@@ -492,7 +492,8 @@ let wget r f =
       in
 
       let filename = Filename.concat webinfos_dir base in
-	  (*lprintf_nl "base: %s" base;*)
+	  (*lprintf_nl "base: %s" base;
+	  lprintf_nl "Filename: %s" filename;*)
       if !verbose then lprintf_nl "Filename: %s" filename;
       if r.req_gzip then
       begin
@@ -537,7 +538,7 @@ let whead r f = whead2 r f def_ferr
 
 (* wget_string
 * r is an Http_client request
-* f?
+* f is the requested url as string
 * progress?
 *)
 let wget_string r f ?(ferr=def_ferr) progress =
@@ -563,16 +564,45 @@ let wget_string r f ?(ferr=def_ferr) progress =
             TcpBufferedSocket.close sock Closed_by_user
         end)
   (fun _ ->
+		let s2= ref "" in
+		if r.req_chunk then begin
+			(*lprintf_nl "Chunk match:";*)
+			(* Each chunk starts with the number of octets of the data
+			* it embeds expressed as a hexadecimal number in ASCII followed
+			* by optional parameters (chunk extension) and a terminating CRLF
+			* sequence, followed by the chunk data. The chunk is terminated by CRLF.
+			*)
+			let rec chunked stng =
+			let crlfindex = (Str.search_forward  (Str.regexp_string "\r\n") stng 0 ) in
+			(*let () = lprintf_nl "crlfindex: %d" crlfindex in*)
+			bitmatch bitstring_of_string stng with
+			| { start : 8*crlfindex : string, check( crlfindex > 0 && start <> "0" ), bind(int_of_string ("0x" ^ start));
+			_ : 16;
+			string1 : (start)*8 : string;
+			_ : 16;
+			rest : -1 : string } ->
+				(* lprintf_nl "start: %d" start; *)
+				s2 := !s2 ^ string1;
+				(*lprintf_nl "rest: %s" rest;*)
+				chunked rest
+			| { "0\r\n" : 24 : string } -> () (*lprintf_nl "end found"; -> we can close the connection here*) 
+			| { _ } -> lprintf_nl "error bitmatch: %s" (AnyEndian.dump_hex_s stng) in
+			chunked (Buffer.contents file_buf);
+		end;
+		let s = if r.req_chunk then
+		!s2 
+		else
+		Buffer.contents file_buf in
       let content = 
         if r.req_gzip then
           try
-            let io = Gzip.input_io (IO.input_string (Buffer.contents file_buf)) in
+            let io = Gzip.input_io (IO.input_string (s)) in
             IO.read_all io
           with e -> 
             lprintf_nl "Exception %s wget_string while uncompressing content from %s" (Printexc2.to_string e) (Url.to_string r.req_url);
             raise Not_found
         else
-          Buffer.contents file_buf
+          s
       in
       f content
   ) ferr
