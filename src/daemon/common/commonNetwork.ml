@@ -22,7 +22,6 @@ open CommonGlobals
 open Options
 open CommonTypes
 
-    
 
 let ni n m = 
   let s = Printf.sprintf "Network.%s not implemented by %s" m n in

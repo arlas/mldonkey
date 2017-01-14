@@ -139,7 +139,7 @@ let search_of_args args =
   in
   let q = iter args [] in
   (match (List.rev q) with 
-      [] -> failwith "Void query"
+    | [] -> failwith "Void query"
     | q1 :: tail ->
         List.fold_left (fun q1 q2 ->
             match q2 with
@@ -734,23 +734,24 @@ Min bitrate
 
 <tr>
 <td> Not </td> 
-<td> 
+<td>
 <input type=text name=not size=40 value=\"\">
 </td>
 </tr>
     ";
-  
+
   Printf.bprintf buf "
 <tr>
-<td> Network </td> 
-<td> 
-      <select name=network>
-    <option value=\"\"> --- </option>            
+<td> Network </td>
+<td>
+	<select name=network>
+	<option value=\"\"> --- </option>
 ";    
   networks_iter_all (fun net ->
       let name = net.network_name in
       try 
 	if network_is_enabled net && 
+	(*mem a l is true if and only if a is equal to an element of l.*)
 	  List.mem NetworkHasSearch net.network_flags then
             Printf.bprintf buf 
 	      "<option value=\"%s\"> %s </option>" name name

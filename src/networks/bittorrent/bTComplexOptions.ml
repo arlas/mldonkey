@@ -25,6 +25,7 @@ open Options
 
 open CommonGlobals
 open CommonDownloads
+open CommonInteractive (* file_add *)
 open CommonTypes
 open CommonFile
 
@@ -99,63 +100,84 @@ module ClientOption = struct
 
   end
 
+(* insert in network.op_network_file_of_option <- value_to_file;
+* value_to_file should decode file from files.ini?
+* values are in bTTypes.ml
+*)
 let value_to_file file_size file_state user group assocs =
-  let get_value name conv = conv (List.assoc name assocs) in
-  let file_trackers =
-    try
-      get_value "file_trackers" (value_to_list value_to_string)
-    with _ ->
-        try
-          [get_value "file_tracker"  value_to_string]
-        with _ -> failwith "Bad file_tracker"
-  in
+	(* loading options: *)
+	let get_value name conv = conv (List.assoc name assocs) in
+	let file_size = get_value "file_size" value_to_int64 in
+	(* file_fd file *)
+	(* file_file *)
+	let file_piece_size = try value_to_int64 (List.assoc "file_piece_size" assocs) with _ -> failwith "Bad file size" in
+	let file_id = try Sha1.of_string (get_value "file_id" value_to_string) with _ -> failwith "Bad file_id" in
+	let file_temp = try get_value "file_temp" value_to_string
+	with Not_found -> Filename.concat !!DO.temp_directory (Printf.sprintf "BT-%s" (Sha1.to_string file_id))
+	in
+	let file_name = get_value "file_name" value_to_string in
+	let file_comment = try get_value "file_comment" value_to_string with Not_found -> "" in
+	let file_created_by = try get_value "file_created_by" value_to_string with Not_found -> "" in
+	let file_creation_date = try get_value "file_creation_date" value_to_int64 with Not_found -> Int64.zero in
+	let file_modified_by = try get_value "file_modified_by" value_to_string with Not_found -> "" in
+	let file_encoding = try get_value "file_encoding" value_to_string with Not_found -> "" in
+	(* file_swarmer *)
+	(* file_clients *)
+	(* file_clients_num *)
+	let file_chunks = get_value "file_hashes" (value_to_array (from_value Sha1.option)) in
+	let file_files =
+		try
+			get_value "file_files"
+				(value_to_list (fun v ->
+					match v with
+					| SmallList [name; p1]
+					| List [name; p1] -> value_to_string name, value_to_int64 p1
+					| _ -> assert false
+				))
+		with _ -> []
+	in
+	(* file_blocks_downloaded *)
+	let file_uploaded = try get_value "file_uploaded" value_to_int64 with _ -> Int64.zero in
+	(* file_torrent_diskname *)
+	let file_torrent_diskname =
+		try
+			get_value "file_torrent_name" value_to_string
+		with Not_found -> Filename.concat downloads_directory
+            (file_name ^ ".torrent")
+	in
+	(* we can use here !!auto_tracker_list *)
+	let file_trackers = try get_value "file_trackers" (value_to_list value_to_string) with _ -> [""] in
+	(* useless old file support? or missing final 's'? *)
+	(*with _ ->
+		try
+			[get_value "file_tracker"  value_to_string]
+		with _ -> failwith "Bad file_tracker"
+	in*)
+	(* file_tracker_connected *)
+	(* file_completed_hook *)
+	(* file_shared *)
+	(* file_session_uploaded *)
+	(* file_session_downloaded *)
+	(* file_last_dht_announce *)
+	let file_metadata_size = try get_value "file_metadata_size" value_to_int64 with _ -> Int64.zero in
+	let file_metadata_piece = try get_value "file_metadata_piece" value_to_int64 with _ -> Int64.zero in
+	let file_metadata_downloading = try get_value "file_metadata_downloading" value_to_bool with _ -> false in
+	let file_metadata_chunks = try get_value "file_metadata_chunks" (value_to_array value_to_string) with _ -> Array.make 20 "" in
+	let file_private = try get_value "file_private" value_to_bool with _ -> false in
+	(* useless old file support? *)
+	(*	| Not_found -> false
+		| _ -> try get_value "file_private" value_to_int64 <> 0L with _ -> false
+	in*)
+	(* end loading options *)
 
-  let file_id, torrent, torrent_diskname =
-    try
-      let torrent_diskname = get_value "file_torrent_name" value_to_string in
-      let s = File.to_string torrent_diskname in
-      let file_id, torrent = BTTorrent.decode_torrent s in
-      file_id, torrent, torrent_diskname
-    with _ ->
-
-        let file_name = get_value "file_name" value_to_string in
-        let file_comment = try get_value "file_comment" value_to_string with Not_found -> "" in
-        let file_id =
-          try
-            Sha1.of_string (get_value "file_id" value_to_string)
-          with _ -> failwith "Bad file_id"
-        in
-        let file_piece_size = try
-            value_to_int64 (List.assoc "file_piece_size" assocs)
-          with _ -> failwith "Bad file size"
-        in
-        let file_chunks =
-          get_value "file_hashes" (value_to_array
-              (from_value Sha1.option))
-        in
-        let file_size = get_value "file_size" value_to_int64 in
-        let file_created_by = try get_value "file_created_by" value_to_string with Not_found -> "" in
-        let file_creation_date = try get_value "file_creation_date" value_to_int64 with Not_found -> Int64.zero in
-        let file_modified_by = try get_value "file_modified_by" value_to_string with Not_found -> "" in
-        let file_encoding = try get_value "file_encoding" value_to_string with Not_found -> "" in
-        let file_is_private = 
-          try get_value "file_is_private" value_to_bool with 
-          | Not_found -> false
-          | _ -> try get_value "file_is_private" value_to_int64 <> 0L with _ -> false
-        in
-        let file_files =
-          try
-            let file_files = (get_value "file_files"
-                  (value_to_list (fun v ->
-                      match v with
-                        SmallList [name; p1]
-                      | List [name; p1] ->
-                          value_to_string name, value_to_int64 p1
-                      | _ -> assert false
-                  ))) in
-            file_files
-          with _ -> []
-        in
+	(* if we saved to files.ini we should take that and not .torrent data *)
+	(*let file_id, torrent, torrent_diskname =
+	try
+		let torrent_diskname = get_value "file_torrent_name" value_to_string in
+		let s = File.to_string torrent_diskname in
+		let file_id, torrent = BTTorrent.decode_torrent s in
+		file_id, torrent, torrent_diskname
+	with _ ->
         let torrent = {
             torrent_name = file_name;
             torrent_filename = "";
@@ -169,12 +191,9 @@ let value_to_file file_size file_state user group assocs =
             torrent_creation_date = file_creation_date;
             torrent_modified_by = file_modified_by;
             torrent_encoding = file_encoding;
-            torrent_private = file_is_private;
-(*
-            torrent_nodes = file_nodes;
-*)
-            torrent_announce =
-            (match file_trackers with
+            torrent_private = file_private;
+			(*torrent_nodes = file_nodes; *)
+            torrent_announce = (match file_trackers with
               | h::q -> h
               | [] -> "");
             torrent_announce_list = file_trackers;
@@ -182,30 +201,109 @@ let value_to_file file_size file_state user group assocs =
         let torrent_diskname = Filename.concat downloads_directory
             (file_name ^ ".torrent") in
         file_id, torrent, torrent_diskname
+	in*)
 
-  in
-  let file_temp = try
-      get_value "file_temp" value_to_string
-    with Not_found ->
-        let file_temp = Filename.concat !!DO.temp_directory
-            (Printf.sprintf "BT-%s" (Sha1.to_string file_id)) in
-        file_temp
-  in
-  let file = new_file file_id torrent torrent_diskname
-               file_temp file_state user group in
-    
-  let file_uploaded = try
+	(* bTGlobals change here: new_file is not good. *)
+	(*let file = new_file file_id torrent torrent_diskname
+               file_temp file_state user group in*)
+	(*let file_uploaded = try
       value_to_int64 (List.assoc "file_uploaded" assocs)
     with _ -> zero
-  in
-  file.file_uploaded <- file_uploaded;
-
-  (match file.file_swarmer with
-      None -> ()
-    | Some swarmer ->
-        CommonSwarming.value_to_frontend swarmer assocs;
-  );
-
+	in*)
+	(*file.file_uploaded <- file_uploaded;*)
+	(* new new_file here *)
+	let file =
+	try
+		Hashtbl.find files_by_uid file_id
+		(* if we find it already, should we update it? *)
+	with Not_found -> begin
+		let file_fd = create_temp_file file_temp file_files file_state in
+		let rec file = {
+			file_file = file_impl;
+			file_piece_size = file_piece_size;
+			file_id = file_id;
+			file_name = file_name;
+			file_comment = file_comment;
+			file_created_by = file_created_by;
+			file_creation_date = file_creation_date;
+			file_modified_by = file_modified_by;
+			file_encoding = file_encoding;
+			file_swarmer = None;  (* not saved *)
+			file_clients = Hashtbl.create 113;  (* not saved *)
+			file_clients_num = 0;  (* not saved *)
+			file_chunks = file_chunks;
+			file_files = (List.map (fun (file,size) -> (file,size,None)) file_files);
+			file_blocks_downloaded = []; (* not saved *)
+			file_uploaded = file_uploaded;
+			file_torrent_diskname = file_torrent_diskname;
+			file_trackers = []; (* will set trackers later, from list *)
+			file_tracker_connected = false; (* not saved *)
+			file_completed_hook = (fun _ -> ()); (* not saved *)
+			file_shared = None; (* not saved *)
+			file_session_uploaded = Int64.zero; (* not saved *)
+			file_session_downloaded = Int64.zero; (* not saved *)
+			file_last_dht_announce = 0;  (* not saved, we should? *)
+			file_metadata_size = file_metadata_size;
+			file_metadata_piece = file_metadata_piece;
+			file_metadata_downloading = file_metadata_downloading;
+			file_metadata_chunks = file_metadata_chunks;
+			file_private = file_private;
+		} and file_impl =  {
+			(dummy_file_impl ()) with
+			impl_file_owner = user;
+			impl_file_group = group;
+			impl_file_fd = Some file_fd;
+			impl_file_size = file_size;
+			impl_file_downloaded = Int64.zero; (* should be updated later *)
+			impl_file_val = file;
+			impl_file_ops = file_ops;
+			impl_file_age = last_time (); (* should we load age? *)
+			impl_file_best_name = file_name;
+		}
+		in
+		if file_trackers <> [] then
+			set_trackers file file_trackers
+		else
+			set_trackers file [""]; (* in this case torrent announce is head, null *)
+		if file_state <> FileShared then begin
+			let kernel = CommonSwarming.create_swarmer file_temp (file.file_file.impl_file_size) in
+			let swarmer = CommonSwarming.create kernel (as_file file) file.file_piece_size in
+			file.file_swarmer <- Some swarmer;
+			CommonSwarming.set_verified swarmer (fun _ num ->
+				file.file_blocks_downloaded <- (num) :: file.file_blocks_downloaded;
+				file_must_update file;
+				(*Automatically send Have to ALL clients once a piece is verified:
+				* useful in determining which piece is rare
+				* whe should not check if client can be interested (?)*)
+				Hashtbl.iter (fun _ c ->
+					if c.client_registered_bitfield then
+						begin
+							match c.client_bitmap with
+							| None -> ()
+							| Some bitmap ->
+								if not (Bitv.get bitmap num) then
+									send_client c (Have (Int64.of_int num));
+							check_if_interesting file c
+						end
+				) file.file_clients
+			);
+			CommonSwarming.set_verifier swarmer (Verification
+				(Array.map (fun sha1 -> Sha1 sha1) file.file_chunks));
+		end;
+		current_files := file :: !current_files;
+		Hashtbl.add files_by_uid file_id file;
+		file_add file_impl file_state;
+		must_share_file file;
+		file (* todo: check rec *)
+	end;
+	in
+	(* end of new_file function *)
+	
+	lprintf_nl "value_to_file call for: %s" file.file_name;
+	(match file.file_swarmer with
+		| None -> ()
+		| Some swarmer -> CommonSwarming.value_to_frontend swarmer assocs;
+	);
 (*
   (try
       ignore
@@ -216,19 +314,56 @@ let value_to_file file_size file_state user group assocs =
           (Printexc2.to_string e);
   );
 *)
-  as_file file
+	as_file file
 
+(* file_to_value saves files in files.ini?
+*  associated to frontend_to_value (commonSwarmer.ml) and file_to_option (commonFile.ml)
+* lista di associazioni, nome -> valore
+* called two times on mldonkey start, why?
+*)
 let file_to_value file =
-  try
-    let assocs =
-      [
-        "file_temp", string_to_value (Unix32.filename (file_fd file));
-        "file_piece_size", int64_to_value (file.file_piece_size);
+	let () = lprintf_nl "file_to_value call for: %s" file.file_name; in
+	try
+	let assocs =
+	[
+		"file_temp", string_to_value (Unix32.filename (file_fd file));
+		"file_piece_size", int64_to_value (file.file_piece_size);
+		"file_id", string_to_value (Sha1.to_string file.file_id);
         "file_name", string_to_value file.file_name;
-        "file_uploaded", int64_to_value  (file.file_uploaded);
-        "file_id", string_to_value (Sha1.to_string file.file_id);
+		"file_comment", string_to_value file.file_comment;
+		"file_created_by", string_to_value file.file_created_by;
+		"file_creation_date", int64_to_value (file.file_creation_date);
+		"file_modified_by", string_to_value file.file_modified_by;
+		"file_encoding", string_to_value file.file_encoding;
+		(* file_swarmer *)
+		(* file_clients: we save client id.
+		* we should put some limit?
+		*)
+		"file_clients", (list_to_value string_to_value)
+		(Hashtbl.fold (fun k v acc -> (Sha1.to_string v.client_uid) :: acc) file.file_clients []);
+		(* file_clients_num *)
+		"file_hashes", array_to_value (to_value Sha1.option) file.file_chunks;
+		"file_files", list_to_value (fun (name, p1, _) ->
+            SmallList [string_to_value name; int64_to_value p1])
+        file.file_files;
+		(* file_blocks_downloaded *)
+        "file_uploaded", int64_to_value (file.file_uploaded);
+		"file_torrent_name", string_to_value (file.file_torrent_diskname);
         "file_trackers", (list_to_value string_to_value)
         (List.map (fun t -> show_tracker_url t.tracker_url) file.file_trackers);
+		(* file_tracker_connected = false *)
+		(* file_completed_hook *)
+		(* file_shared *)
+		(* file_session_uploaded *)
+		(* file_session_downloaded *)
+		(* file_last_dht_announce = 0L? *)
+		(* saving metadata is useful for magnet links,
+		in the case we shutdown client before full metadata received *)
+		"file_metadata_size", int64_to_value (file.file_metadata_size);
+		"file_metadata_piece", int64_to_value (file.file_metadata_piece);
+		"file_metadata_downloading", bool_to_value (file.file_metadata_downloading);
+		"file_metadata_chunks", (array_to_value string_to_value) (file.file_metadata_chunks);
+		"file_private", bool_to_value (file.file_private);
 (* OK, but I still don't like the idea of forgetting all the clients.
 We should have a better strategy, ie rating the clients and connecting
 to them depending on the results of our last connections. And then,
@@ -240,31 +375,18 @@ send us more clients.
         ClientOption.to_value c) sources
 ;
   *)
-      ]
-    in
-    let assocs =
-      ("file_torrent_name", string_to_value file.file_torrent_diskname) ::
-      ("file_hashes", array_to_value
-          (to_value Sha1.option) file.file_chunks) ::
-      ("file_files", list_to_value
-          (fun (name, p1, _) ->
-            SmallList [string_to_value name; int64_to_value p1])
-        file.file_files) ::
-      assocs
+	]
     in
     match file.file_swarmer with
-      None -> assocs
-    | Some swarmer ->
-        CommonSwarming.frontend_to_value swarmer assocs
+    | None -> assocs
+    | Some swarmer -> CommonSwarming.frontend_to_value swarmer assocs
   with
-    e ->
-      lprintf_file_nl (as_file file) "exception %s in file_to_value"
+    e -> lprintf_file_nl (as_file file) "exception %s in file_to_value"
         (Printexc2.to_string e); raise e
 
 
 let save_config () =
   Options.save_with_help bittorrent_ini
-
 
 let config_files_loaded = ref false
 
@@ -278,13 +400,10 @@ let guptime = define_option bt_stats_section ["guptime"] "" int_option 0
 
 let new_stats_array () =
   Array.init brand_count (fun _ ->
-      { dummy_stats with brand_seen = 0 }
-  )
-
+      { dummy_stats with brand_seen = 0 })
 
 let gstats_array = define_option bt_stats_section ["stats"] ""
     (array_option StatsOption.t) (new_stats_array ())
-
 
 let _ =
   option_hook gstats_array (fun _ ->
@@ -321,8 +440,14 @@ let rec update_options () =
       update_options ()
   in
 
-  match !!options_version with
-  | 0 ->
+  (* (default: router.bittorrent.com:6881, router.utorrent.com:6881, dht.transmissionbt.com:6881, dht.libtorrent.org:25401) *)
+  (*session.add_dht_router("router.utorrent.com", 6881)
+session.add_dht_router("router.bittorrent.com", 6881)
+session.add_dht_router("dht.transmissionbt.com", 6881)
+session.add_dht_router("router.bitcomet.com", 6881)
+session.add_dht_router("dht.aelitis.com", 6881)*)
+	match !!options_version with
+	| 0 ->
       let present = ref false in
       (* drop obsolete addresses, add new *)
       dht_bootstrap_nodes =:= List.filter (function
@@ -333,7 +458,17 @@ let rec update_options () =
       if not !present then
         dht_bootstrap_nodes =:= ("router.bittorrent.com", 8991) :: !!dht_bootstrap_nodes;
       update 1
-  | _ -> ()
+	| 1 ->
+		let present = ref false in
+		dht_bootstrap_nodes =:= ("router.bittorrent.com", 6881) ::
+		("router.bittorrent.com", 8991) ::
+		("router.utorrent.com", 6881) ::
+		("dht.transmissionbt.com", 6881) ::
+		("dht.libtorrent.org", 25401 ) ::
+		("router.bitcomet.com", 6881 ) ::
+		("dht.aelitis.com", 6881 ) :: [];
+		update 2
+	| _ -> ()
 
 let () =
   network.op_network_file_of_option <- value_to_file;

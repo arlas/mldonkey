@@ -97,7 +97,7 @@ let execute_command arg_list output cmd args =
                 (if args = [] then "" else ", args " ^ String.concat " " args);
             Buffer.add_string buf (
               match arg_kind, args with
-                Arg_none f, [] -> f output
+              | Arg_none f, [] -> f output
               | Arg_multiple f, _ -> f args output
               | Arg_one f, [arg] -> f arg  output
               | Arg_two f, [a1;a2] -> f a1 a2 output
@@ -1699,8 +1699,8 @@ let _ =
           html_mods_commands buf "commandsTable" "commands" (!custom_commands @ [
             ("bu bbig", "Visit Peerates",
              "parent.frames[_getFrameByName('output')].location.href='http://edk.peerates.net/'", "Peerates");
-            ("bu bbig", "Visit FileDonkey",
-             "parent.frames[_getFrameByName('output')].location.href='http://ed2k.shortypower.org/'", "Shortypower");
+            ("bu bbig", "Visit Ed2k stats",
+             "parent.frames[_getFrameByName('output')].location.href='http://ed2k.shortypower.org/'", "Ed2k stats");
             (* old inactive: ("bu bbig", "Visit Bitzi",
              "parent.frames[_getFrameByName('output')].location.href='http://www.fileheaven.org/'", "Bitzi");
             ("bu bbig", "Visit eMugle",

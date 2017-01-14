@@ -176,20 +176,21 @@ module FileOption = struct
       | _ -> assert false
           
     let file_to_value file =
-        let netname = string_to_value (file_network file).network_name in
-      let impl = as_file_impl file in
-      Options.Module (
-        ("file_network", netname) ::
-        ("file_size", int64_to_value (file_size file)) ::
-        ("file_priority", int_to_value (file_priority file)) ::
-        ("file_state", state_to_value (file_state file)) ::
-        ("file_filename", string_to_value (file_best_name file)) ::
-	("file_filenames", List
-	(List.map string_to_value impl.impl_file_filenames)) ::
-        ("file_age", IntValue (Int64.of_int impl.impl_file_age)) ::
-        ("file_release", bool_to_value impl.impl_file_release) ::
+		let netname = string_to_value (file_network file).network_name in
+		let impl = as_file_impl file in
+		Options.Module (
+		("file_network", netname) ::
+		("file_size", int64_to_value (file_size file)) ::
+		("file_priority", int_to_value (file_priority file)) ::
+		("file_state", state_to_value (file_state file)) ::
+		("file_filename", string_to_value (file_best_name file)) ::
+		("file_filenames", List (List.map string_to_value impl.impl_file_filenames)) ::
+		("file_age", IntValue (Int64.of_int impl.impl_file_age)) ::
+		("file_release", bool_to_value impl.impl_file_release) ::
         ("file_owner", string_to_value (file_owner file).user_name) ::
-        ("file_group", stringoption_to_value (match file_group file with Some g -> Some g.group_name | None -> None)) ::
+        ("file_group", stringoption_to_value (match file_group file with
+		| Some g -> Some g.group_name
+		| None -> None)) ::
           (file_to_option file)
         )
           

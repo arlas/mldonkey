@@ -149,7 +149,7 @@ let op_file_debug file =
   Hashtbl.iter (fun _ c ->
       Printf.bprintf buf "Client %d: %s\n" (client_num c)
       (match c.client_sock with
-          NoConnection -> "No Connection"
+        | NoConnection -> "No Connection"
         | Connection _  -> "Connected"
         | ConnectionWaiting _ -> "Waiting for Connection"
       )
@@ -349,13 +349,13 @@ let op_file_print file o =
       else
       match tracker.tracker_status with
       | Disabled s | Disabled_mld s ->
-         Printf.sprintf "\\<font color=\\\"red\\\"\\>disabled: %s (seeders: %d; leechers: %d)\\<br\\>\\--error: %s\\</font\\>"
-           tracker_url tracker.tracker_torrent_complete tracker.tracker_torrent_incomplete s
+         Printf.sprintf "\\<font color=\\\"red\\\"\\>disabled: %s (seeders: %d; leechers: %d; total: %d)\\<br\\>\\--error: %s\\</font\\>"
+           tracker_url tracker.tracker_torrent_complete tracker.tracker_torrent_incomplete tracker.tracker_last_clients_num s
       | Disabled_failure (i,s) -> 
-         Printf.sprintf "\\<font color=\\\"red\\\"\\>disabled: %s (seeders: %d; leechers: %d)\\<br\\>\\--error: %s (try %d)\\</font\\>"
-           tracker_url tracker.tracker_torrent_complete tracker.tracker_torrent_incomplete s i
+         Printf.sprintf "\\<font color=\\\"red\\\"\\>disabled: %s (seeders: %d; leechers: %d; total: %d)\\<br\\>\\--error: %s (try %d)\\</font\\>"
+           tracker_url tracker.tracker_torrent_complete tracker.tracker_torrent_incomplete tracker.tracker_last_clients_num s i
       | _ ->
-         Printf.sprintf "enabled: %s (seeders: %d; leechers: %d)" tracker_url tracker.tracker_torrent_complete tracker.tracker_torrent_incomplete
+         Printf.sprintf "enabled: %s (seeders: %d; leechers: %d; total: %d)" tracker_url tracker.tracker_torrent_complete tracker.tracker_torrent_incomplete tracker.tracker_last_clients_num
     in
     let text = if not !tracker_header_printed then _s"Tracker(s)" else "" in
     emit text tracker_text;
@@ -435,7 +435,7 @@ let op_file_print file o =
   if !Autoconf.magic_works then begin
   let check_magic file =
     match Magic.M.magic_fileinfo file false with
-      None -> None
+    | None -> None
     | Some s -> Some (intern s)
   in
     let fdn = file_disk_name file in
@@ -613,7 +613,7 @@ let op_file_print_sources file o =
       ] in
 
       html_mods_table_header buf "sourcesTable" "sources al" header_list;
-
+		(* transfers, click on file, source list: *)
       Hashtbl.iter (fun _ c ->
           let cinfo = client_info (as_client c) in
           if use_html_mods o then
@@ -661,7 +661,7 @@ let op_file_print_sources file o =
 
             ("", "sr ar", (let fc = ref 0 in
                 (match c.client_bitmap with
-                    None -> ()
+                  | None -> ()
                   | Some bitmap ->
                       Bitv.iter (fun s -> if s then incr fc) bitmap);
                 (Printf.sprintf "%d" !fc) ) ) 
@@ -681,7 +681,7 @@ let op_file_print_sources file o =
 let op_file_check file =
   lprintf_file_nl (as_file file) "Checking chunks of %s" file.file_name;
   match file.file_swarmer with
-    None ->
+  | None ->
       lprintf_file_nl (as_file file) "verify_chunks: no swarmer to verify chunks"
   | Some swarmer ->
       CommonSwarming.verify_all_chunks_immediately swarmer
@@ -710,7 +710,7 @@ let op_file_info file =
   let module P = GuiTypes in
 
   let last_seen = match file.file_swarmer with
-      None -> [| last_time () |]
+    | None -> [| last_time () |]
     | Some swarmer -> CommonSwarming.compute_last_seen swarmer in
 
     { (impl_file_info file.file_file) with
@@ -1234,6 +1234,59 @@ let output o l =
       Buffer.add_char o.conn_buf s.[i]
     done
 
+(* updates all downloading files trackers with
+*	ones in auto_tracker_list & manual_tracker_list
+*	if num = -1; else only one file.
+*)
+let file_trackers_update num = 
+let tracker_list = List.append !!auto_tracker_list !!manual_tracker_list in
+	(*let () = coppersurfer_update() in*)
+	(*List.iter (lprintf_nl "prova 1: %s") !!auto_tracker_list;
+	List.iter (lprintf_nl "prova 2: %s") !!manual_tracker_list;*)
+	if !verbose then List.iter (lprintf_nl "%s") tracker_list;
+	Hashtbl.iter (fun _ file ->
+		if (num == -1 || (num >= 0 && file_num file = num)) then begin
+		lprintf_file_nl (as_file file) "updating trackers for file %d" (file_num file);
+		set_trackers file tracker_list
+		end
+		) files_by_uid
+		
+(*	download and parse http://coppersurfer.tk/
+*	into a list of trackers, we store this list in
+*	auto_tracker_list for a week
+*)
+let coppersurfer_update num =
+	let now = (int_of_float (Unix.time())) in
+	if (now > !!next_tracker_update || !!auto_tracker_list = []) then
+	begin
+	next_tracker_update =:= (now + (7*86400)); (* a week *)
+	if !verbose then lprintf_nl "Downloading trackers from coppersurfer.tk";
+	(*lprintf_nl "datetime now: %d" (now);
+	lprintf_nl "next update: %d" (!!next_tracker_update);*)
+	let module H = Http_client in
+	let r = {
+			H.basic_request with
+			H.req_url = Url.of_string "http://coppersurfer.tk/";
+			H.req_max_retry = 10;
+			H.req_user_agent = get_user_agent ();
+			} in
+	H.wget_string r (fun answer ->
+	let split = Str.split (Str.regexp "[ \n\r\x0c\t]+") in
+	(*let python_split x = String.split_on_chars ~on:[ ' ' ; '\t' ; '\n' ; '\r' ] x |> List.filter ~f:(fun x -> x <> "") in*)
+	let trackers_start = (16 +(Str.search_forward  (Str.regexp_string "textarea") answer 0 )) in
+	let trackers_end = (Str.search_forward  (Str.regexp_string "</textarea") answer trackers_start ) in
+	(*lprintf_nl "start: %d; end: %d" trackers_start trackers_end;*)
+	(*lprintf_nl "%s" (String.sub answer trackers_start (trackers_end - trackers_start) );*)
+	if !verbose then lprintf_nl "trackers downloaded";
+	auto_tracker_list =:= (split (String.sub answer trackers_start (trackers_end - trackers_start)));
+	file_trackers_update num )
+	(fun _ _ -> ())
+	end
+	else
+		if !verbose then lprintf_nl "no tracker download needed";
+		file_trackers_update num
+
+		
 let commands =
 
     [
@@ -1381,38 +1434,20 @@ let commands =
        _s ""
     ), _s ":\t\t\t\tstops all bittorrent downloads, use this if you want to make sure that the stop signal actually\n\t\t\t\t\tgets to the tracker when shutting mlnet down, but you have to wait till the stops get to the\n\t\t\t\t\ttracker and not wait too long, so mldonkey reconnects to the tracker :)";
 
-	"update_tracker", "Network/Bittorrent", Arg_none (fun o ->
-		let module H = Http_client in
-		let r = {
-			H.basic_request with
-			H.req_url = Url.of_string "http://coppersurfer.tk/";
-			H.req_max_retry = 10;
-			H.req_user_agent = get_user_agent ();
-			(*H.req_save = true;*)
-			} in
-		H.wget_string r
-    (fun answer ->
-	let split = Str.split (Str.regexp "[ \n\r\x0c\t]+") in
-	(*let python_split x = String.split_on_chars ~on:[ ' ' ; '\t' ; '\n' ; '\r' ] x |> List.filter ~f:(fun x -> x <> "") in*)
-	let trackers_start = (16 +(Str.search_forward  (Str.regexp_string "textarea") answer 0 )) in
-	let trackers_end = (Str.search_forward  (Str.regexp_string "</textarea") answer trackers_start ) in
-	(*lprintf_nl "start: %d; end: %d" trackers_start trackers_end;*)
-	(*lprintf_nl "%s" (String.sub answer trackers_start (trackers_end - trackers_start) );*)
-	let trackers_list = (split (String.sub answer trackers_start (trackers_end - trackers_start))) in
-	(*List.iter (lprintf_nl "%s") (split (String.sub answer trackers_start (trackers_end - trackers_start)))*)
-	Hashtbl.iter (fun _ file ->
-		lprintf_file_nl (as_file file) "updating trackers for file %d" (file_num file);
-		set_trackers file trackers_list
-		) files_by_uid;
-	)
-    (fun _ _ -> ());
-		(*try*)
-		(*Hashtbl.iter (fun _ file ->
-		lprintf_file_nl (as_file file) "update test for file %d" (file_num file);
-		) files_by_uid;*)
-		(*with
-		| _ -> lprintf_nl  "error updating trackers.";*)
-       _s ""
+	(* update trackers for all the files; shouldn't be done for private torrents? *)
+	"update_tracker", "Network/Bittorrent", Arg_multiple (fun args o ->
+	(* we wait the possible download and execute a function after that,
+		could be recursive *)
+	let num = ref "" in
+	(match args with
+          | nums :: [] -> num := nums
+		  | _ -> num := "-1");
+	let num = int_of_string !num in
+	coppersurfer_update num;
+	if num < 0 then
+       _s "updating all files"
+	   else
+	   _s (Printf.sprintf "updating file %d" num)
     ), _s ":\t\t\t\tupdates trackers on all bittorrent downloads";
 	
     "tracker", "Network/Bittorrent", Arg_multiple (fun args o ->

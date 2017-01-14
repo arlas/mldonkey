@@ -163,7 +163,7 @@ let eval auth cmd o =
           ) list;
         end
 	| ["prova"] ->
-		let module H = Http_client in
+		(*let module H = Http_client in
 		let r = {
 			H.basic_request with
 			H.req_url = Url.of_string "http://coppersurfer.tk/";(*"http://coppersurfer.tk/";*)
@@ -173,7 +173,7 @@ let eval auth cmd o =
 			(*H.req_accept = "text/html";*)
 			H.req_save = true;
 			(*H.req_headers = ("Accept-Encoding", "identity") :: ("Host", "coppersurfer.tk") :: [];*)
-			} in
+			} in*)
 		if o.conn_output = HTML then
 			begin
 				lprintf_nl "test page download 2...";
@@ -191,9 +191,15 @@ let eval auth cmd o =
 				html_mods_td buf [
                  ("", "sr", "$r\\<a href=\\\"submit?q=prova\\\"\\>test\\</a\\>$n");
                  ("", "sr", "<-spiegazione"); ];
-				Buffer.add_string buf "\\</tr\\>\\</table\\>\\</div\\>\\</div\\>\n";
-				lprintf_nl "test page download 3...";
-				H.wget_string r
+				Buffer.add_string buf "\\</tr\\>\\</table\\>\\</div\\>\\</div\\>\n"
+				(*Scanf.sscanf "udp://zer0day.to:1337" "udp://%s@:%d"
+				(fun host port ->
+				Scanf.sscanf "udp://tracker.zer0day.to:1337" "udp://%s@:%d" (fun host2 port2 ->
+				
+				))*)
+    (*with _ -> `Other url
+				lprintf_nl "test page download 3...";*)
+				(*H.wget_string r
     (fun answer ->
 	let split = Str.split (Str.regexp "[ \n\r\x0c\t]+") in
 	(*let python_split x = String.split_on_chars ~on:[ ' ' ; '\t' ; '\n' ; '\r' ] x |> List.filter ~f:(fun x -> x <> "") in*)
@@ -203,7 +209,7 @@ let eval auth cmd o =
 	(*lprintf_nl "%s" (String.sub answer trackers_start (trackers_end - trackers_start) );*)
 	List.iter (lprintf_nl "%s") (split (String.sub answer trackers_start (trackers_end - trackers_start)))
 	)
-    (fun _ _ -> ())
+    (fun _ _ -> ())*)
 				(*H.wget r (fun file ->
         if !verbose then lprintf_nl "test parsing...";
         Unix2.tryopen_read file (fun cin ->

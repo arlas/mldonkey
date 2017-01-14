@@ -226,8 +226,12 @@ let brand_to_string_short brand =
 let brand_to_int brand = 
   find_int_of_brand brand brand_list
 
+type client_status =
+| Connected
+| Disconnected
+
 type tracker_status =
-  Enabled
+| Enabled
 | Disabled of string
 | Disabled_mld of string
 | Disabled_failure of (int * string)
@@ -238,116 +242,119 @@ type tracker_url =
 | `Other of string ]
 
 type client = {
-    client_client : client CommonClient.client_impl;
-    mutable client_file : file;
-    mutable client_connection_control : connection_control;
-    mutable client_sock : tcp_connection;
-    mutable client_host : Ip.t * int;
-    mutable client_country_code : int option;
-    mutable client_chunks : (int64 * int64) list;
-    mutable client_uploader : CommonSwarming.uploader option;
-    mutable client_ranges_sent : (int64 * int64 * CommonSwarming.range) list;
-    mutable client_range_waiting :
-    (int64 * int64 * CommonSwarming.range) option;
-    mutable client_chunk : (int * CommonSwarming.uploader_block list) option;
+	client_client : client CommonClient.client_impl;
+	mutable client_file : file;
+	mutable client_connection_control : connection_control;
+	mutable client_sock : tcp_connection;
+	mutable client_host : Ip.t * int;
+	mutable client_country_code : int option;
+	mutable client_chunks : (int64 * int64) list;
+	mutable client_uploader : CommonSwarming.uploader option;
+	mutable client_ranges_sent : (int64 * int64 * CommonSwarming.range) list;
+	mutable client_range_waiting : (int64 * int64 * CommonSwarming.range) option;
+	mutable client_chunk : (int * CommonSwarming.uploader_block list) option;
 
-    mutable client_received_peer_id : bool;
-    mutable client_sent_choke : bool; (* we sent a Choke to the client *)
-    mutable client_choked : bool;      (* we received a Choke from the client *)
-    mutable client_interested : bool;
-    mutable client_uid : Sha1.t;
+	mutable client_received_peer_id : bool;
+	mutable client_sent_choke : bool;	(* we sent a Choke to the client *)
+	mutable client_choked : bool;		(* we received a Choke from the client *)
+	mutable client_interested : bool;
+	mutable client_uid : Sha1.t;
 
-    mutable client_brand : brand;
-    mutable client_release : string;
+	mutable client_brand : brand;
+	mutable client_release : string;
 
-    mutable client_bitmap : Bitv.t option;
-    mutable client_new_chunks : int list;
+	mutable client_bitmap : Bitv.t option;
+	mutable client_new_chunks : int list;
 
-    mutable client_upload_requests : (int * int64 * int64) list;
-    mutable client_allowed_to_write : int64;
-    mutable client_upload_rate : Rate.t;
-    mutable client_downloaded_rate :  Rate.t;
-    mutable client_total_downloaded : int64;
-    mutable client_total_uploaded : int64;
-    mutable client_session_downloaded : int64;
-    mutable client_session_uploaded : int64;
-    mutable client_connect_time : int;
+	mutable client_upload_requests : (int * int64 * int64) list;
+	mutable client_allowed_to_write : int64;
+	mutable client_upload_rate : Rate.t;
+	mutable client_downloaded_rate :  Rate.t;
+	mutable client_total_downloaded : int64;
+	mutable client_total_uploaded : int64;
+	mutable client_session_downloaded : int64;
+	mutable client_session_uploaded : int64;
+	mutable client_connect_time : int;
 
-    mutable client_blocks_sent : int list;
-    mutable client_good : bool;
-    mutable client_num_try : int;
-    mutable client_alrd_sent_interested : bool;
-    mutable client_alrd_sent_notinterested : bool;
-    mutable client_interesting : bool;
-    mutable client_incoming : bool;
-    mutable client_registered_bitfield : bool;
-    mutable client_last_optimist : int;
+	mutable client_blocks_sent : int list;
+	mutable client_good : bool;
+	mutable client_num_try : int;
+	mutable client_alrd_sent_interested : bool;
+	mutable client_alrd_sent_notinterested : bool;
+	mutable client_interesting : bool;
+	mutable client_incoming : bool;
+	mutable client_registered_bitfield : bool;
+	mutable client_last_optimist : int;
 
-    mutable client_dht : bool;
-    mutable client_cache_extension : bool;
-    mutable client_fast_extension : bool;
-    mutable client_utorrent_extension : bool;
-    mutable client_azureus_messaging_protocol : bool;
+	mutable client_dht : bool;
+	mutable client_cache_extension : bool;
+	mutable client_fast_extension : bool;
+	mutable client_utorrent_extension : bool;
+	mutable client_azureus_messaging_protocol : bool;
 
-    mutable client_ut_metadata_msg : int64;
-  }
+	mutable client_ut_metadata_msg : int64;
+	(* mantain disconnected clients:*)(*check client DHT port?*)
+	mutable client_status : client_status;
+}
 
 and tracker_info = {
-    tracker_url : tracker_url;
-    mutable tracker_interval : int;
-    mutable tracker_min_interval : int;
-    mutable tracker_last_conn : int;
-    mutable tracker_last_clients_num : int;
-    mutable tracker_torrent_downloaded : int;
-    mutable tracker_torrent_complete : int;
-    mutable tracker_torrent_incomplete : int;
-    mutable tracker_torrent_total_clients_count : int;
-    mutable tracker_torrent_last_dl_req : int;
-    mutable tracker_id : string;
-    mutable tracker_key : string;
-    mutable tracker_status : tracker_status;
-  }
+	tracker_url : tracker_url;
+	mutable tracker_interval : int;
+	mutable tracker_min_interval : int;
+	mutable tracker_last_conn : int;
+	mutable tracker_last_clients_num : int;
+	mutable tracker_torrent_downloaded : int;
+	mutable tracker_torrent_complete : int;
+	mutable tracker_torrent_incomplete : int;
+	mutable tracker_torrent_total_clients_count : int;
+	mutable tracker_torrent_last_dl_req : int;
+	mutable tracker_id : string;
+	mutable tracker_key : string;
+	mutable tracker_status : tracker_status;
+}
 
 and file = {
-    file_file : file CommonFile.file_impl;
-    file_piece_size : int64;
-    file_id : Sha1.t;
-    file_name : string;
-    file_comment : string;
-    file_created_by : string;
-    file_creation_date : int64;
-    file_modified_by : string;
-    file_encoding : string;
-    mutable file_swarmer : CommonSwarming.t option;
-    mutable file_clients : ((Ip.t*int), client) Hashtbl.t ;
-    mutable file_clients_num : int ;
-    mutable file_chunks : Sha1.t array;
-    mutable file_files : (string * int64 * string option) list;
-    mutable file_blocks_downloaded : int list;
-    (* vvv probably a network specific value vvv ?what about file_downloaded?*)
-    mutable file_uploaded : int64;
-    mutable file_torrent_diskname : string;
-    mutable file_trackers : tracker_info list;
-    mutable file_tracker_connected : bool;
-    mutable file_completed_hook : (file -> unit);
-    mutable file_shared : file CommonShared.shared_impl option;
-    (** session uploaded and downloaded bytes, for statistics reporting *)
-    mutable file_session_uploaded : int64;
-    mutable file_session_downloaded : int64;
-    (** DHT specific *)
-    mutable file_last_dht_announce : int;
+	file_file : file CommonFile.file_impl;
+	file_piece_size : int64;
+	file_id : Sha1.t;
+	file_name : string;
+	file_comment : string;
+	file_created_by : string;
+	file_creation_date : int64;
+	file_modified_by : string;
+	file_encoding : string;
+	mutable file_swarmer : CommonSwarming.t option;
+	mutable file_clients : ((Ip.t*int), client) Hashtbl.t ;
+	mutable file_clients_num : int ;
+	mutable file_chunks : Sha1.t array;
+	mutable file_files : (string * int64 * string option) list;
+	mutable file_blocks_downloaded : int list;
+	(* vvv probably a network specific value vvv ?what about file_downloaded?
+	arlas: file downloaded isn't useful, because at max is the actual file size *)
+	mutable file_uploaded : int64;
+	
+	mutable file_torrent_diskname : string;
+	mutable file_trackers : tracker_info list;
+	mutable file_tracker_connected : bool;
+	mutable file_completed_hook : (file -> unit);
+	mutable file_shared : file CommonShared.shared_impl option;
+	(** session uploaded and downloaded bytes, for statistics reporting *)
+	mutable file_session_uploaded : int64;
+	mutable file_session_downloaded : int64;
+	(** DHT specific *)
+	mutable file_last_dht_announce : int;
 
-    mutable file_metadata_size : int64;
-    mutable file_metadata_piece : int64;
-    mutable file_metadata_downloading : bool;
-    mutable file_metadata_chunks : string array;
+	mutable file_metadata_size : int64;
+	mutable file_metadata_piece : int64;
+	mutable file_metadata_downloading : bool;
+	mutable file_metadata_chunks : string array;
 
-    file_private : bool;
-  }
+	file_private : bool;
+}
 
 and ft = {
-    ft_file : ft CommonFile.file_impl;
-    ft_id : int;
-    ft_filename : string;
-    mutable ft_retry : (ft -> unit);
-  }
+	ft_file : ft CommonFile.file_impl;
+	ft_id : int;
+	ft_filename : string;
+	mutable ft_retry : (ft -> unit);
+}

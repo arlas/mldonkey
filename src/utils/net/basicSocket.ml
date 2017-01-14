@@ -28,7 +28,7 @@ open Options
 (*************************************************************************)
 
 type close_reason =
-    Closed_for_timeout    (* timeout exceeded *)
+  | Closed_for_timeout    (* timeout exceeded *)
   | Closed_for_lifetime   (* lifetime exceeded *)
   | Closed_by_peer        (* end of file *)
   | Closed_for_error of string
@@ -184,7 +184,7 @@ let add_bandwidth_second_timer f =
 
 let string_of_reason c =
   match c with
-    Closed_for_timeout -> "timeout"
+  | Closed_for_timeout -> "timeout"
   | Closed_for_lifetime -> "lifetime"
   | Closed_by_peer -> "peer"
   | Closed_for_error error -> Printf.sprintf "error %s" error
@@ -268,8 +268,7 @@ let exn_log name f x =
 
 let close t msg =
   if t.fd <> dummy_fd then begin
-      if !debug then
-          lprintf_nl "[bS] CLOSING: %s (%s)" (sprint_socket t) (string_of_reason msg);
+      if !debug then lprintf_nl "[bS] CLOSING: %s (%s)" (sprint_socket t) (string_of_reason msg);
       exn_log "close" Unix.close t.fd;
       t.fd <- dummy_fd;
       closed_tasks := t :: !closed_tasks;

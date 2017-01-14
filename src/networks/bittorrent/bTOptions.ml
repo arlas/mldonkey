@@ -59,13 +59,26 @@ let check_client_uid () =
     ) - 3) then
     client_uid =:= Sha1.direct_of_string generate_client_uid
 
-let shortname o =
-  Printf.sprintf "BT-%s" (shortname o)
+let shortname o = Printf.sprintf "BT-%s" (shortname o)
 
 let gui_bittorrent_options_panel =
-  [
-    "Port", shortname client_port, "T";
-  ]
+	[
+		"Port", shortname client_port, "T";
+	]
+
+let next_tracker_update = define_option bittorrent_section ["next_tracker_update"]
+	"When to download an updated tracker list"
+	int_option 24
+
+let auto_tracker_list = define_option bittorrent_section ["auto_tracker_list"]
+	"List of automatically found trackers"
+	(list_option string_option)
+	[]
+
+let manual_tracker_list = define_option bittorrent_section ["manual_tracker_list"]
+	"List of trackers you want to use"
+	(list_option string_option)
+	[]
 
 let ask_tracker_threshold = define_option bittorrent_section ["ask_tracker_threshold"]
   "Ask the tracker for new sources only if you have fewer than that number of sources"
@@ -165,7 +178,7 @@ let get_user_agent () =
   else !!user_agent
 
 let dht_port = define_option bittorrent_section ["dht_port"]
-  "DHT port (UDP, set 0 to disable)"
+  "DHT (random 2000-22000) port (UDP, set 0 to disable)"
   port_option (2000 + Random.int 20000)
 
 let use_trackers = define_option bittorrent_section ["use_trackers"]

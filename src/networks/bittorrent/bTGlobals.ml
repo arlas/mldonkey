@@ -77,11 +77,12 @@ let set_client_disconnected client =
 
 let client_num c = client_num (as_client c)
 
-
 let network = new_network "BT" "BitTorrent"
     [
     NetworkHasMultinet;
     NetworkHasUpload;
+	(* extratorrents search: *)
+	NetworkHasSearch;
     NetworkHasStats;
   ]
 
@@ -139,7 +140,7 @@ let must_share_file file = must_share_file file (file_best_name (as_file file)) 
 
 let unshare_file file =
   match file.file_shared with
-    None -> ()
+  | None -> ()
   | Some s ->
       begin
         file.file_shared <- None;
@@ -188,7 +189,7 @@ let check_if_interesting file c =
             let x,y = CommonSwarming.range_range r in
             x < y) c.client_ranges_sent = []) &&
       (match c.client_range_waiting with
-          None -> true
+        | None -> true
         | Some (x,y,r) ->
             let x,y = CommonSwarming.range_range r in
             x < y) &&
@@ -226,10 +227,7 @@ let create_temp_file file_temp file_files file_state =
       Unix32.create_diskfile file_temp writable
   in
   if Unix32.destroyed file_fd then
-    failwith
-      (Printf.sprintf
-        "create_temp_file: Unix32.create returned a destroyed FD for %s\n"
-        file_temp);
+    failwith (Printf.sprintf "create_temp_file: Unix32.create returned a destroyed FD for %s\n" file_temp);
   file_fd
 
 let make_tracker_url url =
@@ -276,7 +274,8 @@ let set_trackers file file_trackers =
             tracker_status = if can_handle_tracker url then Enabled 
                              else Disabled_mld (intern "Tracker type not supported")
           } in
-          file.file_trackers <-  t :: file.file_trackers)
+		  (* we should put the best tracker first *)
+          file.file_trackers <- file.file_trackers @ t :: [] )
   file_trackers
 
 let new_file ?(metadata=false) file_id t torrent_diskname file_temp file_state user group =
@@ -347,7 +346,7 @@ let new_file ?(metadata=false) file_id t torrent_diskname file_temp file_state u
                   if c.client_registered_bitfield then
                     begin
                       match c.client_bitmap with
-                        None -> ()
+                      | None -> ()
                       | Some bitmap ->
                           if not (Bitv.get bitmap num) then
                             send_client c (Have (Int64.of_int num));
@@ -739,11 +738,11 @@ let decode_non_zero s =
   in
   let bv = ref None in
   (match find_non_zero 0 with
-     8 -> (if "UDP0" = String.sub s 16 4 then
+  | 8 -> (if "UDP0" = String.sub s 16 4 then
             bv := Some (Brand_bitcomet, "UDP");
           if "HTTPBT" = String.sub s 14 6 then
             bv := Some (Brand_bitcomet, "HTTP"));
-  |  9 -> if check_all s 3 [9;10;11] then
+  | 9 -> if check_all s 3 [9;10;11] then
       bv := Some (Brand_snark, "");
   | 12 -> if check_all s 97 [12;13] then
         bv := Some (Brand_experimental, "3.2.1b2")
@@ -821,6 +820,14 @@ let check_client_country_code c =
           Geoip.get_country_code_option (fst c.client_host)
     | _ -> ()
 
+(* Called if:
+*	id != my id
+*	ip != 0
+*	ip != my ip
+*	port != 0
+*	ip is not banned
+*	file peer_id=id kind=(ip,port) cc
+*)
 let new_client file peer_id kind cc =
   try
     let c = Hashtbl.find file.file_clients kind in
@@ -879,6 +886,7 @@ let new_client file peer_id kind cc =
           client_utorrent_extension = false;
           client_ut_metadata_msg = -1L;
           client_azureus_messaging_protocol = false;
+		  client_status = Disconnected;
         } and impl = {
           dummy_client_impl with
           impl_client_val = c;

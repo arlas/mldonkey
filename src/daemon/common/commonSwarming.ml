@@ -60,7 +60,7 @@ type intervals =
 | AvailableBitv of Bitv.t
 
 type verification =
-  NoVerification
+| NoVerification
 | VerificationNotAvailable
 | ForceVerification
 | Verification of uid_type array
