@@ -40,366 +40,437 @@ let string name x = define_option message_section [name] "" string_option x
 
 (* Please do not modify *_mods0, add/modify your own html_mods_theme *)
 
+(*	127.0.0.1:4080 h.css
+*	css style for all pages
+*)
 (* Style 0 *)
-
 let html_css_mods0 = define_option message_section ["html_css_mods0"]
   "Main CSS style 0"
     string_option
 "
 body {
-  background: @color_background@;
-  margin-top: 3px;
-  margin-left: 5px;
-  margin-right: 5px;
-  font-family: Verdana, sans-serif;
-  font-size: 12px;
-  }
+background: @color_background@;
+margin:0;
+font-family:Verdana, sans-serif;
+font-size:12px;
+}
 table.commands {
-  border: @color_general_border@ solid 1px;
-  background: @color_background@;
-  }
+border: @color_general_border@ solid 1px;
+background: @color_background@;
+}
 table.topcommands {
-  background: @color_background@;
-  border: @color_general_border@ solid 1px;
-  border-top: @color_scrollbar_highlight@ solid 1px;
-  border-left: @color_scrollbar_highlight@ solid 1px;
-  }
+background: @color_background@;
+border: @color_general_border@ solid 1px;
+border-top: @color_scrollbar_highlight@ solid 1px;
+border-left: @color_scrollbar_highlight@ solid 1px;
+}
 pre {
-  color: @color_general_text@;
-  font-family: Courier, Arial, Helvetica, sans-serif;
-  font-size: 12px;
-  }
+color: @color_general_text@;
+font-family: Courier, Arial, Helvetica, sans-serif;
+font-size: 12px;
+}
 p {
-  color: @color_general_text@;
-  font-family: Verdana, Courier, Arial, Helvetica, sans-serif;
-  font-size: 12px;
-  }
+color: @color_general_text@;
+font-family: Verdana, Courier, Arial, Helvetica, sans-serif;
+font-size: 12px;
+}
 input.txt {
-  background: @color_input_text@;
-  }
+background: @color_input_text@;
+}
 input.txt2 {
-  background: @color_bbig_background@;
-  font: 12px courier;
-  padding: 0px;
-  width: 38px;
-  height: 18px;
-  line-height: 14px;
-  color: @color_general_text@;
-  border-right: @color_some_border@ 2px solid;
-  border-top: @color_general_border@ 1px solid;
-  border-left: @color_general_border@ 1px solid;
-  border-bottom: @color_some_border@ 2px solid;
-  }
+background: @color_bbig_background@;
+font: 12px courier;
+padding: 0px;
+width: 38px;
+height: 18px;
+line-height: 14px;
+color: @color_general_text@;
+border-right: @color_some_border@ 2px solid;
+border-top: @color_general_border@ 1px solid;
+border-left: @color_general_border@ 1px solid;
+border-bottom: @color_some_border@ 2px solid;
+}
 input.but2 {
-  background: @color_bsmall3@;
-  border: 0px;
-  padding: 0px;
-  font: bold 10px verdana;
-  width: 36px;
-  height: 14px;
-  }
+background: @color_bsmall3@;
+border: 0px;
+padding: 0px;
+font: bold 10px verdana;
+width: 36px;
+height: 14px;
+}
 input.but {
-  background: @color_input_button@;
-  }
+background: @color_input_button@;
+}
 input.changed { border: 2px solid red; }
 a:link, a:active, a:visited {
-  text-decoration: none;
-  font-family: verdana;
-  font-size: 10px;
-  color: @color_anchor@;
-  }
+text-decoration: none;
+font-family: verdana;
+font-size: 10px;
+color: @color_anchor@;
+}
 a:hover {
-  color: @color_anchor_hover@;
-  text-decoration: underline;
-  }
+color: @color_anchor_hover@;
+text-decoration: underline;
+}
 .bu {
-  vertical-align: middle;
-  white-space: nowrap;
-  background: @color_chunk3@;
-  color: @color_foreground_text_for_top_buttons@;
-  font-family: Verdana;
-  font-size: 9px;
-  line-height: 12px;
-  margin-top: 0px;
-  margin-bottom: 0px;
-  padding-left: 6px;
-  padding-right: 6px;
-  padding-top: 1px;
-  padding-bottom: 1px;
-  border: @color_some_border@ 0px solid;
-  }
+vertical-align: middle;
+white-space: nowrap;
+background: @color_chunk3@;
+color: @color_foreground_text_for_top_buttons@;
+font-family: Verdana;
+font-size: 9px;
+line-height: 12px;
+margin-top: 0px;
+margin-bottom: 0px;
+padding-left: 6px;
+padding-right: 6px;
+padding-top: 1px;
+padding-bottom: 1px;
+border: @color_some_border@ 0px solid;
+}
 .bbig {
-  text-align: center;
-  font-size: 10px;
-  font-family: Verdana;
-  font-weight: 500;
-  border-top: @color_scrollbar_highlight@ 1px solid;
-  border-left: @color_scrollbar_highlight@ 1px solid;
-  border-bottom: @color_general_border@ 1px solid;
-  border-right: @color_general_border@ 1px solid;
-  padding-left: 4px;
-  padding-right: 4px;
-  padding-top: 1px;
-  padding-bottom: 1px;
-  color: @color_general_text@;
-  background: @color_bbig_background@;
-  }
+text-align: center;
+font-size: 10px;
+font-family: Verdana;
+font-weight: 500;
+border-top: @color_scrollbar_highlight@ 1px solid;
+border-left: @color_scrollbar_highlight@ 1px solid;
+border-bottom: @color_general_border@ 1px solid;
+border-right: @color_general_border@ 1px solid;
+padding-left: 4px;
+padding-right: 4px;
+padding-top: 1px;
+padding-bottom: 1px;
+color: @color_general_text@;
+background: @color_bbig_background@;
+}
 .bbigm {
-  text-align: center;
-  font: bold 10px verdana;
-  border-top: @color_scrollbar_highlight@ 1px solid;
-  border-left: @color_scrollbar_highlight@ 1px solid;
-  border-bottom: @color_general_border@ 1px solid;
-  border-right: @color_general_border@ 1px solid;
-  padding-left: 4px;
-  padding-right: 4px;
-  padding-top: 1px;
-  padding-bottom: 1px;
-  color: @color_general_text@;
-  background: @color_bsmall3@;
-  }
+text-align: center;
+font: bold 10px verdana;
+border-top: @color_scrollbar_highlight@ 1px solid;
+border-left: @color_scrollbar_highlight@ 1px solid;
+border-bottom: @color_general_border@ 1px solid;
+border-right: @color_general_border@ 1px solid;
+padding-left: 4px;
+padding-right: 4px;
+padding-top: 1px;
+padding-bottom: 1px;
+color: @color_general_text@;
+background: @color_bsmall3@;
+}
 .bsmall {
-  background: @color_bsmall_back@;
-  }
+background: @color_bsmall_back@;
+}
 .bsmall1 {
-  background: @color_bbig_background@;
-  }
+background: @color_bbig_background@;
+}
 .bsmall2 {
-  background: @color_bsmall2@;
-  }
+background: @color_bsmall2@;
+}
 .bsmall3 {
-  background: @color_bsmall3@;
-  }
+background: @color_bsmall3@;
+}
 .bbig2 {
-  background: @color_bsmall3@;
-  }
+background: @color_bsmall3@;
+}
 .bbig3 {
-  background: @color_scrollbar_face@;
-  }
+background: @color_scrollbar_face@;
+}
 .b1 {
-  border-left: @color_border_of_top_buttons@ solid 1px;
-  border-top: @color_border_of_top_buttons@ solid 1px;
-  border-right: @color_border_of_top_buttons@ solid 1px;
-  border-bottom: @color_border_of_top_buttons@ solid 1px;
-  }
+border-left: @color_border_of_top_buttons@ solid 1px;
+border-top: @color_border_of_top_buttons@ solid 1px;
+border-right: @color_border_of_top_buttons@ solid 1px;
+border-bottom: @color_border_of_top_buttons@ solid 1px;
+}
 .b2 {
-  border-left: @color_border_of_top_buttons@ solid 0px;
-  border-top: @color_border_of_top_buttons@ solid 1px;
-  border-right: @color_border_of_top_buttons@ solid 1px;
-  border-bottom: @color_border_of_top_buttons@ solid 1px;
-  }
+border-left: @color_border_of_top_buttons@ solid 0px;
+border-top: @color_border_of_top_buttons@ solid 1px;
+border-right: @color_border_of_top_buttons@ solid 1px;
+border-bottom: @color_border_of_top_buttons@ solid 1px;
+}
 .b3 {
-  border-left: @color_border_of_top_buttons@ solid 1px;
-  border-top: @color_border_of_top_buttons@ solid 0px;
-  border-right: @color_border_of_top_buttons@ solid 1px;
-  border-bottom: @color_border_of_top_buttons@ solid 1px;
-  }
+border-left: @color_border_of_top_buttons@ solid 1px;
+border-top: @color_border_of_top_buttons@ solid 0px;
+border-right: @color_border_of_top_buttons@ solid 1px;
+border-bottom: @color_border_of_top_buttons@ solid 1px;
+}
 .b4 {
-  border-left: @color_border_of_top_buttons@ solid 0px;
-  border-top: @color_border_of_top_buttons@ solid 0px;
-  border-right: @color_border_of_top_buttons@ solid 1px;
-  border-bottom: @color_border_of_top_buttons@ solid 1px;
-  }
+border-left: @color_border_of_top_buttons@ solid 0px;
+border-top: @color_border_of_top_buttons@ solid 0px;
+border-right: @color_border_of_top_buttons@ solid 1px;
+border-bottom: @color_border_of_top_buttons@ solid 1px;
+}
 .bb1 {
-  border-left: @color_general_border@ solid 1px;
-  border-top: @color_scrollbar_highlight@ solid 1px;
-  border-right: @color_scrollbar_highlight@ solid 1px;
-  border-bottom: @color_general_border@ solid 1px;
-  }
+border-left: @color_general_border@ solid 1px;
+border-top: @color_scrollbar_highlight@ solid 1px;
+border-right: @color_scrollbar_highlight@ solid 1px;
+border-bottom: @color_general_border@ solid 1px;
+}
 .bb2 {
-  border-left: @color_big_buttons_and_border_highlight@ solid 1px;
-  border-top: @color_scrollbar_highlight@ solid 1px;
-  border-right: @color_scrollbar_highlight@ solid 0px;
-  border-bottom: @color_general_border@ solid 1px;
-  }
+border-left: @color_big_buttons_and_border_highlight@ solid 1px;
+border-top: @color_scrollbar_highlight@ solid 1px;
+border-right: @color_scrollbar_highlight@ solid 0px;
+border-bottom: @color_general_border@ solid 1px;
+}
 .bb3 {
-  border-left: @color_big_buttons_and_border_highlight@ solid 1px;
-  border-top: @color_scrollbar_highlight@ solid 1px;
-  border-right: @color_general_border@ solid 0px;
-  border-bottom: @color_general_border@ solid 0px;
-  }
+border-left: @color_big_buttons_and_border_highlight@ solid 1px;
+border-top: @color_scrollbar_highlight@ solid 1px;
+border-right: @color_general_border@ solid 0px;
+border-bottom: @color_general_border@ solid 0px;
+}
 .bb4 {
-  border-left: @color_big_buttons_and_border_highlight@ solid 1px;
-  border-top: @color_scrollbar_highlight@ solid 1px;
-  border-right: @color_general_border@ solid 1px;
-  border-bottom: @color_general_border@ solid 0px;
-  }
+border-left: @color_big_buttons_and_border_highlight@ solid 1px;
+border-top: @color_scrollbar_highlight@ solid 1px;
+border-right: @color_general_border@ solid 1px;
+border-bottom: @color_general_border@ solid 0px;
+}
 .src {
-  border-left: @color_general_border@ solid 0px;
-  border-top: @color_general_border@ solid 0px;
-  border-right: @color_general_border@ solid 1px;
-  border-bottom: @color_general_border@ solid 1px;
-  }
+border-left: @color_general_border@ solid 0px;
+border-top: @color_general_border@ solid 0px;
+border-right: @color_general_border@ solid 1px;
+border-bottom: @color_general_border@ solid 1px;
+}
 .srctd {
-  font-family: Verdana;
-  font-size: 8px;
-  }
+font-family: Verdana;
+font-size: 8px;
+}
 .hcenter {
-  margin-left: auto;
-  margin-right: auto;
+margin-left: auto;
+margin-right: auto;
 }
 td.fbig {
-  color: @color_general_text@;
-  cursor: pointer;
-  padding-left: 2px;
-  padding-right: 2px;
-  font-family: Verdana;
-  font-size: 10px;
-  background: @color_fbig_background@;
-  border-top: @color_general_border@ solid 1px;
-  border-left: @color_general_border@ solid 1px;
-  }
+color: @color_general_text@;
+cursor: pointer;
+padding-left: 2px;
+padding-right: 2px;
+font-family: Verdana;
+font-size: 10px;
+background: @color_fbig_background@;
+border-top: @color_general_border@ solid 1px;
+border-left: @color_general_border@ solid 1px;
+}
 td.pr {
-  border-right: @color_general_border@ solid 1px;
-  }
+border-right: @color_general_border@ solid 1px;
+}
 td.fbigb {
-  border-top: @color_general_border@ solid 0px;
-  border-bottom: @color_general_border@ solid 1px;
-  }
+border-top: @color_general_border@ solid 0px;
+border-bottom: @color_general_border@ solid 1px;
+}
 td.fbigpad {
-  padding-top: 2px;
-  padding-bottom: 2px;
-  }
+padding-top: 2px;
+padding-bottom: 2px;
+}
 td, tr {
-  font-size: 12px;
-  font-family: verdana;
-  }
+font-size: 12px;
+font-family: verdana;
+}
 td.sr {
-  white-space: nowrap;
-  padding-top: 2px;
-  padding-bottom: 2px;
-  padding-left: 4px;
-  padding-right: 4px;
-  font-family: verdana;
-  font-size: 10px;
-  color: @color_general_text@;
-  }
+white-space: nowrap;
+padding-top: 2px;
+padding-bottom: 2px;
+padding-left: 4px;
+padding-right: 4px;
+font-family: verdana;
+font-size: 10px;
+color: @color_general_text@;
+}
 td.srp {
-  white-space: nowrap;
-  padding-top: 2px;
-  padding-bottom: 2px;
-  padding-left: 0px;
-  padding-right: 4px;
-  font-family: verdana;
-  font-size: 10px;
-  color: @color_one_td_text@;
-  }
+white-space: nowrap;
+padding-top: 2px;
+padding-bottom: 2px;
+padding-left: 0px;
+padding-right: 4px;
+font-family: verdana;
+font-size: 10px;
+color: @color_one_td_text@;
+}
 td.srw {
-  padding-top: 2px;
-  padding-bottom: 2px;
-  padding-left: 4px;
-  padding-right: 4px;
-  font-family: verdana;
-  font-size: 10px;
-  color: @color_general_text@;
-  }
+padding-top: 2px;
+padding-bottom: 2px;
+padding-left: 4px;
+padding-right: 4px;
+font-family: verdana;
+font-size: 10px;
+color: @color_general_text@;
+}
 td.srh {
-  cursor: pointer;
-  vertical-align: top;
-  background: @color_table_header_background@;
-  white-space: nowrap;
-  padding-top: 2px;
-  padding-bottom: 2px;
-  padding-left: 4px;
-  padding-right: 4px;
-  font-family: verdana;
-  font-size: 10px;
-  color: @color_general_text@;
-  }
+cursor: pointer;
+vertical-align: top;
+background: @color_table_header_background@;
+white-space: nowrap;
+padding-top: 2px;
+padding-bottom: 2px;
+padding-left: 4px;
+padding-right: 4px;
+font-family: verdana;
+font-size: 10px;
+color: @color_general_text@;
+}
 td.total {
-  border-top: @color_general_border@ solid 1px;
-  border-bottom: @color_general_border@ solid 1px;
-  }
+border-top: @color_general_border@ solid 1px;
+border-bottom: @color_general_border@ solid 1px;
+}
 tr.dl-1, td.dl-1 {
-  background: @color_dl1_back@;
-  }
+background: @color_dl1_back@;
+}
 tr.dl-2, td.dl-2 {
-  background: @color_dl2_back@;
-  }
+background: @color_dl2_back@;
+}
 .mOvr1, tr.mOvr1 {
-  background: @color_mOver1_back@;
-  cursor: pointer;
-  }
+background: @color_mOver1_back@;
+cursor: pointer;
+}
 .mOvr2, tr.mOvr2 {
-  background: @color_mOver2_back@;
-  cursor: pointer;
-  }
+background: @color_mOver2_back@;
+cursor: pointer;
+}
 .mOvr3, tr.mOvr3 {
-  background: @color_mOver3_back@;
-  cursor: pointer;
-  }
+background: @color_mOver3_back@;
+cursor: pointer;
+}
 table.uploaders, table.friends, table.bw_stats, table.vo, table.cs, table.servers,
 table.shares, table.downloaders, table.scan_temp, table.upstats, table.messages,
 table.shares, table.vc, table.results, table.networkInfo, table.memstats {
-  margin-right: auto;
-  margin-left: auto;
-  border: @color_general_border@ solid 1px;
-  border-collapse: collapse;
-  }
+margin-right: auto;
+margin-left: auto;
+border: @color_general_border@ solid 1px;
+border-collapse: collapse;
+}
 table.sourcesInfo, table.subfilesInfo, table.serversC {
-  width: 100%;
-  margin-right: auto;
-  margin-left: auto;
-  border: @color_general_border@ solid 1px;
-  border-collapse: collapse;
-  }
+width: 100%;
+margin-right: auto;
+margin-left: auto;
+border: @color_general_border@ solid 1px;
+border-collapse: collapse;
+}
 table.sources {
-  border: @color_general_border@ solid 1px;
-  border-collapse: collapse;
-  }
+border: @color_general_border@ solid 1px;
+border-collapse: collapse;
+}
 table.main {
-  margin-right: auto;
-  margin-left: auto;
-  }
+margin-right: auto;
+margin-left: auto;
+}
 div.main, div.uploaders, div.friends, div.cs, div.shares, div.upstats, div.servers, div.serversC, div.vo,
 div.downloaders, div.messages, div.vc, div.bw_stats, div.scan_temp, div.results, div.memstats {
-  text-align: center;
-  }
+text-align: center;
+}
 td.srb {
-  padding-top: 1px;
-  padding-bottom: 1px;
-  font-size: 10px;
-  font-family: Verdana;
-  white-space: nowrap;
-  border-right: @color_general_border@ solid 1px;
-  border-bottom: @color_general_border@ solid 1px;
-  border-left: @color_general_border@ solid 1px;
-  border-top: @color_general_border@ solid 0px;
-  padding-left: 3px;
-  padding-right: 3px;
-  }
+padding-top: 1px;
+padding-bottom: 1px;
+font-size: 10px;
+font-family: Verdana;
+white-space: nowrap;
+border-right: @color_general_border@ solid 1px;
+border-bottom: @color_general_border@ solid 1px;
+border-left: @color_general_border@ solid 1px;
+border-top: @color_general_border@ solid 0px;
+padding-left: 3px;
+padding-right: 3px;
+}
 td.act {
-  font-size: 10px;
-  font-weight: 700;
-  }
+font-size: 10px;
+font-weight: 700;
+}
 td.br {
-  border-right: @color_general_border@ dotted 1px;
-  }
+border-right: @color_general_border@ dotted 1px;
+}
 td.ar {
-  text-align: right;
-  }
+text-align: right;
+}
 td.al {
-  text-align: left;
-  }
+text-align: left;
+}
 td.ac {
-  text-align: center;
-  }
+text-align: center;
+}
 td.chunk0 {
-  height: 12px;
-  background: @color_chunk0@;
-  }
+height: 12px;
+background: @color_chunk0@;
+}
 td.chunk1 {
-  height: 12px;
-  background: @color_chunk1@;
-  }
+height: 12px;
+background: @color_chunk1@;
+}
 td.chunk2 {
-  height: 12px;
-  background: @color_chunk2@;
-  }
+height: 12px;
+background: @color_chunk2@;
+}
 td.chunk3 {
-  height: 12px;
-  background: @color_chunk3@;
-  }
+height: 12px;
+background: @color_chunk3@;
+}
+a.topnav-icons {
+font-size:20px !important;
+padding-top:1px !important;
+padding-bottom:1px !important;
+text-align:center;
+font-family:FontAwesome;
+}
+a.topnav-icons.fa-home {font-size:22px !important}
+ul.topnav {
+font-family: \"Segoe UI\",Arial,sans-serif;
+font-size: 8px;
+list-style-type: none;
+margin: 0;
+padding: 0;
+background-color: @color_topnavbackground@;
+color: @color_topnavtext@;
+letter-spacing: 1px;
+overflow: hidden;
+}
+ul.topnav a.link {
+font-family: \"Segoe UI\",Arial,sans-serif;
+font-size: 12px;
+}
+ul.topnav li {
+float:left;
+text-align: center;
+}
+ul.topnav li a {
+display: block;
+color: @color_topnavlink@;
+padding: 5px 8px;
+text-decoration: none;
+}
+/* Change the link color on page */
+ul.topnav li a.active {
+background-color: @color_topnavactive@;
+color: @color_topnavlink@;
+}
+/* Change the link color on hover */
+ul.topnav li a:hover:not(.active) {
+background-color: @color_topnavnotactive@;
+/*color: white;*/
+}
+ul.topnav li.right {float: right;}
+@media screen and (max-width: 600px){
+ul.topnav li.right {float:right; clear:none;} 
+ul.topnav li {float: none;}
+}
+/* dropdown menus */
+li.dropdown {
+display: inline-block;
+}
+.dropdown-content {
+display: none;
+position: absolute;
+background-color: @color_topnavbackground@;
+min-width: 160px;
+box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+}
+.dropdown-content a {
+color: black;
+padding: 12px 16px;
+text-decoration: none;
+display: block;
+text-align: left;
+font-size: 10px;
+}
+.dropdown-content a:hover {background-color: #f1f1f1}
+.dropdown:hover .dropdown-content {
+display: block;
+}
 "
 
 let html_js_mods0 = define_option message_section ["html_js_mods0"]
@@ -710,20 +781,25 @@ fixHeightOfTheText();
 </html>
 "
 
-
+(* 127.0.0.1:4080 page header
+*	added:
+*	font awesome
+*	jquery
+*)
 let html_header_mods0 = define_option message_section ["html_header_mods0"]
   "Header - style 0"
     string_option
 ("<title>" ^ _s "MLdonkey: Web Interface" ^ "</title>
 <meta name=\"generator\" content=\"MLDonkey\" >
 <meta name=\"robots\" content=\"noindex,nofollow\" >
-<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\" >
+<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" >
 <meta http-equiv=\"Expires\" content=\"-1\" >
 <meta http-equiv=\"Pragma\" content=\"no-cache\" >
 <link rel=\"shortcut icon\" href=\"favicon.ico\" type=\"image/x-icon\" >
 <link href=\"h.css\" rel=\"stylesheet\" type=\"text/css\" >
-<script type=\"text/javascript\" src=\"i.js\" >
-</script>")
+<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css\" >
+<script type=\"text/javascript\" src=\"i.js\" > </script>
+<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js\"> </script>")
 
 let download_html_css_mods0 = define_option message_section ["download_html_css_mods0"]
   "Download CSS - style 0"
@@ -964,10 +1040,56 @@ let download_html_header_mods0 = define_option message_section ["download_html_h
 <script type=\"text/javascript\" src=\"di.js\"></script>
   ")
 
+(* 127.0.0.1:4080 top command bar
+*	framed commands.html
+*	added w3schools style bar
+*)
 let web_common_header_mods0 = define_option message_section ["web_common_header_mods0"]
   "Web header - style 0"
     string_option
 ("
+<!-- topnav -->
+<ul class=\"topnav\">
+  <li class=\"dropdown\">
+  <a href=\"javascript:void(0)\" class=\"dropbtn\"><i class=\"topnav-icons fa fa-folder\" aria-hidden=\"true\"></i> File</a>
+    <div class=\"dropdown-content\">
+		<a onclick=\"dllink();\">Download links</a>
+    </div>
+  </li>
+  <li class=\"dropdown\">
+  <a href=\"javascript:void(0)\" class=\"dropbtn\"><i class=\"topnav-icons fa fa-bars\" aria-hidden=\"true\"></i> Options</a>
+    <div class=\"dropdown-content\">
+		<a href=\"javascript:void(0)\" onClick=\"mSub('fstatus','version');mSub('fstatus','close_fds')\">Close files</a>
+		<a href=\"javascript:void(0)\" onClick=\"mSub('fstatus','version');mSub('output','friends')\">Friends</a>
+		<a href=\"javascript:void(0)\" onClick=\"mSub('fstatus','version');mSub('output','block_list')\">IP blocking</a>
+		<a href=\"javascript:void(0)\" onClick=\"mSub('fstatus','version');mSub('output','message')\">Messages</a>
+		<a href=\"javascript:void(0)\" onClick=\"mSub('fstatus','recover_temp');mSub('output','scan_temp');\">Recover temp</a>
+		<a href=\"javascript:void(0)\" onClick=\"mSub('fstatus','version');mSub('output','voo+1')\">Settings</a>
+		<a href=\"javascript:void(0)\" onClick=\"mSub('fstatus','version');mSub('output','shares')\">Shares</a>
+		<a href=\"javascript:void(0)\" onclick=\"mSub('fstatus','version');mSub('output','users')\">Users</a>
+		<a href=\"javascript:void(0)\" onClick=\"mSub('fstatus','version');mSub('output','vc+all')\">View clients</a>
+    </div>
+  </li>
+  <li class=\"dropdown\">
+  <a href=\"javascript:void(0)\" class=\"dropbtn\"><i class=\"topnav-icons fa fa-question\" aria-hidden=\"true\"></i> Help</a>
+    <div class=\"dropdown-content\">
+		<a href=\"javascript:void(0)\" onClick=\"parent.frames[_getFrameByName('output')].location.href='http://savannah.nongnu.org/cgi-bin/viewcvs/mldonkey/mldonkey/distrib/ChangeLog?rev=HEAD&amp;content-type=text/vnd.viewcvs-markup'\">Changelog</a>
+		<a href=\"javascript:void(0)\" onClick=\"parent.frames[_getFrameByName('output')].location.href='http://mldonkey.sourceforge.net/forums'\">English support</a>
+		<a href=\"javascript:void(0)\" onClick=\"parent.frames[_getFrameByName('output')].location.href='http://mldonkey.org/phpbb2'\">German forum</a>
+		<a href=\"javascript:void(0)\" onClick=\"parent.frames[_getFrameByName('output')].location.href='http://mldonkey.sourceforge.net'\">Homepage</a>
+		<a href=\"javascript:void(0)\" onClick=\"mSub('output','kill')\">Kill core</a>
+		<a href=\"javascript:void(0)\" onClick=\"mSub('output','log')\">Log</a>
+		<a href=\"javascript:void(0)\" onClick=\"mSub('output','logout')\">Logout</a>
+		<a href=\"javascript:void(0)\" onClick=\"mSub('output','longhelp')\">LongHelp</a>
+		<a href=\"javascript:void(0)\" onClick=\"mSub('output','networks')\">Networks</a>
+		<a href=\"javascript:void(0)\" onClick=\"mSub('output','porttest')\">Porttest</a>
+		<a href=\"javascript:void(0)\" onClick=\"mSub('output','sysinfo')\">Sysinfo</a>
+    </div>
+  </li>
+  <li class=\"right\"><a href=\"javascript:void(0)\" onClick=\"mSub('output','kill')\" class=\"topnav-icons fa fa-times\"></a></li>
+  <li class=\"right\"><a href=\"https://www.facebook.com/mldonkey.dev\" class=\"topnav-icons fa fa-facebook-square\"></a></li>
+  <li class=\"right\">MLDonkey "^ Autoconf.current_version ^"</li>
+</ul>
 <!-- Main Table -->
 <form name=cmdFormular action=btnsubmit target=output>
 <TABLE BORDER=0 cellspacing=1 cellpadding=0 width=\"100%\"><TR>
@@ -1547,7 +1669,13 @@ type style_type = {
   color_some_scrollbar: string;
   color_some_border: string;
   color_one_td_text: string;
-  frame_height: int
+  (* topnav colours *)
+	color_topnavbackground: string;
+	color_topnavtext: string;
+	color_topnavlink: string;
+	color_topnavactive: string;
+	color_topnavnotactive: string;
+	frame_height: int
 }
 
 let dummy_style = {
@@ -1589,11 +1717,61 @@ let dummy_style = {
   color_some_scrollbar = "#000";
   color_some_border = "#000";
   color_one_td_text = "#000";
-  frame_height = 0;
+	color_topnavbackground = "#000";
+	color_topnavtext = "#000";
+	color_topnavlink = "#000";
+	color_topnavactive = "#000";
+	color_topnavnotactive = "#000";
+	frame_height = 0;
 }
 
-    (* Default *)
+(* Style list (they can be chosen) *)
 let styles = Array.of_list [
+  { style_name = "ML";
+    color_background = "#F6F6F6"; 
+    color_scrollbar_face = "#94AE94";  
+    color_chunk2 = "#33F"; 
+    color_scrollbar_highlight = "#E5FFE5"; 
+    color_vd_page_background = "#B2CCB2"; 
+    color_big_buttons_and_border_highlight = "#E5E5E5"; 
+    color_input_text = "#BADEBA"; 
+    color_input_button = "#A3BDA3"; 
+    color_chunk3 = "#00F"; 
+    color_foreground_text_for_top_buttons = "#3D3D3D"; 
+    color_fbig_background = "#86BE86"; 
+    color_bbig_background = "#B2CCB2"; 
+    color_bsmall_back = "#BCD6BC"; 
+    color_bsmall2 = "#A8C2A8"; 
+    color_bsmall3 = "#A3BDA3"; 
+    color_border_of_top_buttons = "#718B71"; 
+    color_table_header_background = "#90C890"; 
+    color_mOver1_back = "#BADEBA"; 
+    color_mOver2_back = "#F00"; 
+    color_mOver3_back = "#94AE94";
+    color_dl1_back = "#FFF"; 
+    color_dl2_back = "#EEE"; 
+    color_chunk0 = "#F33"; 
+    color_chunk1 = "#101077" ; 
+    color_vd_downloaded = "#72AA72"; 
+    color_vd_remaining = "#EEE"; 
+    color_general_text = "#000"; 
+    color_general_border = "#000"; 
+    color_anchor = "#0000ff"; 
+    color_anchor_hover = "#0000ff"; 
+    color_download_anchor = "#000"; 
+    color_download_anchor_hover = "#000";
+    color_external_anchor = "#000"; 
+    color_external_anchor_hover = "#000099"; 
+    color_some_scrollbar = "#000"; 
+    color_some_border = "#FFF"; 
+    color_one_td_text = "#555";
+	color_topnavbackground = "#5f5f5f";
+	color_topnavtext = "#f1f1f1";
+	color_topnavlink = "#ffffff";
+	color_topnavactive = "#4CAF50";
+	color_topnavnotactive = "#111";
+    frame_height = 60; };
+
   { style_name = "Green";
     color_background = "#CBE5CB"; 
     color_scrollbar_face = "#94AE94";  
@@ -1632,7 +1810,12 @@ let styles = Array.of_list [
     color_some_scrollbar = "#000"; 
     color_some_border = "#FFF"; 
     color_one_td_text = "#555";
-    frame_height = 46; };
+	color_topnavbackground = "#5f5f5f";
+	color_topnavtext = "#f1f1f1";
+	color_topnavlink = "#ffffff";
+	color_topnavactive = "#4CAF50";
+	color_topnavnotactive = "#111";
+    frame_height = 60; };
   
   { style_name = "Orange Tang";
     color_background = "#EEE"; 
@@ -1672,7 +1855,12 @@ let styles = Array.of_list [
     color_some_scrollbar = "#000"; 
     color_some_border = "#FFF"; 
     color_one_td_text = "#555";
-    frame_height = 46; };
+	color_topnavbackground = "#5f5f5f";
+	color_topnavtext = "#f1f1f1";
+	color_topnavlink = "#ffffff";
+	color_topnavactive = "#4CAF50";
+	color_topnavnotactive = "#111";
+    frame_height = 60; };
 
   { style_name = "Light blue";
     color_background = "#B3E7FF"; 
@@ -1712,7 +1900,12 @@ let styles = Array.of_list [
     color_some_scrollbar = "#000"; 
     color_some_border = "#FFF"; 
     color_one_td_text = "#555";
-    frame_height = 46; };
+	color_topnavbackground = "#5f5f5f";
+	color_topnavtext = "#f1f1f1";
+	color_topnavlink = "#ffffff";
+	color_topnavactive = "#4CAF50";
+	color_topnavnotactive = "#111";
+    frame_height = 60; };
   
   { style_name = "Light purple";
     color_background = "#CAB2E4"; 
@@ -1752,7 +1945,12 @@ let styles = Array.of_list [
     color_some_scrollbar = "#000"; 
     color_some_border = "#FFF"; 
     color_one_td_text = "#555";
-    frame_height = 46; };
+	color_topnavbackground = "#5f5f5f";
+	color_topnavtext = "#f1f1f1";
+	color_topnavlink = "#ffffff";
+	color_topnavactive = "#4CAF50";
+	color_topnavnotactive = "#111";
+    frame_height = 60; };
   
   { style_name = "Monochrome";
     color_background = "#C8C8C8"; 
@@ -1792,7 +1990,12 @@ let styles = Array.of_list [
     color_some_scrollbar = "#000"; 
     color_some_border = "#FFF"; 
     color_one_td_text = "#555";
-    frame_height = 46; };
+	color_topnavbackground = "#5f5f5f";
+	color_topnavtext = "#f1f1f1";
+	color_topnavlink = "#ffffff";
+	color_topnavactive = "#4CAF50";
+	color_topnavnotactive = "#111";
+    frame_height = 60; };
 
   { style_name = "Corona";
     color_background = "#C1CADE"; 
@@ -1832,7 +2035,12 @@ let styles = Array.of_list [
     color_some_scrollbar = "#000"; 
     color_some_border = "#FFF"; 
     color_one_td_text = "#555";
-    frame_height = 46; };
+	color_topnavbackground = "#5f5f5f";
+	color_topnavtext = "#f1f1f1";
+	color_topnavlink = "#ffffff";
+	color_topnavactive = "#4CAF50";
+	color_topnavnotactive = "#111";
+    frame_height = 60; };
 
   { style_name = "Coronax";
     color_background = "#B1BACE"; 
@@ -1872,7 +2080,12 @@ let styles = Array.of_list [
     color_some_scrollbar = "#000"; 
     color_some_border = "#8195D6"; 
     color_one_td_text = "#555";
-    frame_height = 46; };
+	color_topnavbackground = "#5f5f5f";
+	color_topnavtext = "#f1f1f1";
+	color_topnavlink = "#ffffff";
+	color_topnavactive = "#4CAF50";
+	color_topnavnotactive = "#111";
+    frame_height = 60; };
 
   { style_name = "Construction";
     color_background = "#C8C8C8"; 
@@ -1912,7 +2125,12 @@ let styles = Array.of_list [
     color_some_scrollbar = "#000"; 
     color_some_border = "#8195D6"; 
     color_one_td_text = "#555";
-    frame_height = 46; } ]
+	color_topnavbackground = "#5f5f5f";
+	color_topnavtext = "#f1f1f1";
+	color_topnavlink = "#ffffff";
+	color_topnavactive = "#4CAF50";
+	color_topnavnotactive = "#111";
+    frame_height = 60; } ]
 
 let style_codes = [
   "@color_background@";
@@ -1952,7 +2170,12 @@ let style_codes = [
   "@color_some_scrollbar@";
   "@color_some_border@";
   "@color_one_td_text@";
-
+  (*topnav*)
+	"@color_topnavbackground@";
+	"@color_topnavtext@";
+	"@color_topnavlink@";
+	"@color_topnavactive@";
+	"@color_topnavnotactive@";
 (* legacy values *)
   "@C0@";"@C1@";"@C2@";"@C3@";
   "@C4@";"@C5@";"@C6@";"@C7@";
@@ -2006,8 +2229,12 @@ let color_from_style stylenum code =
   | "@color_some_scrollbar@" | "@C34@" -> style.color_some_scrollbar
   | "@color_some_border@" | "@C35@" -> style.color_some_border
   | "@color_one_td_text@" | "@C36@" -> style.color_one_td_text
+	| "@color_topnavbackground@" -> style.color_topnavbackground
+	| "@color_topnavtext@" -> style.color_topnavtext
+	| "@color_topnavlink@" -> style.color_topnavlink
+	| "@color_topnavactive@" -> style.color_topnavactive
+	| "@color_topnavnotactive@" -> style.color_topnavnotactive
   | _ -> assert false
-
 
 let html_css_mods = ref ""
 let download_html_css_mods = ref ""
