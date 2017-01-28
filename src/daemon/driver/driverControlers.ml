@@ -518,7 +518,7 @@ let user_reader o telnet sock nread  =
         *)
 
 type telnet_state =
-  EMPTY
+| EMPTY
 | STRING
 | IAC
 | WILL
@@ -552,7 +552,7 @@ let user_reader o telnet sock nread =
       if c <> '\255' && telnet.telnet_iac then begin
           telnet.telnet_iac <- false;
           (match c with
-              '\250' | '\251' ->
+            | '\250' | '\251' ->
                 Buffer.add_char telnet.telnet_buffer c;
                 telnet.telnet_wait <- 1
             | _ ->
@@ -572,7 +572,7 @@ let user_reader o telnet sock nread =
           let len = String.length cmd in
           if len = 2 then
             match cmd with
-              "\251\031" ->
+            | "\251\031" ->
                 Buffer.reset telnet.telnet_buffer
             | "\250\031" ->
                 telnet.telnet_wait <- 4
@@ -710,14 +710,14 @@ open Http_server
 let buf = Buffer.create 1000
 
 type http_file =
-  BIN
+| BIN
 | HTM
 | MLHTM
 | TXT
 | UNK
 
 type file_ext =
-  BINARY
+| BINARY
 | CSS
 | HTMLS
 | ICON
@@ -941,36 +941,40 @@ let any_ip = Ip.of_inet_addr Unix.inet_addr_any
 
 (* GUI header *)
 let html_open_page buf t r open_body =
-  Buffer.reset buf;
-  http_add_html_header r;
+	Buffer.reset buf;
+	http_add_html_header r;
 
-  if not !!html_mods then
-    (Buffer.add_string buf
-      "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Frameset//EN\"
-        \"http://www.w3.org/TR/html4/frameset.dtd\">\n<HTML>\n<HEAD>\n";)
+	if not !!html_mods then
+		(Buffer.add_string buf
+		"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Frameset//EN\"
+		\"http://www.w3.org/TR/html4/frameset.dtd\">\n<HTML>\n<HEAD>\n";)
     else Buffer.add_string buf "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n<html>\n<head>\n";
-  if !CommonInteractive.display_vd then begin
-      let this_page = "dheader.html" in
-      Buffer.add_string buf
-        (
-                if !!html_mods_theme <> "" && theme_page_exists this_page then
-                        read_theme_page this_page else
-                        if !!html_mods then !!CommonMessages.download_html_header_mods0
-                        else !!CommonMessages.download_html_header_old);
-      Printf.bprintf buf "<meta http-equiv=\"refresh\" content=\"%d\">" !!vd_reload_delay;
-    end else
-    if !CommonInteractive.display_bw_stats then
-      Printf.bprintf buf "<meta http-equiv=\"refresh\" content=\"%d\">" !!html_mods_bw_refresh_delay;
-   
-        let this_page = "header.html" in
-    Buffer.add_string buf (
-                if !!html_mods_theme <> "" && theme_page_exists this_page then
-                        read_theme_page this_page else
-                        if !!html_mods then !!CommonMessages.html_header_mods0
-                        else !!CommonMessages.html_header_old);
+	if !CommonInteractive.display_vd then begin
+		let this_page = "dheader.html" in
+		Buffer.add_string buf (
+			if !!html_mods_theme <> "" && theme_page_exists this_page then
+				read_theme_page this_page
+			else
+				if !!html_mods then !!CommonMessages.download_html_header_mods0
+				else !!CommonMessages.download_html_header_old
+		);
+		(*arlas: removed automatic refresh *)
+		(*Printf.bprintf buf "<meta http-equiv=\"refresh\" content=\"%d\">" !!vd_reload_delay;*)
+	end; (*else
+		if !CommonInteractive.display_bw_stats then
+			Printf.bprintf buf "<meta http-equiv=\"refresh\" content=\"%d\">" !!html_mods_bw_refresh_delay;*)
 
-  Buffer.add_string buf "</head>\n";
-  if open_body then Buffer.add_string buf "<body>\n"
+	let this_page = "header.html" in
+	Buffer.add_string buf (
+		if !!html_mods_theme <> "" && theme_page_exists this_page then
+			read_theme_page this_page
+		else
+			if !!html_mods then !!CommonMessages.html_header_mods0
+			else !!CommonMessages.html_header_old
+	);
+		
+	Buffer.add_string buf "</head>\n";
+	if open_body then Buffer.add_string buf "<body>\n"
 
 let html_close_page buf close_body =
   if close_body then Buffer.add_string buf "</body>\n";
@@ -985,7 +989,7 @@ let send_preview r file fd size filename exten =
     try
       let (begin_pos, end_pos) = request_range r in
       let end_pos = match end_pos with
-          None -> size
+        | None -> size
         | Some end_pos -> end_pos in
       let range_size = end_pos -- begin_pos in
       add_reply_header r "Content-Length"
@@ -1019,27 +1023,26 @@ let send_preview r file fd size filename exten =
       Unix32.read fd !pos s 0 max;
       pos := !pos ++ max64;
       set_lifetime sock 60.;
-(*                      lprintf "HTTPSEND: refill %d %Ld\n" max !pos;*)
-(*                    lprintf "HTTPSEND: [%s]\n" (String.escaped
+	(*lprintf "HTTPSEND: refill %d %Ld\n" max !pos;*)
+	(*lprintf "HTTPSEND: [%s]\n" (String.escaped
                         (String.sub s 0 max)); *)
       write sock s 0 max;
       if output_buffered sock = 0 then begin
-(*                          lprintf "Recursing STREAM\n"; *)
+		(*lprintf "Recursing STREAM\n"; *)
           stream_file file pos sock
         end
   in
   r.reply_stream <- Some (stream_file file (ref begin_pos))
 
-
 let http_handler o t r =
-  CommonInteractive.display_vd := false;
-  CommonInteractive.display_bw_stats := false;
-  clear_page buf;
-  let short_file =
-    let file = r.get_url.Url.short_file in
-    match !!http_root_url with
-    | "" | "/" -> `File file
-    | root ->
+	CommonInteractive.display_vd := false;
+	CommonInteractive.display_bw_stats := false;
+	clear_page buf;
+	let short_file =
+		let file = r.get_url.Url.short_file in
+		match !!http_root_url with
+		| "" | "/" -> `File file
+		| root ->
       let root = if not (String2.starts_with root "/") then "/" ^ root else root in
       (* we want to treat "/root" requests as invalid and redirect them to "/root/" *)
       let root_dir = if root <> "" && root.[String.length root - 1] = '/' then root else root ^ "/" in
@@ -1047,7 +1050,7 @@ let http_handler o t r =
         `File (String2.after file (String.length root_dir - 1))
       else
         `Redirect root_dir
-  in
+	in
   if !Http_server.verbose && short_file <> `File "" then
     lprintf_nl "received URL %s %s"
       r.get_url.Url.short_file
@@ -1069,7 +1072,7 @@ let http_handler o t r =
     begin
       let user = find_ui_user user  in
       let o = match user.ui_http_conn with
-          Some oo -> oo.conn_buf <- o.conn_buf;
+        | Some oo -> oo.conn_buf <- o.conn_buf;
             oo.conn_info <- Some (WEB, peer_addr t); oo
         | None -> let oo = { o with conn_user = user;
                                     conn_info = Some (WEB, peer_addr t)} in
@@ -1113,7 +1116,7 @@ let http_handler o t r =
 (* functions *)
               List.iter (fun (arg, value) ->
                   match arg with
-                    "VDC" ->
+                  | "VDC" ->
                       let num = int_of_string value in
                       let file = file_find num in
                       file_cancel file o.conn_user.ui_user
@@ -1171,12 +1174,37 @@ let http_handler o t r =
                 if !!html_mods then
                   (if !!html_frame_border then
                     Printf.bprintf buf
+"<div id=\"command_div\"></div>
+<div id=\"output_div\"></div>
+<div id=\"status_div\" class=\"statusbar\"></div>
+<script type=\"text/javascript\">
+$.ajax({
+    url: 'commands.html',
+    success: function(html) {
+        var content = $('<div />').html(html).find('#container');
+        $('#command_div').html(content);
+    }
+});
+$.ajax({
+    url: 'oneframe.html',
+    success: function(html) {
+        var content = $('<div />').html(html).find('#container');
+        $('#output_div').html(content);
+    }
+});
+mSub('#status_div','bw_stats','#container',5000);
+</script>
+"
+(*$( \"#command_div\" ).load( \"commands.html #container\" );
+$.get(\"commands.html body\", function(data) {$( \"#command_div\" ).html ( data );});
+$( \"#command_div\" ).load( \"commands.html\" ); $(\"body\").replaceWith(data);*)
+					(* old: 
 "<frameset src=\"index\" rows=\"%d,25,*\">
 <frame name=\"commands\" noresize scrolling=\"no\" noshade marginwidth=0 marginheight=0 border=0 framespacing=0 src=\"commands.html\">
 <frame name=\"fstatus\" noresize scrolling=\"no\" noshade marginwidth=0 marginheight=0 border=0 framespacing=0 src=\"noframe.html\">
 <frame name=\"output\" noresize noshade marginwidth=0 marginheight=0 border=0 framespacing=0 src=\"oneframe.html\">
 </frameset>
-" !!commands_frame_height
+" !!commands_frame_height*)
                   else
                     Printf.bprintf buf
 "<frameset src=\"index\" rows=\"%d,25,*\" frameborder=\"no\">
@@ -1200,48 +1228,48 @@ let http_handler o t r =
             CommonSearch.complex_search buf
         | "noframe.html" ->
             html_open_page buf t r true
-
+		(* empty index page *)
         | "oneframe.html" ->
             html_open_page buf t r true;
-            Buffer.add_string buf (Printf.sprintf "<br><div align=\"center\"><h3>%s %s</h3></div>"
-	      (Printf.sprintf (_b "Welcome to MLDonkey")) Autoconf.current_version);
-	    if !!motd_html <> "" then Buffer.add_string buf !!motd_html;
-	    if user2_is_admin o.conn_user.ui_user then
-	    (match DriverInteractive.real_startup_message () with
-	       Some s -> Buffer.add_string buf (Printf.sprintf "<p><pre><b><h3>%s</b></h3></pre>" s);
-	     | None -> ())
+            Buffer.add_string buf (Printf.sprintf "<br><div id=\"container\" align=\"center\"><h3>%s %s</h3></div>"
+				(Printf.sprintf (_b "Welcome to MLDonkey")) Autoconf.current_version);
+			if !!motd_html <> "" then Buffer.add_string buf !!motd_html;
+			if user2_is_admin o.conn_user.ui_user then
+				(match DriverInteractive.real_startup_message () with
+				| Some s -> Buffer.add_string buf (Printf.sprintf "<p><pre><b><h3>%s</b></h3></pre>" s);
+				| None -> ())
 
         | "bw_updown.png" ->
             (match http_error_no_gd "png" with
-              false ->
+            | false ->
                 G.do_draw_pic "Traffic" "s(kb)" "t(h:m:s)" download_history upload_history;
                 http_send_bin r buf "bw_updown.png"
             | true -> raise Not_found)
 
         | "bw_updown.jpg" ->
             (match http_error_no_gd "jpg" with
-              false ->
+            | false ->
                 G.do_draw_pic "Traffic" "s(kb)" "t(h:m:s)" download_history upload_history;
                 http_send_bin r buf "bw_updown.jpg"
             | true -> raise Not_found)
 
         | "bw_download.png" ->
             (match http_error_no_gd "png" with
-              false ->
+            | false ->
                 G.do_draw_down_pic "Traffic" "download" "s(kb)" "t(h:m:s)" download_history;
                 http_send_bin r buf "bw_download.png"
             | true -> raise Not_found)
 
         | "bw_download.jpg" ->
             (match http_error_no_gd "jpg" with
-              false ->
+            | false ->
                 G.do_draw_down_pic "Traffic" "download" "s(kb)" "t(h:m:s)" download_history;
                 http_send_bin r buf "bw_download.jpg"
             | true -> raise Not_found)
 
         | "bw_upload.png" ->
             (match http_error_no_gd "png" with
-              false ->
+            | false ->
                 G.do_draw_up_pic "Traffic" "upload" "s(kb)" "t(h:m:s)" upload_history;
                 http_send_bin r buf "bw_upload.png"
             | true -> raise Not_found)
@@ -1336,7 +1364,7 @@ let http_handler o t r =
                           let mega20 = Int64.of_int (20 * 1024 * 1024) in
                           let mega400 = Int64.of_int (400 * 1024 * 1024) in
                           let min, max = match value with
-                              "0to5" -> Int64.zero, mega5
+                            | "0to5" -> Int64.zero, mega5
                             | "5to20" -> mega5, mega20
                             | "20to400" -> mega20, mega400
                             | "400+" -> mega400, Int64.max_int
@@ -1360,8 +1388,7 @@ let http_handler o t r =
                   Buffer.add_string buf (html_escaped
                       (Buffer.contents b))
 
-              | _ ->
-                  Buffer.add_string buf "Bad filter"
+              | _ -> Buffer.add_string buf "Bad filter"
             end
 
         | "results" ->
@@ -1369,7 +1396,7 @@ let http_handler o t r =
             let b = Buffer.create 10000 in
             List.iter (fun (arg, value) ->
                 match arg with
-                  "d" -> begin
+                | "d" -> begin
                       try
                         let num = int_of_string value in
                         let r = find_result num in
@@ -1387,10 +1414,9 @@ let http_handler o t r =
             Buffer.add_string buf (html_escaped (Buffer.contents b))
 
         | "files" ->
-
             List.iter (fun (arg, value) ->
                 match arg with
-                  "cancel" ->
+                | "cancel" ->
                     let num = int_of_string value in
                     let file = file_find num in
                     file_cancel file o.conn_user.ui_user
@@ -1445,20 +1471,18 @@ let http_handler o t r =
 
         | "submit" ->
             begin
-
               match r.get_url.Url.args with
-                | [ "jvcmd", "multidllink" ; "links", links] ->
-                    html_open_page buf t r true;
-                    List.iter (fun url ->
-		      let url = fst (String2.cut_at url '\013') in
-		      if url <> "" then
-		        begin
-                          Buffer.add_string buf (html_escaped (dllink_parse (o.conn_output = HTML) url o.conn_user.ui_user));
-                          Buffer.add_string buf (html_escaped "\\<P\\>")
-			end
-                    ) (String2.split links '\n')
-
-              | ("q", cmd) :: other_args ->
+				| [ "jvcmd", "multidllink" ; "links", links] ->
+					html_open_page buf t r true;
+					List.iter (fun url ->
+						let url = fst (String2.cut_at url '\013') in
+						if url <> "" then
+						begin
+							Buffer.add_string buf (html_escaped (dllink_parse (o.conn_output = HTML) url o.conn_user.ui_user));
+							Buffer.add_string buf (html_escaped "\\<P\\>")
+						end
+					) (String2.split links '\n')
+				| ("q", cmd) :: other_args ->
                   List.iter (fun arg ->
                       match arg with
                       | "sortby", "size" -> o.conn_sortvd <- BySize
@@ -1493,7 +1517,7 @@ let http_handler o t r =
                     | "version" | "rename" | "force_download" | "close_fds"
                     | "vd" | "vo" | "voo" | "upstats" | "shares" | "share"
                     | "unshare" | "stats" | "users" | "block_list" -> 
-			drop_pre := true;
+						drop_pre := true;
                     | _ -> ());
                   Printf.bprintf buf "%s\n"
                     (if use_html_mods o && !drop_pre then s else "\n<pre>\n" ^ s ^ "</pre>");
@@ -1639,7 +1663,7 @@ let http_handler o t r =
 
   let s =
     match !http_file_type with
-      HTM -> html_close_page buf false; dollar_escape o true (Buffer.contents buf)
+    | HTM -> html_close_page buf false; dollar_escape o true (Buffer.contents buf)
     | MLHTM -> html_close_page buf true; dollar_escape o true (Buffer.contents buf)
     | TXT
     | UNK

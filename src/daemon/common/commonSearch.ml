@@ -158,32 +158,31 @@ let search_of_args args =
 type englob_op = IN_NOOP | IN_AND | IN_OR
 
 let can_search = ref false
-  
+
+(* custom query as:
+*	http://127.0.0.1:4080/submit?custom=Album+Search
+*	http://127.0.0.1:4080/submit?custom=Complex+Search
+*)
 let custom_query buf query =
-  can_search :=
-    networks_iter_all_until_true (fun net ->
-      try 
-	network_is_enabled net && List.mem NetworkHasSearch net.network_flags
-      with _ -> false
-    );
-  if !can_search then begin
-  try
-    let q = List.assoc query (CommonComplexOptions.customized_queries()) in
-    Printf.bprintf buf "
-    <center>
-    <h2> %s </h2>
-    </center>
+	can_search :=
+		networks_iter_all_until_true (fun net ->
+			try network_is_enabled net && List.mem NetworkHasSearch net.network_flags
+			with _ -> false
+		);
+	if !can_search then begin
+		try
+			let q = List.assoc query (CommonComplexOptions.customized_queries()) in
+			Printf.bprintf buf "
+<div id=\"container\">
+<center><h2>%s</h2></center>
 
 <form action=\"submit\">
-<input type=hidden name=custom value=\"%s\">
-<input type=submit value=Search>" query query;
-    
-    let rec iter q in_op =
-      match q with
-      
-      | Q_COMBO _ -> assert false
-      
-      | Q_AND list ->
+<input type=\"hidden\" name=\"custom\" value=\"%s\">
+<input type=\"submit\" value=\"Search\">" query query;
+			let rec iter q in_op =
+				match q with
+				| Q_COMBO _ -> assert false
+				| Q_AND list ->
           if in_op <> IN_AND then begin
               Buffer.add_string buf "<table border=1>";
               Buffer.add_string buf "<tr>";
@@ -211,7 +210,7 @@ let custom_query buf query =
               Buffer.add_string buf "</table>";              
             end
       
-      | Q_OR list ->
+				| Q_OR list ->
           if in_op <> IN_OR then begin
               Buffer.add_string buf "<table border=1>";
               Buffer.add_string buf "<tr>";
@@ -239,7 +238,7 @@ let custom_query buf query =
               Buffer.add_string buf "</table>";              
             end
       
-      | Q_ANDNOT (q1,q2) ->
+				| Q_ANDNOT (q1,q2) ->
           Buffer.add_string buf "<table border=1>";
           Buffer.add_string buf "<tr>";
           Buffer.add_string buf "<td>";
@@ -260,13 +259,13 @@ let custom_query buf query =
           Buffer.add_string buf "</table>";
           Buffer.add_string buf "</tr>";
       
-      | Q_KEYWORDS (label, default) ->
+				| Q_KEYWORDS (label, default) ->
           Printf.bprintf buf "
 <table border=0>
           <td width=100 align=right>%s</td><td><input type=text name=keywords size=40 value=\"%s\"></td>
 </table>" label default
       
-      | Q_MINSIZE (label, default) ->
+				| Q_MINSIZE (label, default) ->
           Printf.bprintf  buf "
 <table border=0>
 <td width=100 align=right> %s </td> 
@@ -290,7 +289,7 @@ let custom_query buf query =
               Int64.to_string size
             with _ -> "")
       
-      | Q_MAXSIZE (label, default) ->
+				| Q_MAXSIZE (label, default) ->
           Printf.bprintf  buf "
 <table border=0>
 <td width=100 align=right> %s </td> 
@@ -314,7 +313,7 @@ let custom_query buf query =
               Int64.to_string size
             with _ -> "")
       
-      | Q_MP3_BITRATE (label, default) -> 
+				| Q_MP3_BITRATE (label, default) -> 
           Printf.bprintf buf "
 <table border=0>
 
@@ -339,7 +338,7 @@ let custom_query buf query =
 
 </table>
           " label default
-      | Q_MP3_ALBUM (label, default) -> 
+				| Q_MP3_ALBUM (label, default) -> 
           Printf.bprintf buf "
 
 <table border=0>
@@ -353,7 +352,7 @@ let custom_query buf query =
 </table>
 
           " label default
-      | Q_MP3_TITLE (label, default) -> 
+				| Q_MP3_TITLE (label, default) -> 
           Printf.bprintf buf "
  
 <table border=0>
@@ -367,7 +366,7 @@ let custom_query buf query =
 </table>
 
          " label default
-      | Q_MP3_ARTIST (label, default) -> 
+				| Q_MP3_ARTIST (label, default) -> 
           Printf.bprintf buf "
 
 <table border=0>
@@ -382,7 +381,7 @@ let custom_query buf query =
 
           " label default
       
-      | Q_MEDIA (label, default) -> 
+				| Q_MEDIA (label, default) -> 
           
           Printf.bprintf buf "
 <table border=0>
@@ -412,7 +411,7 @@ let custom_query buf query =
           " label default
       
       
-      | Q_FORMAT (label, default) -> 
+				| Q_FORMAT (label, default) -> 
           Printf.bprintf  buf "
 <table border=0>
 <tr>
@@ -437,81 +436,64 @@ let custom_query buf query =
 
           " label default
       
-      | Q_MODULE (label, q) -> 
+				| Q_MODULE (label, q) -> 
           Printf.bprintf buf "<table border=0> <tr><td> <h3> %s </h3> </td></tr>" label;
           Printf.bprintf buf "<tr><td>";
           iter q in_op;
           Printf.bprintf buf "</td></tr>";
           Printf.bprintf buf "</table>";
       
-      | Q_HIDDEN list ->
-          List.iter iter_hidden list
-    
-    and iter_hidden q =
-      match q with
-      
-      | Q_COMBO _ -> assert false
-      
-      | Q_AND list | Q_OR list | Q_HIDDEN list ->
-          List.iter iter_hidden list
-      
-      | Q_ANDNOT (q1,q2) ->
-          iter_hidden q1;
-          iter_hidden q2;
-      
-      | Q_KEYWORDS (label, default) ->
-          Printf.bprintf buf 
-            "<input type=hidden name=keywords value=\"%s\">"
-            default
-      
-      | Q_MINSIZE (label, default) ->
+				| Q_HIDDEN list ->
+					List.iter iter_hidden list
+			and iter_hidden q =
+				match q with
+				| Q_COMBO _ -> assert false
+				| Q_AND list | Q_OR list | Q_HIDDEN list ->
+					List.iter iter_hidden list
+				| Q_ANDNOT (q1,q2) ->
+					iter_hidden q1;
+					iter_hidden q2;
+				| Q_KEYWORDS (label, default) ->
+					Printf.bprintf buf 
+					"<input type=hidden name=keywords value=\"%s\">"
+					default
+				| Q_MINSIZE (label, default) ->
           Printf.bprintf  buf 
             "<input type=hidden name=minsize value=\"%s\">
            <input type=hidden name=minsize_unit value=\"1\">" default
-      
-      | Q_MAXSIZE (label, default) ->
+				| Q_MAXSIZE (label, default) ->
           Printf.bprintf  buf 
             "<input type=hidden name=maxsize value=\"%s\">
            <input type=hidden name=maxsize_unit value=\"1\">" default
-      
-      | Q_MP3_BITRATE (label, default) -> 
+				| Q_MP3_BITRATE (label, default) -> 
           Printf.bprintf buf 
             "<input type=hidden name=bitrate value=\"%s\">"
             default
-      
-      | Q_MP3_ALBUM (label, default) -> 
+				| Q_MP3_ALBUM (label, default) -> 
           Printf.bprintf buf 
             "<input type=album name=bitrate value=\"%s\">"
             default
-      
-      | Q_MP3_TITLE (label, default) -> 
+				| Q_MP3_TITLE (label, default) -> 
           Printf.bprintf  buf 
             "<input type=hidden name=title value=\"%s\">"
             default
-      
-      | Q_MP3_ARTIST (label, default) -> 
+				| Q_MP3_ARTIST (label, default) -> 
           Printf.bprintf  buf 
             "<input type=hidden name=artist value=\"%s\">"
             default
-      
-      | Q_MEDIA (label, default) -> 
+				| Q_MEDIA (label, default) -> 
           Printf.bprintf  buf 
             "<input type=hidden name=media value=\"%s\">
           <input type=hidden name=media_propose value=\"\">"
             default
-      
-      
-      | Q_FORMAT (label, default) -> 
+				| Q_FORMAT (label, default) -> 
           Printf.bprintf  buf 
             "<input type=hidden name=format value=\"%s\">
           <input type=hidden name=format_propose value=\"\">"
             default
-      
-      | Q_MODULE (label, q) -> 
-          iter_hidden q
-    
-    in
-    iter q IN_AND;
+				| Q_MODULE (label, q) -> iter_hidden q
+			in
+			iter q IN_AND;
 
     Printf.bprintf buf "</td></tr>";
     Printf.bprintf buf "</table>";
@@ -537,34 +519,33 @@ let custom_query buf query =
     Printf.bprintf buf "
       </select></td></table>" ;
     
-    Buffer.add_string buf "</form>"
+    Buffer.add_string buf "</form></div>" (*end of body*)
     
   with Not_found ->
       Printf.bprintf buf "No custom search %s" query
   end
   else
     begin
-(*       html_mods_table_header buf "searchTable" "search" [];
-      html_mods_td buf [
-        ("", "srh", "No searchable networks enabled"); ];
- *)
-      Buffer.add_string buf "<div class=\"results\">
+		(*html_mods_table_header buf "searchTable" "search" [];
+		html_mods_td buf [("", "srh", "No searchable networks enabled"); ];*)
+		Buffer.add_string buf "<div class=\"results\">
 <table id=\"memstatsTable\" name=\"searchTable\" class=\"search\" cellspacing=0 cellpadding=0>
 <tr><td class=\"srh\" >No searchable networks enabled</td>";
 
       Buffer.add_string buf "</tr></table></div>\n"
     end
-(*   Printf.bprintf buf "
-<h3> No searchable networks enabled </h3>
-  "
- *)
-let complex_search buf =
-  can_search := 
-    networks_iter_all_until_true (fun net ->
-      try network_is_enabled net && List.mem NetworkHasSearch net.network_flags
-      with _ -> false
-    );
-  Buffer.add_string buf "<div class=\"results\">
+	(*Printf.bprintf buf "<h3>No searchable networks enabled</h3>"*)
+
+(*
+*	complex_search.html page:
+*)
+ let complex_search buf =
+	can_search := 
+		networks_iter_all_until_true (fun net ->
+			try network_is_enabled net && List.mem NetworkHasSearch net.network_flags
+			with _ -> false
+		);
+	Buffer.add_string buf "<div id=\"container\" class=\"results\">
 <table id=\"memstatsTable\" name=\"searchTable\" class=\"search\" cellspacing=0 cellpadding=0>
 <tr><td class=\"srh\" >";
 
@@ -572,7 +553,7 @@ let complex_search buf =
   Buffer.add_string  buf
     "
 <center>
-<h2> Complex Search </h2>
+<h2>Complex Search</h2>
 </center>
 </td>
     ";
@@ -589,8 +570,7 @@ let complex_search buf =
 <td align=left><input type=submit value=Search></td>
 </tr>
 </table>
-
-<h3> Simple Options </h3>
+<h3>Simple Options</h3>
 
 <table border=0>
 <tr>

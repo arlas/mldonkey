@@ -1,20 +1,20 @@
 (* Copyright 2001, 2002 b8_bavard, b8_fee_carabine, INRIA *)
 (*
-    This file is part of mldonkey.
+	This file is part of mldonkey.
 
-    mldonkey is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+	mldonkey is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; either version 2 of the License, or
+	(at your option) any later version.
 
-    mldonkey is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	mldonkey is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with mldonkey; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with mldonkey; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 *)
 
 open Printf2
@@ -22,15 +22,12 @@ open Gettext
 open Options
 open Str (* global_replace *)
 
-
 let _s x = _s "CommonMessages" x
 let _b x = _b "CommonMessages" x
 
 let message_file_name = try
-    Sys.getenv "MLDONKEY_MESSAGES"
-  with _ ->
-      Filename.concat CommonOptions.home_dir "messages.ini"
-
+	Sys.getenv "MLDONKEY_MESSAGES"
+	with _ -> Filename.concat CommonOptions.home_dir "messages.ini"
 
 let message_file = Options.create_options_file message_file_name
 let message_section = file_section message_file [] ""
@@ -77,25 +74,34 @@ font-size: 12px;
 input.txt {
 background: @color_input_text@;
 }
+input.txt2:focus {
+background-color: lightsteelblue;
+}
 input.txt2 {
 background: @color_bbig_background@;
 font: 12px courier;
+-webkit-font-smoothing: antialiased;
 padding: 0px;
+padding-left: 3px;
+padding-bottom: 3px;
 width: 38px;
 height: 18px;
 line-height: 14px;
 color: @color_general_text@;
-border-right: @color_some_border@ 2px solid;
-border-top: @color_general_border@ 1px solid;
-border-left: @color_general_border@ 1px solid;
-border-bottom: @color_some_border@ 2px solid;
+border-radius: 4px;
+border: 1px solid #ccc;
+}
+input.but2:hover {
+background-color: black;
 }
 input.but2 {
 background: @color_bsmall3@;
+color: white;
+border-radius: 2px;
 border: 0px;
 padding: 0px;
 font: bold 10px verdana;
-width: 36px;
+width: 45px;
 height: 14px;
 }
 input.but {
@@ -239,13 +245,13 @@ margin-left: auto;
 margin-right: auto;
 }
 td.fbig {
-color: @color_general_text@;
+color: @color_topnavtext@;
 cursor: pointer;
 padding-left: 2px;
 padding-right: 2px;
 font-family: Verdana;
 font-size: 10px;
-background: @color_fbig_background@;
+background: @color_topnavbackground@;
 border-top: @color_general_border@ solid 1px;
 border-left: @color_general_border@ solid 1px;
 }
@@ -296,7 +302,7 @@ color: @color_general_text@;
 td.srh {
 cursor: pointer;
 vertical-align: top;
-background: @color_table_header_background@;
+background: @color_topnavbackground@;
 white-space: nowrap;
 padding-top: 2px;
 padding-bottom: 2px;
@@ -304,7 +310,7 @@ padding-left: 4px;
 padding-right: 4px;
 font-family: verdana;
 font-size: 10px;
-color: @color_general_text@;
+color: @color_topnavtext@;
 }
 td.total {
 border-top: @color_general_border@ solid 1px;
@@ -316,17 +322,8 @@ background: @color_dl1_back@;
 tr.dl-2, td.dl-2 {
 background: @color_dl2_back@;
 }
-.mOvr1, tr.mOvr1 {
+tr.dl-1:hover, td.dl-1:hover, tr.dl-2:hover, td.dl-2:hover {
 background: @color_mOver1_back@;
-cursor: pointer;
-}
-.mOvr2, tr.mOvr2 {
-background: @color_mOver2_back@;
-cursor: pointer;
-}
-.mOvr3, tr.mOvr3 {
-background: @color_mOver3_back@;
-cursor: pointer;
 }
 table.uploaders, table.friends, table.bw_stats, table.vo, table.cs, table.servers,
 table.shares, table.downloaders, table.scan_temp, table.upstats, table.messages,
@@ -467,9 +464,28 @@ display: block;
 text-align: left;
 font-size: 10px;
 }
+.dropdown-right{
+position:relative;
+}
+.dropdown-content-right{
+display: none;
+position: absolute;
+left: 100%;
+top: 0;
+background-color: #5f5f5f;
+min-width: 160px;
+box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+}
 .dropdown-content a:hover {background-color: #f1f1f1}
+.dropdown-right:hover .dropdown-content-right,
 .dropdown:hover .dropdown-content {
 display: block;
+}
+div.statusbar {
+position: fixed;
+bottom: 0;
+right: 0;
+opacity: 0.8;
 }
 "
 
@@ -487,38 +503,119 @@ function mOvr(src,clrOver) {
 function mOut(src) {
  src.className=mOvrClass;
 }
-function _getFrameByName(name) {
-  switch (name) {
-    case 'commands' :
-      return('0');
-    case 'fstatus' :
-      return('1');
-    case 'output' :
-      return('2');
-    default :
-      alert('wrong arg for _getFrameByName');
-      break;
-  }
-}
-function mSub(target,cmd) {
-  if (cmd=='kill') {
-    if (confirm('Are you sure?')) {
-      parent.frames[_getFrameByName(target)].location.href='submit?q=kill';
-    }
-  }
-  else {
-    if (cmd.substring(0,6)=='custom') {
-      parent.frames[_getFrameByName(target)].location.href='submit?' + cmd;
-    }
-    else {
-      parent.frames[_getFrameByName(target)].location.href='submit?q=' + cmd;
-    } 
-  }
-}
+var timer1;
+var timerstatus;
+function mSub(target,cmd,partof,refr) {
+if (typeof partof === 'undefined') partof = 'page';
+if (typeof refr === 'undefined') refr = 0;
 
-function showTab(t){
-       for (i=1; i<=6; i++) document.getElementById('tab' + i).style.display = 'none';
-       document.getElementById(\"tab\" + t).style.display = 'block';
+if (cmd=='kill') {
+	if (confirm('Are you sure?')) {
+		$.post('submit?q=kill',
+		function(data,status){
+            $('#output_div').html(data);
+        });
+	}
+}
+else {
+	if (cmd.substring(0,6)=='custom') {
+		postcmd('submit?' + cmd,partof,refr);
+		if (refr > 0)
+		{
+			clearInterval(timer1);
+			timer1 = setInterval(function() {postcmd('submit?' + cmd,partof,refr)}, refr);
+		}
+		else clearInterval(timer1);
+	}
+	else {
+		postcmd('submit?q=' + cmd,partof,refr);
+		if (refr > 0)
+		{
+			if (cmd == 'bw_stats')
+			{
+				clearInterval(timerstatus);
+				timerstatus = setInterval(function() {postcmd('submit?q=' + cmd,partof,refr,target)}, refr);
+			}
+			else
+			{
+				clearInterval(timer1);
+				timer1 = setInterval(function() {postcmd('submit?q=' + cmd,partof,refr)}, refr);
+			}
+		}
+		else
+		{
+			clearInterval(timer1);
+		}
+	}
+}
+}
+var vis = (function(){
+    var stateKey, eventKey, keys = {
+        hidden: \"visibilitychange\",
+        webkitHidden: \"webkitvisibilitychange\",
+        mozHidden: \"mozvisibilitychange\",
+        msHidden: \"msvisibilitychange\"
+    };
+    for (stateKey in keys) {
+        if (stateKey in document) {
+            eventKey = keys[stateKey];
+            break;
+        }
+    }
+    return function(c) {
+        if (c) document.addEventListener(eventKey, c);
+        return !document[stateKey];
+    }
+})();
+function postcmd(comm,partof,refr,optionaldiv,sourcet){
+if (typeof optionaldiv === 'undefined') optionaldiv = '#output_div';
+
+	if (vis()) {
+	var $x = $(optionaldiv);
+	$.post(comm,
+		function(data,status){
+			if (optionaldiv != '#nodiv'){
+			if ( partof != 'page' )
+				data= $('<div />').html(data).find(partof);
+            $x.html(data);
+			$x.prop('refresh', refr);
+			$x.prop('command', comm);}
+			if (sourcet != null)
+				sourcet.style.background = 'greenyellow';
+        })
+		.fail(function() {
+    clearInterval(timer1);
+	clearInterval(timerstatus);
+		if (sourcet != null)
+			sourcet.style.background = 'red';
+  });
+	}
+}
+function frl(fromurl,todiv) {
+$(todiv).load(fromurl);
+}
+function ff(fromurl,todiv) {
+$.ajax({
+    url: fromurl,
+    success: function(html) {
+        var content = $('<div />').html(html).find('#container');
+        $(todiv).html(content);
+    }
+});
+}
+function inputkp(event,command) {
+var f = event.target;
+f.style.background = 'khaki';
+	if (event.which == 13 || event.keyCode == 13) {
+		event.preventDefault();
+		if (f.value.length > 0){
+		postcmd('submit?' + command + f.value,'page',0,'#nodiv',f);
+		}}
+}
+function choose(event,command) {
+event.preventDefault();
+var f = event.target;
+postcmd('submit?' + command + f.value,'page',0,'#nodiv',f);
 }
 var _tabLast=null;
 function _rObj (s,ar) {
@@ -595,22 +692,6 @@ function _tabSort(obj,st,total){
 	_tabCreateArray(obj,st,total);
 	_tabLast=obj;
 	return _tabMode;
-}
-function _cmdLine(){
-top.fstatus.document.open();
-top.fstatus.document.clear();
-top.fstatus.document.writeln(\"<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN' 'http://www.w3.org/TR/html4/loose.dtd'>\");
-top.fstatus.document.writeln(\"<html><head>\");
-top.fstatus.document.writeln(\"<link href='h.css' rel='stylesheet' type='text/css'>\");
-top.fstatus.document.writeln(\"</head><body><center><table width=99% border=0 cellspacing=0 cellpadding=0>\");
-top.fstatus.document.writeln(\"<form action=submit target=$O name=cmdFormular> \" );
-top.fstatus.document.writeln(\"<tr><td width=100% nowrap>\");
-top.fstatus.document.writeln(\" <input class='txt' style='width: 99%; height: 20px; font-size: 12px;\'\");
-top.fstatus.document.writeln(\" type=text name=q value=''> </td><td width=1>\");
-top.fstatus.document.writeln(\"	<input class='but' style='color: #FFF; font-weight: 600; height: 20px; font-size: 10px;'\");
-top.fstatus.document.writeln(\"type=submit value=Execute></td></form>\");
-top.fstatus.document.writeln(\"</tr></table></body></html>\");
-top.fstatus.document.close();
 }
 
 if (document.layers) {navigator.family = \"nn4\"}
@@ -806,167 +887,166 @@ let download_html_css_mods0 = define_option message_section ["download_html_css_
     string_option
 "
 body {
-  background-color: @color_vd_page_background@;
-  color: @color_general_text@;
-  font-family: Verdana, Arial, Helvetica, sans-serif;
-  font-size: 13px;
-  margin-top: 10px;
-  margin: 2;
-  }
+background-color: @color_vd_page_background@;
+color: @color_general_text@;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 13px;
+margin-top: 10px;
+margin: 2;
+}
 td, pre {
-  color: @color_general_text@;
-  font-family: Verdana, Arial, Helvetica, sans-serif;
-  font-size: 10px;
-  }
+color: @color_general_text@;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10px;
+}
 table.downloaders {
-  margin-right: auto;
-  margin-left: auto;
-  border: @color_general_border@ solid 1px;
-  }
+margin-right: auto;
+margin-left: auto;
+border: @color_general_border@ solid 1px;
+}
 div.main {
-  text-align: center;
-  }
+text-align: center;
+}
 table.main {
-  margin-right: auto;
-  margin-left: auto;
-  }
+margin-right: auto;
+margin-left: auto;
+}
 td.loaded {
-  padding-top: 0px;
-  padding-bottom: 0px;
-  background-color: @color_vd_downloaded@;
-  font-size: 1px;
-  line-height: 2px;
-  }
+padding-top: 0px;
+padding-bottom: 0px;
+background-color: @color_vd_downloaded@;
+font-size: 1px;
+line-height: 2px;
+}
 td.remain {
-  padding-top: 0px;
-  padding-bottom: 0px;
-  background-color: @color_vd_remaining@;
-  font-size: 1px;
-  line-height: 2px;
-  }
+padding-top: 0px;
+padding-bottom: 0px;
+background-color: @color_vd_remaining@;
+font-size: 1px;
+line-height: 2px;
+}
 td.downloaded {
-  font-family: Verdana;
-  font-weight: 500;
-  font-size: 12px;
-  color: @color_general_text@;
-  }
+font-family: Verdana;
+font-weight: 500;
+font-size: 12px;
+color: @color_general_text@;
+}
 td.dl {
-  white-space: nowrap;
-  padding-top: 2px;
-  padding-bottom: 2px;
-  padding-left: 5px;
-  padding-right: 5px;
-  font-family: verdana;
-  font-size: 10px;
-  color: @color_general_text@;
-  }
+white-space: nowrap;
+padding-top: 2px;
+padding-bottom: 2px;
+padding-left: 5px;
+padding-right: 5px;
+font-family: verdana;
+font-size: 10px;
+color: @color_general_text@;
+}
 td.dlheader {
-  cursor: pointer;
-  color: @color_general_text@;
-  font-family: Verdana, serif;
-  font-size: 10px;
-  border-bottom: solid 1px;
-  background: @color_table_header_background@;
-  padding-left: 3px;
-  padding-right: 3px;
-  }
+cursor: pointer;
+color: @color_general_text@;
+font-family: Verdana, serif;
+font-size: 10px;
+border-bottom: solid 1px;
+background: @color_table_header_background@;
+padding-left: 3px;
+padding-right: 3px;
+}
 input.checkbox {
-  background: @color_table_header_background@;
-  vertical-align: middle;
-  height: 10px;
-  width: 10px;
-  }
+background: @color_table_header_background@;
+vertical-align: middle;
+height: 10px;
+width: 10px;
+}
 td.sr {
-  white-space: nowrap;
-  padding-top: 2px;
-  padding-bottom: 2px;
-  padding-left: 5px;
-  padding-right: 5px;
-  font-family: verdana;
-  font-size: 10px;
-  color: @color_general_text@;
-  }
+white-space: nowrap;
+padding-top: 2px;
+padding-bottom: 2px;
+padding-left: 5px;
+padding-right: 5px;
+font-family: verdana;
+font-size: 10px;
+color: @color_general_text@;
+}
 table {
-  border-spacing: 0px;
-  }
+border-spacing: 0px;
+}
 td {
-  padding: 0px;
-  }
+padding: 0px;
+}
 td.ar {
-  text-align: right;
-  }
+text-align: right;
+}
 td.al {
-  text-align: left;
-  }
+text-align: left;
+}
 td.ac {
-  text-align: center;
-  }
+text-align: center;
+}
 td.brs {
-  border-right: @color_general_border@ solid 1px;
-  padding-left: 2px;
-  padding-right: 2px;
-  text-align: center;
-  }
+border-right: @color_general_border@ solid 1px;
+padding-left: 2px;
+padding-right: 2px;
+text-align: center;
+}
 td.np {
-  padding-left: 2px;
-  padding-right: 0px;
-  text-align: center;
-  }
+padding-left: 2px;
+padding-right: 0px;
+text-align: center;
+}
 td.big {
-  border-top: @color_general_border@ solid 1px;
-  border-left: @color_general_border@ solid 1px;
-  }
+border-top: @color_general_border@ solid 1px;
+border-left: @color_general_border@ solid 1px;
+}
 td.pr {
-  border-right: @color_general_border@ solid 1px;
-  }
+border-right: @color_general_border@ solid 1px;
+}
 .bigbutton {
-  color: @color_general_text@;
-  font-family: Verdana, serif;
-  font-size: 10px;
-  background: @color_background@;
-  border: @color_background@ solid 1px;
-  cursor: pointer;
-  }
+color: @color_general_text@;
+font-family: Verdana, serif;
+font-size: 10px;
+background: @color_background@;
+border: @color_background@ solid 1px;
+cursor: pointer;
+}
 .headbutton {
-  font-family: Verdana, serif;
-  font-size: 10px;
-  border: @color_table_header_background@ solid 1px;
-  background: @color_table_header_background@;
-  padding-left: 5px;
-  padding-right: 5px;
-  cursor: pointer;
-  }
+font-family: Verdana, serif;
+font-size: 10px;
+border: @color_table_header_background@ solid 1px;
+background: @color_table_header_background@;
+padding-left: 5px;
+padding-right: 5px;
+cursor: pointer;
+}
 tr.dl-1 {
-  background: @color_dl1_back@;
-  }
+background: @color_dl1_back@;
+}
 tr.dl-2 {
-  background: @color_dl2_back@;
-  }
-tr.mOvrDL, .mOvrDL {
-  background: @color_mOver1_back@;
-  cursor: pointer;
-  }
+background: @color_dl2_back@;
+}
+tr.dl-1:hover, td.dl-1:hover, tr.dl-2:hover, td.dl-2:hover {
+background: @color_mOver1_back@;
+}
 input {
-  font-family: tahoma;
-  font-size: 10px;
-  }
+font-family: tahoma;
+font-size: 10px;
+}
 a {
-  text-decoration: none;
-  font-weight: bold;
-  }
+text-decoration: none;
+font-weight: bold;
+}
 a:link,a:active,a:visited {
-  color: @color_download_anchor@;
-  }
+color: @color_download_anchor@;
+}
 a:hover {
-  color: @color_download_anchor_hover@;
-  text-decoration: underline;
-  }
+color: @color_download_anchor_hover@;
+text-decoration: underline;
+}
 a.extern:visited,a.extern:hover,a.extern:active {
-  color: @color_external_anchor@;
-  }
+color: @color_external_anchor@;
+}
 .extern:hover {
-  color: @color_external_anchor_hover@;
-  }
+color: @color_external_anchor_hover@;
+}
 "
 
 let download_html_js_mods0 = define_option message_section ["download_html_js_mods0"]
@@ -1048,98 +1128,184 @@ let web_common_header_mods0 = define_option message_section ["web_common_header_
   "Web header - style 0"
     string_option
 ("
+<div id=\"container\">
 <!-- topnav -->
 <ul class=\"topnav\">
   <li class=\"dropdown\">
   <a href=\"javascript:void(0)\" class=\"dropbtn\"><i class=\"topnav-icons fa fa-folder\" aria-hidden=\"true\"></i> File</a>
     <div class=\"dropdown-content\">
-		<a onclick=\"dllink();\">Download links</a>
+		<a href=\"javascript:void(0)\" title=\" " ^ _s "dllink" ^ " \"
+		onclick=\"dllink();\">" ^ _s "Download links" ^ "</a>
+		<div class=\"dropdown-right\">
+			<a href=\"javascript:void(0)\" class=\"dropbtn\" title=\" " ^ _s "Searches Tab" ^ " \"
+			onclick=\"mSub('#output_div','custom=Complex+Search','#container');\">" ^ _s "Search" ^ "</a>
+			<div class=\"dropdown-content-right\">
+				<a href=\"javascript:void(0)\" title=\" " ^ _s "Album search" ^ " \"
+				onClick=\"mSub('#output_div','custom=Album+Search','#container')\">" ^ _s "Album Search" ^ "</a>
+				<a href=\"javascript:void(0)\" title=\" " ^ _s "Complex search" ^ " \"
+				onClick=\"mSub('#output_div','custom=Complex+Search','#container')\">" ^ _s "Complex Search" ^ "</a>
+				<a href=\"javascript:void(0)\" title=\" " ^ _s "Extend search to more servers and view results" ^ " \"
+				onClick=\"mSub('fstatus','xs');mSub('#output_div','vr','#container');\">" ^ _s "Extended Search" ^ "</a>
+				<a href=\"javascript:void(0)\" title=\" " ^ _s "Force download (click after trying to download the duplicate file)" ^ " \"
+				onClick=\"mSub('#output_div','force_download','#container')\">" ^ _s "Force DL" ^ "</a>
+				<a href=\"javascript:void(0)\" title=\" " ^ _s "Movie search" ^ " \"
+				onClick=\"mSub('#output_div','custom=Movie+Search','#container')\">" ^ _s "Movie Search" ^ "</a>
+				<a href=\"javascript:void(0)\" title=\" " ^ _s "MP3 search" ^ " \"
+				onClick=\"mSub('#output_div','custom=MP3+Search','#container')\">" ^ _s "MP3 Search" ^ "</a>
+				<a href=\"javascript:void(0)\" title=\" " ^ _s "View RSS feeds" ^ " \"
+				onClick=\"mSub('#output_div','rss','#container')\">" ^ _s "RSS" ^ "</a>
+				<a href=\"javascript:void(0)\" title=\" " ^ _s "View search results" ^ " \"
+				onClick=\"mSub('#output_div','vr','#container')\">" ^ _s "Search Results" ^ "</a>
+				<a href=\"javascript:void(0)\" title=\" " ^ _s "View searches" ^ " \"
+				onClick=\"mSub('#output_div','vs','#container')\">" ^ _s "View Searches" ^ "</a>
+				<a href=\"http://ed2k.shortypower.org/\" title=\" " ^ _s "Visit Ed2k stats" ^ " \"
+				>" ^ _s "Visit Ed2k stats" ^ "</a>
+				<a href=\"http://edk.peerates.net/\" title=\" " ^ _s "Visit Peerates" ^ " \"
+				>" ^ _s "Visit Peerates" ^ "</a>
+			</div>
+		</div>
+		<div class=\"dropdown-right\">
+		<a href=\"javascript:void(0)\" class=\"dropbtn\" title=\" " ^ _s "Servers Tab" ^ " \"
+		onclick=\"mSub('#output_div','vm','#container',30000);\">" ^ _s "Servers" ^ "</a>
+		<div class=\"dropdown-content-right\">
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "List all servers" ^ " \"
+			onClick=\"mSub('#output_div','vma','#container',15000)\">All servers" ^ "</a>
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "List connected servers" ^ " \"
+			onClick=\"mSub('#output_div','vm','#container',15000)\">Connected Servers" ^ "</a>
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "Connect to more servers" ^ " \"
+			onClick=\"mSub('fstatus','c','#container')\">" ^ _s "Connect to more Servers" ^ "</a>
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "Import Serverlist" ^ " \"
+			onclick=\"servers();\">" ^ _s "Import Server.met" ^ "</a>
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "Remove old servers" ^ " \"
+			onClick=\"mSub('#output_div','remove_old_servers','#container')\">" ^ _s "Remove old servers" ^ "</a>
+			<a href=\"http://www.gruk.org/list.php\" title=\" " ^ _s "Open Serverlist" ^ " \"
+			>" ^ _s "Serverlist" ^ "</a>
+		</div>
+		</div>
+		<div class=\"dropdown-right\">
+		<a href=\"javascript:void(0)\" class=\"dropbtn\" title=\" " ^ _s "Transfers Tab" ^ " \"
+		onclick=\"mSub('#output_div','vd','#container',5000);\">" ^ _s "Transfers" ^ "</a>
+		<div class=\"dropdown-content-right\">
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "Bandwidth statistics (set html_mods_bw_refresh_delay)" ^ " \" 
+			onClick=\"mSub('#output_div','gdstats','#container',5000)\">" ^ _s "Bandwidth Stats" ^ "</a>
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "Bandwidth statistics (set html_mods_bw_refresh_delay)" ^ " \"
+			onClick=\"mSub('#output_div','bw_toggle','#container')\">" ^ _s "Bandwidth Toggle" ^ "</a>
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "Commit downloaded files to incoming directory" ^ " \"
+			onClick=\"mSub('#output_div','commit','#container')\">" ^ _s "Commit" ^ "</a>
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "Current downloaders" ^ " \"
+			onClick=\"mSub('#output_div','downloaders','#container',5000)\">" ^ _s "Downloaders" ^ "</a>
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "Current downloads" ^ " \"
+			onClick=\"mSub('#output_div','vd','#container',5000)\">" ^ _s "Downloads" ^ "</a>
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "Check shared files for removal" ^ " \"
+			onClick=\"mSub('#output_div','reshare','#container')\">" ^ _s "Reshare" ^ "</a>
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "List contents of the temp directory" ^ " \"
+			onClick=\"mSub('#output_div','scan_temp','#container')\">" ^ _s "Scan Temp" ^ "</a>
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "Upload statistics" ^ " \"
+			onClick=\"mSub('#output_div','upstats','#container',5000)\">" ^ _s "Uploads" ^ "</a>
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "Uploaders" ^ " \"
+			onClick=\"mSub('#output_div','uploaders','#container',5000)\">" ^ _s "Uploaders" ^ "</a>
+			</div>
+		</div>
+	</div>
+  </li>
+  <li class=\"dropdown\">
+  <a href=\"javascript:void(0)\" class=\"dropbtn\" title=\" " ^ _s "Options Tab" ^ " \"
+  onclick=\"mSub('#output_div','voo+1');\"><i class=\"topnav-icons fa fa-bars\" aria-hidden=\"true\"></i> " ^ _s "Options" ^ "</a>
+    <div class=\"dropdown-content\">
+		<a href=\"javascript:void(0)\" title=\" " ^ _s "Close all files (use to free space on disk after remove)" ^ " \"
+		onClick=\"mSub('#output_div','close_fds')\">" ^ _s "Close files" ^ "</a>
+		<a href=\"javascript:void(0)\" title=\" " ^ _s "Friends" ^ " \"
+		onClick=\"mSub('#output_div','friends')\">" ^ _s "Friends" ^ "</a>
+		<a href=\"javascript:void(0)\" title=\" " ^ _s "IP blocking statistics" ^ " \"
+		onClick=\"mSub('#output_div','block_list')\">" ^ _s "IP blocking" ^ "</a>
+		<a href=\"javascript:void(0)\" title=\" " ^ _s "View/send messages (20 second refresh)" ^ " \"
+		onClick=\"mSub('#output_div','message')\">" ^ _s "Messages" ^ "</a>
+		<a href=\"javascript:void(0)\" title=\" " ^ _s "Recover files from temp directory" ^ " \"
+		onClick=\"mSub('fstatus','recover_temp');mSub('#output_div','scan_temp');\">" ^ _s "Recover temp" ^ "</a>
+		<a href=\"javascript:void(0)\" title=\" " ^ _s "Settings" ^ " \"
+		onClick=\"mSub('#output_div','voo+1')\">" ^ _s "Settings" ^ "</a>
+		<a href=\"javascript:void(0)\" title=\" " ^ _s "View/edit shared directories" ^ " \"
+		onClick=\"mSub('#output_div','shares')\">" ^ _s "Shares" ^ "</a>
+		<div class=\"dropdown-right\">
+		<a href=\"javascript:void(0)\" class=\"dropbtn\" title=\" " ^ _s "Statistics Tab" ^ " \"
+		onclick=\"mSub('#output_div','stats');\">" ^ _s "Statistics" ^ "</a>
+		<div class=\"dropdown-content-right\">
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "Bittorrent statistics" ^ " \"
+			onClick=\"mSub('#output_div','csbt')\" >" ^ _s "Bittorrent Table" ^ "</a>
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "Country statistics - all seen" ^ " \"
+			onClick=\"mSub('#output_div','costats all')\">" ^ _s "Countries" ^ "</a>
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "eDonkey statistics in a table" ^ " \"
+			onClick=\"mSub('#output_div','cs')\">" ^ _s "eDonkey Table" ^ "</a>
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "eMule MODs statistics" ^ " \"
+			onClick=\"mSub('#output_div','csm')\">" ^ _s "eMule MODs" ^ "</a>
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "Gnutella statistics" ^ " \"
+			onClick=\"mSub('#output_div','gstats')\">" ^ _s "Gnutella" ^ "</a>
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "Gnutella2 statistics" ^ " \"
+			onClick=\"mSub('#output_div','g2stats')\">" ^ _s "Gnutella2" ^ "</a>
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "Kademlia statistics" ^ " \"
+			onClick=\"mSub('#output_div','kad_stats')\">" ^ _s "Kademlia" ^ "</a>
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "Memory statistics" ^ " \"
+			onClick=\"mSub('#output_div','mem_stats 0')\">" ^ _s "Memory" ^ "</a>
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "Overnet statistics" ^ " \"
+			onClick=\"mSub('#output_div','ov_stats')\">" ^ _s "Overnet" ^ "</a>
+			<a href=\"javascript:void(0)\" title=\" " ^ _s "Sources statistics" ^ " \"
+			onClick=\"mSub('#output_div','sources')\">" ^ _s "Sources" ^ "</a>
+		</div>
+		</div>
+		<a href=\"javascript:void(0)\" title=\" " ^ _s "Users" ^ " \"
+		onclick=\"mSub('#output_div','users')\">" ^ _s "Users" ^ "</a>
+		<a href=\"javascript:void(0)\" title=\" " ^ _s "View all clients" ^ " \"
+		onClick=\"mSub('#output_div','vc+all')\">" ^ _s "View clients" ^ "</a>
     </div>
   </li>
   <li class=\"dropdown\">
-  <a href=\"javascript:void(0)\" class=\"dropbtn\"><i class=\"topnav-icons fa fa-bars\" aria-hidden=\"true\"></i> Options</a>
+  <a href=\"javascript:void(0)\" class=\"dropbtn\" title=\" " ^ _s "Help+Miscellaneous Tab" ^ " \"
+  onclick=\"mSub('#output_div','help');\"><i class=\"topnav-icons fa fa-question\" aria-hidden=\"true\"></i> " ^ _s "Help" ^ "</a>
     <div class=\"dropdown-content\">
-		<a href=\"javascript:void(0)\" onClick=\"mSub('fstatus','version');mSub('fstatus','close_fds')\">Close files</a>
-		<a href=\"javascript:void(0)\" onClick=\"mSub('fstatus','version');mSub('output','friends')\">Friends</a>
-		<a href=\"javascript:void(0)\" onClick=\"mSub('fstatus','version');mSub('output','block_list')\">IP blocking</a>
-		<a href=\"javascript:void(0)\" onClick=\"mSub('fstatus','version');mSub('output','message')\">Messages</a>
-		<a href=\"javascript:void(0)\" onClick=\"mSub('fstatus','recover_temp');mSub('output','scan_temp');\">Recover temp</a>
-		<a href=\"javascript:void(0)\" onClick=\"mSub('fstatus','version');mSub('output','voo+1')\">Settings</a>
-		<a href=\"javascript:void(0)\" onClick=\"mSub('fstatus','version');mSub('output','shares')\">Shares</a>
-		<a href=\"javascript:void(0)\" onclick=\"mSub('fstatus','version');mSub('output','users')\">Users</a>
-		<a href=\"javascript:void(0)\" onClick=\"mSub('fstatus','version');mSub('output','vc+all')\">View clients</a>
+		<a href=\"https://github.com/arlas/mldonkey/commits/master\" title=\" " ^ _s "View ChangeLog" ^ " \"
+		>" ^ _s "Changelog" ^ "</a>
+		<a href=\"http://mldonkey.sourceforge.net/forums\" title=\" " ^ _s "Support forum english" ^ " \"
+		>" ^ _s "English support" ^ "</a>
+		<!--<a href=\"http://mldonkey.org/phpbb2\" title=\" " ^ _s "Support forum german" ^ " \"
+		>" ^ _s "German forum" ^ "</a>-->
+		<a href=\"http://mldonkey.sourceforge.net/Main_Page\" title=\" " ^ _s "Homepage" ^ " \"
+		>" ^ _s "Homepage" ^ "</a>
+		<a href=\"javascript:void(0)\" title=\" " ^ _s "Kill core" ^ " \"
+		onClick=\"mSub('#output_div','kill')\">" ^ _s "Kill core" ^ "</a>
+		<a href=\"javascript:void(0)\" title=\" " ^ _s "View core log" ^ " \"
+		onClick=\"mSub('#output_div','log')\">" ^ _s "Log" ^ "</a>
+		<a href=\"javascript:void(0)\" title=\" " ^ _s "Logout interface" ^ " \"
+		onClick=\"mSub('#output_div','logout')\">" ^ _s "Logout" ^ "</a>
+		<a href=\"javascript:void(0)\" title=\" " ^ _s "Long help" ^ " \"
+		onClick=\"mSub('#output_div','longhelp')\">" ^ _s "LongHelp" ^ "</a>
+		<a href=\"javascript:void(0)\" title=\" " ^ _s "Network listing" ^ " \"
+		onClick=\"mSub('#output_div','networks')\">" ^ _s "Networks" ^ "</a>
+		<a href=\"javascript:void(0)\" title=\" " ^ _s "Porttest" ^ " \"
+		onClick=\"mSub('#output_div','porttest')\">" ^ _s "Porttest" ^ "</a>
+		<a href=\"javascript:void(0)\" title=\" " ^ _s "Sysinfo" ^ " \"
+		onClick=\"mSub('#output_div','sysinfo')\">" ^ _s "Sysinfo" ^ "</a>
     </div>
   </li>
-  <li class=\"dropdown\">
-  <a href=\"javascript:void(0)\" class=\"dropbtn\"><i class=\"topnav-icons fa fa-question\" aria-hidden=\"true\"></i> Help</a>
-    <div class=\"dropdown-content\">
-		<a href=\"javascript:void(0)\" onClick=\"parent.frames[_getFrameByName('output')].location.href='http://savannah.nongnu.org/cgi-bin/viewcvs/mldonkey/mldonkey/distrib/ChangeLog?rev=HEAD&amp;content-type=text/vnd.viewcvs-markup'\">Changelog</a>
-		<a href=\"javascript:void(0)\" onClick=\"parent.frames[_getFrameByName('output')].location.href='http://mldonkey.sourceforge.net/forums'\">English support</a>
-		<a href=\"javascript:void(0)\" onClick=\"parent.frames[_getFrameByName('output')].location.href='http://mldonkey.org/phpbb2'\">German forum</a>
-		<a href=\"javascript:void(0)\" onClick=\"parent.frames[_getFrameByName('output')].location.href='http://mldonkey.sourceforge.net'\">Homepage</a>
-		<a href=\"javascript:void(0)\" onClick=\"mSub('output','kill')\">Kill core</a>
-		<a href=\"javascript:void(0)\" onClick=\"mSub('output','log')\">Log</a>
-		<a href=\"javascript:void(0)\" onClick=\"mSub('output','logout')\">Logout</a>
-		<a href=\"javascript:void(0)\" onClick=\"mSub('output','longhelp')\">LongHelp</a>
-		<a href=\"javascript:void(0)\" onClick=\"mSub('output','networks')\">Networks</a>
-		<a href=\"javascript:void(0)\" onClick=\"mSub('output','porttest')\">Porttest</a>
-		<a href=\"javascript:void(0)\" onClick=\"mSub('output','sysinfo')\">Sysinfo</a>
-    </div>
-  </li>
-  <li class=\"right\"><a href=\"javascript:void(0)\" onClick=\"mSub('output','kill')\" class=\"topnav-icons fa fa-times\"></a></li>
+  <li class=\"right\"><a href=\"javascript:void(0)\" onClick=\"mSub('#output_div','kill')\" class=\"topnav-icons fa fa-times\"></a></li>
   <li class=\"right\"><a href=\"https://www.facebook.com/mldonkey.dev\" class=\"topnav-icons fa fa-facebook-square\"></a></li>
   <li class=\"right\">MLDonkey "^ Autoconf.current_version ^"</li>
 </ul>
-<!-- Main Table -->
-<form name=cmdFormular action=btnsubmit target=output>
-<TABLE BORDER=0 cellspacing=1 cellpadding=0 width=\"100%\"><TR>
-<TD width=85><TABLE class=commands cellSpacing=0 cellPadding=0 width=\"100%\">
-<TBODY><TR><TD class=\"bu bbigm\" title=\" " ^ _s "Transfers Tab" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onclick=\"showTab(1);mSub('fstatus','bw_stats');mSub('output','vd');\">" ^ _s
-"Transfers" ^ "</TD></TR></TBODY></TABLE></TD>
-<TD width=85><TABLE class=commands cellSpacing=0 cellPadding=0 width=\"100%\">
-<TBODY><TR><TD class=\"bu bbigm\" title=\" " ^ _s "Searches Tab" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onclick=\"showTab(2);mSub('fstatus','view_custom_queries');mSub('output','custom=Complex+Search');\">" ^ _s
-"Search" ^ "</TD></TR></TBODY></TABLE></TD>
-<TD width=85><TABLE class=commands cellSpacing=0 cellPadding=0 width=\"100%\">
-<TBODY><TR><TD class=\"bu bbigm\" title=\" " ^ _s "Servers Tab" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onclick=\"showTab(3);mSub('fstatus','bw_stats');mSub('output','vm');\">" ^ _s
-"Servers" ^ "</TD></TR></TBODY></TABLE></TD>
-<TD width=85><TABLE class=commands cellSpacing=0 cellPadding=0 width=\"100%\">
-<TBODY><TR><TD class=\"bu bbigm\" title=\" " ^ _s "Statistics Tab" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onclick=\"showTab(4);mSub('fstatus','bw_stats');mSub('output','stats');\">" ^ _s
-"Statistics" ^ "</TD></TR></TBODY></TABLE></TD>
-<TD width=85><TABLE class=commands cellSpacing=0 cellPadding=0 width=\"100%\">
-<TBODY><TR><TD class=\"bu bbigm\" title=\" " ^ _s "Options Tab" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onclick=\"showTab(5);mSub('fstatus','version');mSub('output','voo+1');\">" ^ _s
-"Options" ^ "</TD></TR></TBODY></TABLE></TD>
-<TD width=85><TABLE class=commands cellSpacing=0 cellPadding=0 width=\"100%\">
-<TBODY><TR><TD class=\"bu bbigm\" title=\" " ^ _s "Help+Miscellaneous Tab" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onclick=\"showTab(6);mSub('fstatus','version');mSub('output','help');\">" ^ _s
-"Help+" ^ "</TD></TR></TBODY></TABLE></TD>
-<TD width=85><TABLE class=commands cellSpacing=0 cellPadding=0 width=\"100%\">
-<TBODY><TR><TD class=\"bu bbigm\" title=\" " ^ _s "dllink" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onclick=\"dllink();\">" ^ _s
-"DL" ^ "</TD></TR></TBODY></TABLE></TD>
-<TD noWrap width=\"100%\" title=\" " ^ _s "Input mldonkey commands here" ^ " \">
-<TABLE cellSpacing=0 cellpadding=0 width=\"100%\"><TBODY><TR>
-<TD style=\"height: 1%; padding: 0px; border: 0px; padding-left: 5px;\" title=\" " ^ _s "Input mldonkey command here" ^ " \">
-<INPUT class=\"txt2\" type=text style=\"WIDTH: 99%;\" id=inputbox name=q>
-</TD></TR></TBODY></TABLE></TD><TD noWrap>
-<TABLE class=commands cellSpacing=0 cellPadding=0 width=\"100%\"><TBODY><TR>
-<TD class=\"bu bbigm\" style=\"padding-top: 0px; padding-bottom: 0px;\" title=\" " ^ _s "Input Command" ^ " \">
-<INPUT class=\"but2\" type=button onclick=\"submitForm();\" value=\" " ^ _s "Input" ^ " \">
-</TD></TR></TBODY></TABLE>
-</TD>
-</TR></TABLE>
-<!-- End Main Table -->
+<!-- Input bar -->
+<form name=\"cmdFormular\" action=\"btnsubmit\" target=\"output\">
+	<table border=\"0\" cellspacing=\"1\" cellpadding=\"0\" width=\"100%\"><tbody><tr>
+		<td nowrap width=\"100%\" title=\" " ^ _s "Input mldonkey commands here" ^ " \">
+			<table cellSpacing=\"0\" cellpadding=\"0\" width=\"100%\"><tbody><tr>
+				<td style=\"height: 1%; padding: 0px; border: 0px; padding-left: 5px;\" title=\" " ^ _s "Input mldonkey command here" ^ " \">
+					<input class=\"txt2\" type=\"text\" style=\"width: 99%;\" id=\"inputbox\" name=\"q\">
+				</td></tr></tbody></table></td>
+		<td nowrap>
+			<table cellSpacing=\"0\" cellPadding=\"0\" width=\"100%\"><tbody><tr>
+				<td style=\"padding-top: 0px; padding-bottom: 0px;\" title=\" " ^ _s "Input Command" ^ " \">
+					<input class=\"but2\" type=\"button\" onclick=\"submitForm();\" value=\" " ^ _s "Input" ^ " \">
+				</td></tr></tbody></table>
+</td>
+</tr></tbody></table>
+<!-- End Input bar -->
 
 <!-- set focus -->
 <script type=\"text/javascript\">
@@ -1147,258 +1313,15 @@ document.getElementById('inputbox').addEventListener('keypress', function(event)
 	if (event.which == 13 ||event.keyCode == 13) {
 		event.preventDefault();
 		var f = document.forms[\"cmdFormular\"].elements['q'];
-		if (f.value.length > 0){mSub('output',encodeURIComponent(f.value));f.value = \"\";}
+		if (f.value.length > 0){mSub('#output_div',encodeURIComponent(f.value),'#container');f.value = \"\";}
 	}});
-function submitForm() {var f = document.forms[\"cmdFormular\"].elements['q']; if (f.value.length > 0){mSub('output',encodeURIComponent(f.value));f.value = \"\";}};
+function submitForm() {var f = document.forms[\"cmdFormular\"].elements['q']; if (f.value.length > 0){mSub('#output_div',encodeURIComponent(f.value),'#container');f.value = \"\";}};
 
 document.forms['cmdFormular'].elements['q'].focus();
 </script>
 
-<DIV ID=\"tab1\" style=\"display: none\">
-<TABLE class=commands cellSpacing=0 cellPadding=0 width=\"100%\">
-<TBODY><TR>
-<TD class=\"bu bbig\" title=\" " ^ _s "Current downloads" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','bw_stats');mSub('output','vd')\">" ^ _s
-"Downloads" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Current downloaders" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','bw_stats');mSub('output','downloaders')\">" ^ _s
-"Downloaders" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Upload statistics" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','bw_stats');mSub('output','upstats')\">" ^ _s
-"Uploads" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Uploaders" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','bw_stats');mSub('output','uploaders')\">" ^ _s
-"Uploaders" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Commit downloaded files to incoming directory" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','commit')\">" ^ _s
-"Commit" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Check shared files for removal" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','reshare')\">" ^ _s
-"Reshare" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "List contents of the temp directory" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','bw_stats');mSub('output','scan_temp')\">" ^ _s
-"Scan temp" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Bandwidth statistics (set html_mods_bw_refresh_delay)" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','bw_stats');mSub('output','gdstats')\">" ^ _s
-"Bandwidth stats" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Toggle bandwidth and max connections" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','bw_stats');mSub('output','bw_toggle')\">" ^ _s
-"Bandwidth toggle" ^ "</TD>
-</TR></TBODY></TABLE></DIV>
-
-<DIV ID=\"tab2\" style=\"display: none\">
-<TABLE class=commands cellSpacing=0 cellPadding=0 width=\"100%\">
-<TBODY><TR>
-<TD class=\"bu bbig\" title=\" " ^ _s "Extend search to more servers and view results" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','xs');mSub('output','vr');\">" ^ _s
-"Extend search" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "View search results" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','view_custom_queries');mSub('output','vr')\">" ^ _s
-"Search results" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "View searches" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','view_custom_queries');mSub('output','vs')\">" ^ _s
-"View searches" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Complex search" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','view_custom_queries');mSub('output','custom=Complex+Search')\">" ^ _s
-"Complex search" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "MP3 search" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','view_custom_queries');mSub('output','custom=MP3+Search')\">" ^ _s
-"MP3 search" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Movie search" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','view_custom_queries');mSub('output','custom=Movie+Search')\">" ^ _s
-"Movie search" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Album search" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','view_custom_queries');mSub('output','custom=Album+Search')\">" ^ _s
-"Album search" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Force download (click after trying to download the duplicate file)" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('output','force_download')\">" ^ _s
-"Force DL" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "View RSS feeds" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','view_custom_queries');mSub('output','rss')\">" ^ _s
-"RSS" ^ "</TD>
-</TR></TBODY></TABLE></DIV>
-
-<DIV ID=\"tab3\" style=\"display: none\">
-<TABLE class=commands cellSpacing=0 cellPadding=0 width=\"100%\">
-<TBODY><TR>
-<TD class=\"bu bbig\" title=\" " ^ _s "List connected servers" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','bw_stats');mSub('output','vm')\">" ^ _s
-"Connected servers" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "List all servers" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','bw_stats');mSub('output','vma')\">" ^ _s
-"All servers" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Connect to more servers" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','c')\">" ^ _s
-"Connect to more servers" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Remove old servers" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','remove_old_servers')\">" ^ _s
-"Remove old servers" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Import Serverlist" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onclick=\"servers();\">" ^ _s
-"Import Server.met" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Open Serverlist" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','bw_stats');parent.frames[_getFrameByName('output')].location.href='http://www.gruk.org/list.php'\">" ^ _s
-"Serverlist" ^ "</TD>
-</TR></TBODY></TABLE></DIV>
-
-<DIV ID=\"tab4\" style=\"display: none\">
-<TABLE class=commands cellSpacing=0 cellPadding=0 width=\"100%\">
-<TBODY><TR>
-<TD class=\"bu bbig\" title=\" " ^ _s "eDonkey statistics in a table" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','bw_stats');mSub('output','cs')\">" ^ _s
-"eDonkey Table" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "eMule MODs statistics" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','bw_stats');mSub('output','csm')\">" ^ _s
-"eMule MODs" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Bittorrent statistics" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','bw_stats');mSub('output','csbt')\">" ^ _s
-"Bittorrent Table" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Overnet statistics" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','ov_view_stats_cmds');mSub('output','ov_stats')\">" ^ _s
-"Overnet" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Kademlia statistics" ^ " \" 
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','kad_view_stats_cmds');mSub('output','kad_stats')\">" ^ _s
-"Kademlia" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Gnutella statistics" ^ " \" 
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','bw_stats');mSub('output','gstats')\">" ^ _s
-"Gnutella" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Gnutella2 statistics" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','bw_stats');mSub('output','g2stats')\">" ^ _s
-"Gnutella2" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Country statistics - all seen" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','bw_stats');mSub('output','costats all')\">" ^ _s
-"Countries" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Memory statistics" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','bw_stats');mSub('output','mem_stats 0')\">" ^ _s
-"Memory" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Sources statistics" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','bw_stats');mSub('output','sources')\">" ^ _s
-"Sources" ^ "</TD>
-</TR></TBODY></TABLE></DIV>
-
-<DIV ID=\"tab5\" style=\"display: none\">
-<TABLE class=commands cellSpacing=0 cellPadding=0 width=\"100%\">
-<TBODY><TR>
-<TD class=\"bu bbig\" title=\" " ^ _s "Settings" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','version');mSub('output','voo+1')\">" ^ _s
-"Settings" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Users" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onclick=\"mSub('fstatus','version');mSub('output','users')\">" ^ _s
-"Users" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "View/edit shared directories" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','version');mSub('output','shares')\">" ^ _s
-"Shares" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Friends" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','version');mSub('output','friends')\">" ^ _s
-"Friends" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "View/send messages (20 second refresh)" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','version');mSub('output','message')\">" ^ _s
-"Messages" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "IP blocking statistics" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','version');mSub('output','block_list')\">" ^ _s
-"IP blocking" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Recover files from temp directory" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','recover_temp');mSub('output','scan_temp');\">" ^ _s
-"Recover temp" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Close all files (use to free space on disk after remove)" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','version');mSub('fstatus','close_fds')\">" ^ _s
-"Close files" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "View all clients" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('fstatus','version');mSub('output','vc+all')\">" ^ _s
-"View clients" ^ "</TD>
-</TR></TBODY></TABLE></DIV>
-
-<DIV ID=\"tab6\" style=\"display: none\">
-<TABLE class=commands cellSpacing=0 cellPadding=0 width=\"100%\">
-<TBODY><TR>
-<TD class=\"bu bbig\" title=\" " ^ _s "Long help" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('output','longhelp')\">" ^ _s
-"LongHelp" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Network listing" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('output','networks')\">" ^ _s
-"Networks" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Sysinfo" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('output','sysinfo')\">" ^ _s
-"Sysinfo" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Porttest" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('output','porttest')\">" ^ _s
-"Porttest" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "View ChangeLog" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"parent.frames[_getFrameByName('output')].location.href='http://savannah.nongnu.org/cgi-bin/viewcvs/mldonkey/mldonkey/distrib/ChangeLog?rev=HEAD&amp;content-type=text/vnd.viewcvs-markup'\">" ^ _s
-"ChangeLog" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Homepage" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"parent.frames[_getFrameByName('output')].location.href='http://mldonkey.sourceforge.net'\">" ^ _s
-"Homepage" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Support forum english" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"parent.frames[_getFrameByName('output')].location.href='http://mldonkey.sourceforge.net/forums'\">" ^ _s
-"English support" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Support forum german" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"parent.frames[_getFrameByName('output')].location.href='http://mldonkey.org/phpbb2'\">German forum" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "View core log" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('output','log')\">" ^ _s
-"Log" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Logout interface" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('output','logout')\">" ^ _s
-"Logout" ^ "</TD>
-<TD class=\"bu bbig\" title=\" " ^ _s "Kill core" ^ " \"
-onMouseOver=\"mOvr(this,'mOvr1');\" onMouseOut=\"mOut(this);\"
-onClick=\"mSub('output','kill')\">" ^ _s
-"Kill core" ^ "</TD>
-</TR></TBODY></TABLE></DIV>
-</FORM>
+</form>
+</div>
 ")
 
 (* Old *)
@@ -1537,99 +1460,6 @@ let no_such_command  = message "no_such_command"
 
 let bad_number_of_args cmd help = _s (Printf.sprintf "Bad number of arguments, see help for correct use:\n%s %s" cmd help)
 
-(* Colour arrays list for debug and devs
-
--- Isn't that redundant, hence, probably already out of sync ?
-
-Main CSS :
-
-body { background: @color_background@;    
-scrollbar-face-color: @color_scrollbar_face@; scrollbar-shadow-color: @color_scrollbar_face@;
-scrollbar-highlight-color: @color_scrollbar_highlight@; scrollbar-3dlight-color: @color_some_scrollbar@;
-scrollbar-darkshadow-color: @color_some_scrollbar@; scrollbar-track-color: @color_background@;
-scrollbar-arrow-color: @color_some_scrollbar@; }
-table.commands { border: @color_general_border@; background: @color_background@;}
-table.topcommands { background: @color_background@; border: @color_general_border@; border-top: @color_scrollbar_highlight@; border-left: @color_scrollbar_highlight@;} 
-pre { color: @color_general_text@; }
-p { color: @color_general_text@; }
-input.txt { background: @color_input_text@; }
-input.txt2 { background: @color_bbig_background@; color: @color_general_text@;
-border-right: @color_some_border@; border-top: @color_general_border@; border-left: @color_general_border@; border-bottom: @color_some_border@; }
-input.but2 { background: @color_bsmall3@; }
-input.but { background: @color_input_button@; }
-a:link,a:active,a:visited { color: @color_anchor@; }
-a:hover { color: @color_anchor_hover@; }
-.bu { background: @color_chunk3@; color: @color_foreground_text_for_top_buttons@; border: @color_some_border@; }
-.bbig { border-top: @color_scrollbar_highlight@;  border-left: @color_scrollbar_highlight@;  border-bottom: @color_general_border@;  border-right: @color_general_border@;
-color: @color_general_text@; background: @color_bbig_background@; }
-.bbigm { border-top: @color_scrollbar_highlight@; border-left: @color_scrollbar_highlight@; border-bottom: @color_general_border@; border-right: @color_general_border@;
-color: @color_general_text@; background: @color_bsmall3@; }
-.bsmall { background: @color_bsmall_back@; }
-.bsmall1 { background: @color_bbig_background@; }
-.bsmall2 { background: @color_bsmall2@; }
-.bsmall3 { background: @color_bsmall3@; }
-.bbig2 { background: @color_bsmall3@; }
-.bbig3 { background: @color_scrollbar_face@; }
-.b1 { border-left: @color_border_of_top_buttons@; border-top: @color_border_of_top_buttons@; border-right: @color_border_of_top_buttons@; border-bottom: @color_border_of_top_buttons@; }
-.b2 { border-left: @color_border_of_top_buttons@; border-top: @color_border_of_top_buttons@; border-right: @color_border_of_top_buttons@; border-bottom: @color_border_of_top_buttons@; }
-.b3 { border-left: @color_border_of_top_buttons@; border-top: @color_border_of_top_buttons@; border-right: @color_border_of_top_buttons@; border-bottom: @color_border_of_top_buttons@; }
-.b4 { border-left: @color_border_of_top_buttons@; border-top: @color_border_of_top_buttons@; border-right: @color_border_of_top_buttons@; border-bottom: @color_border_of_top_buttons@; }
-.bb1 { border-left: @color_general_border@; border-top: @color_scrollbar_highlight@; border-right: @color_scrollbar_highlight@; border-bottom: @color_general_border@; }
-.bb2 { border-left: @color_big_buttons_and_border_highlight@; border-top: @color_scrollbar_highlight@; border-right: @color_scrollbar_highlight@; border-bottom: @color_general_border@; }
-.bb3 { border-left: @color_big_buttons_and_border_highlight@; border-top: @color_scrollbar_highlight@; border-right: @color_general_border@; border-bottom: @color_general_border@; }
-.bb4 { border-left: @color_big_buttons_and_border_highlight@; border-top: @color_scrollbar_highlight@; border-right: @color_general_border@; border-bottom: @color_general_border@; }
-.src { border-left: @color_general_border@; border-top: @color_general_border@; border-right: @color_general_border@; border-bottom: @color_general_border@; }
-td.fbig { background: @color_fbig_background@; border-top: @color_general_border@; border-left: @color_general_border@; }
-td.pr { border-right: @color_general_border@; }
-td.fbigb { border-top: @color_general_border@; border-bottom: @color_general_border@; }
-td.sr { color: @color_general_text@; }
-td.srp { color: @color_one_td_text@; }
-td.srw { color: @color_general_text@; }
-td.srh { vertical-align: top; background: @color_table_header_background@; color: @color_general_text@; }
-tr.dl-1, td.dl-1 { background: @color_dl1_back@; }
-tr.dl-2, td.dl-2 { background: @color_dl2_back@; }
-.mOvr1, tr.mOvr1 {background: @color_mOver1_back@; }
-.mOvr2, tr.mOvr2 {background: @color_mOver2_back@; }
-.mOvr3, tr.mOvr3 {background: @color_mOver3_back@; }
-table.uploaders, table.friends, table.bw_stats, table.vo, table.cs, table.servers,
-table.shares, table.downloaders, table.scan_temp, table.upstats, table.messages,
-table.shares, table.vc, table.results, table.networkInfo { border: @color_general_border@; }
-table.sourcesInfo, table.subfilesInfo, table.serversC { border: @color_general_border@; }
-table.sources { border: @color_general_border@;}
-td.srb { border-right: @color_general_border@; border-bottom: @color_general_border@;
-border-left: @color_general_border@; border-top: @color_general_border@; }
-td.br { border-right: @color_general_border@;}
-.chunk0;{ background: @color_chunk0@}
-.chunk1 { background: @color_chunk1@}
-.chunk2 { background: @color_chunk2@}
-.chunk3 { background: @color_chunk3@}
-
-Download CSS
-body{ background-color:@color_vd_page_background@; color: @color_general_text@; }
-td,pre { color: @color_general_text@; }
-table.downloaders { border: @color_general_border@;}
-td.loaded{ background-color:@color_vd_downloaded@; }
-td.remain{ background-color:@color_vd_remaining@; }
-td.downloaded{ color: @color_general_text@;}
-td.dl { color: @color_general_text@;  }
-td.dlheader { color: @color_general_text@;  
-border-bottom: ( background: @color_table_header_background@; }
-input.checkbox { background: @color_table_header_background@; }
-td.sr { color: @color_general_text@; }
-td.brs { border-right: @color_general_border@; }
-td.big { border-top: @color_general_border@;  border-left: @color_general_border@; }
-td.pr { border-right: @color_general_border@; }
-.bigbutton { background: @color_background@; border: @color_background@; color: @color_general_text@; }
-.headbutton { border: @color_table_header_background@; background: @color_table_header_background@; }
-tr.dl-1 { background: @color_dl1_back@; }
-tr.dl-2 { background: @color_dl2_back@; }
-tr.mOvrDL, .mOvrDL { background: @color_mOver1_back@;  }
-a:link,a:active,a:visited { color: @color_download_anchor@; }
-a:hover { color: @color_download_anchor_hover@; }
-a.extern:visited,a.extern:hover,a.extern:active { color: @color_external_anchor@; }
-.extern:hover { color: @color_external_anchor_hover@; }
-*)
-
 type style_type = {
   style_name: string;
   color_background: string;
@@ -1642,7 +1472,6 @@ type style_type = {
   color_input_button: string;
   color_chunk3: string;
   color_foreground_text_for_top_buttons: string;
-  color_fbig_background: string; (* (tabs) *)
   color_bbig_background: string; (* (vma button) *)
   color_bsmall_back: string; (* (help!) *)
   color_bsmall2: string; (* (options, memstats) *)
@@ -1650,8 +1479,6 @@ type style_type = {
   color_border_of_top_buttons: string;
   color_table_header_background: string;
   color_mOver1_back: string;
-  color_mOver2_back: string;
-  color_mOver3_back: string;
   color_dl1_back: string;
   color_dl2_back: string;
   color_chunk0: string;
@@ -1690,7 +1517,6 @@ let dummy_style = {
   color_input_button = "#000";
   color_chunk3 = "#000";
   color_foreground_text_for_top_buttons = "#000";
-  color_fbig_background = "#000";
   color_bbig_background = "#000";
   color_bsmall_back = "#000";
   color_bsmall2 = "#000";
@@ -1698,8 +1524,6 @@ let dummy_style = {
   color_border_of_top_buttons = "#000";
   color_table_header_background = "#000";
   color_mOver1_back = "#000";
-  color_mOver2_back = "#000";
-  color_mOver3_back = "#000";
   color_dl1_back = "#000";
   color_dl2_back = "#000";
   color_chunk0 = "#000";
@@ -1738,16 +1562,13 @@ let styles = Array.of_list [
     color_input_button = "#A3BDA3"; 
     color_chunk3 = "#00F"; 
     color_foreground_text_for_top_buttons = "#3D3D3D"; 
-    color_fbig_background = "#86BE86"; 
-    color_bbig_background = "#B2CCB2"; 
+    color_bbig_background = "#FFF"; 
     color_bsmall_back = "#BCD6BC"; 
     color_bsmall2 = "#A8C2A8"; 
-    color_bsmall3 = "#A3BDA3"; 
+    color_bsmall3 = "#5f5f5f"; 
     color_border_of_top_buttons = "#718B71"; 
-    color_table_header_background = "#90C890"; 
-    color_mOver1_back = "#BADEBA"; 
-    color_mOver2_back = "#F00"; 
-    color_mOver3_back = "#94AE94";
+    color_table_header_background = "#5f5f5f"; 
+    color_mOver1_back = "lightsteelblue"; 
     color_dl1_back = "#FFF"; 
     color_dl2_back = "#EEE"; 
     color_chunk0 = "#F33"; 
@@ -1783,7 +1604,6 @@ let styles = Array.of_list [
     color_input_button = "#A3BDA3"; 
     color_chunk3 = "#00F"; 
     color_foreground_text_for_top_buttons = "#3D3D3D"; 
-    color_fbig_background = "#86BE86"; 
     color_bbig_background = "#B2CCB2"; 
     color_bsmall_back = "#BCD6BC"; 
     color_bsmall2 = "#A8C2A8"; 
@@ -1791,8 +1611,6 @@ let styles = Array.of_list [
     color_border_of_top_buttons = "#718B71"; 
     color_table_header_background = "#90C890"; 
     color_mOver1_back = "#BADEBA"; 
-    color_mOver2_back = "#F00"; 
-    color_mOver3_back = "#94AE94";
     color_dl1_back = "#FFF"; 
     color_dl2_back = "#EEE"; 
     color_chunk0 = "#F33"; 
@@ -1828,7 +1646,6 @@ let styles = Array.of_list [
     color_input_button = "#FF9900"; 
     color_chunk3 = "#FF7700"; 
     color_foreground_text_for_top_buttons = "#FFF";
-    color_fbig_background = "#FF9D2D"; 
     color_bbig_background = "#FF8800"; 
     color_bsmall_back = "#FF8800"; 
     color_bsmall2 = "#FF8800"; 
@@ -1836,8 +1653,6 @@ let styles = Array.of_list [
     color_border_of_top_buttons = "#FF9900"; 
     color_table_header_background = "#FF8800"; 
     color_mOver1_back = "#FACF8E"; 
-    color_mOver2_back = "#FACF8E"; 
-    color_mOver3_back = "#FACF8E";
     color_dl1_back = "#FFF"; 
     color_dl2_back = "#EEE"; 
     color_chunk0 = "#DDD"; 
@@ -1873,7 +1688,6 @@ let styles = Array.of_list [
     color_input_button = "#8CBFD7"; 
     color_chunk3 = "#7AF3FF"; 
     color_foreground_text_for_top_buttons = "#000";
-    color_fbig_background = "#4EBCEF"; 
     color_bbig_background = "#9BCEE6"; 
     color_bsmall_back = "#A3D8F1"; 
     color_bsmall2 = "#91C4DC"; 
@@ -1881,8 +1695,6 @@ let styles = Array.of_list [
     color_border_of_top_buttons = "#5B8EA6"; 
     color_table_header_background = "#5CCBFF"; 
     color_mOver1_back = "#BFE5F7"; 
-    color_mOver2_back = "#7FBCD9"; 
-    color_mOver3_back = "#99D6F2";
     color_dl1_back = "#FFF"; 
     color_dl2_back = "#EEE"; 
     color_chunk0 = "#4DBCF0"; 
@@ -1918,7 +1730,6 @@ let styles = Array.of_list [
     color_input_button = "#A68FC0"; 
     color_chunk3 = "#D9B6FF"; 
     color_foreground_text_for_top_buttons = "#000";
-    color_fbig_background = "#9360CD"; 
     color_bbig_background = "#B29DCC"; 
     color_bsmall_back = "#BDA5D7"; 
     color_bsmall2 = "#AB94C5"; 
@@ -1926,8 +1737,6 @@ let styles = Array.of_list [
     color_border_of_top_buttons = "#786392"; 
     color_table_header_background = "#A06ED8"; 
     color_mOver1_back = "#BE9EE3"; 
-    color_mOver2_back = "#D9C5F1"; 
-    color_mOver3_back = "#C0A2E0";
     color_dl1_back = "#FFF"; 
     color_dl2_back = "#EEE"; 
     color_chunk0 = "#9A77C0"; 
@@ -1963,7 +1772,6 @@ let styles = Array.of_list [
     color_input_button = "#999"; 
     color_chunk3 = "#494949"; 
     color_foreground_text_for_top_buttons = "#000";
-    color_fbig_background = "#686868"; 
     color_bbig_background = "#AAA"; 
     color_bsmall_back = "#B6B6B6"; 
     color_bsmall2 = "#9F9F9F"; 
@@ -1971,8 +1779,6 @@ let styles = Array.of_list [
     color_border_of_top_buttons = "#5E5E5E"; 
     color_table_header_background = "#7F7F7F"; 
     color_mOver1_back = "#C1C1C1"; 
-    color_mOver2_back = "#DFBDBD"; 
-    color_mOver3_back = "#A4A4A4";
     color_dl1_back = "#FFF"; 
     color_dl2_back = "#EEE"; 
     color_chunk0 = "#989898"; 
@@ -2008,7 +1814,6 @@ let styles = Array.of_list [
     color_input_button = "#6B80BF"; 
     color_chunk3 = "#B2C0D2"; 
     color_foreground_text_for_top_buttons = "#000";
-    color_fbig_background = "#778BCC"; 
     color_bbig_background = "#95A9EA"; 
     color_bsmall_back = "#9AAEEF"; 
     color_bsmall2 = "#90A4E5"; 
@@ -2016,8 +1821,6 @@ let styles = Array.of_list [
     color_border_of_top_buttons = "#364A8B"; 
     color_table_header_background = "#687CBD"; 
     color_mOver1_back = "#6578BB"; 
-    color_mOver2_back = "#CF82C5"; 
-    color_mOver3_back = "#8195D6";
     color_dl1_back = "#FFF"; 
     color_dl2_back = "#EEE"; 
     color_chunk0 = "#5668AB"; 
@@ -2053,7 +1856,6 @@ let styles = Array.of_list [
     color_input_button = "#6B80BF"; 
     color_chunk3 = "#B2C0D2"; 
     color_foreground_text_for_top_buttons = "#000";
-    color_fbig_background = "#778BCC"; 
     color_bbig_background = "#95A9EA"; 
     color_bsmall_back = "#9AAEEF"; 
     color_bsmall2 = "#90A4E5"; 
@@ -2061,8 +1863,6 @@ let styles = Array.of_list [
     color_border_of_top_buttons = "#364A8B"; 
     color_table_header_background = "#687CBD"; 
     color_mOver1_back = "#6578BB"; 
-    color_mOver2_back = "#CF82C5"; 
-    color_mOver3_back = "#5165A6";
     color_dl1_back = "#768FD0"; 
     color_dl2_back = "#E08686"; 
     color_chunk0 = "#5668AB"; 
@@ -2098,7 +1898,6 @@ let styles = Array.of_list [
     color_input_button = "#999"; 
     color_chunk3 = "#494949"; 
     color_foreground_text_for_top_buttons = "#000";
-    color_fbig_background = "#686868"; 
     color_bbig_background = "#AAA"; 
     color_bsmall_back = "#B6B6B6"; 
     color_bsmall2 = "#9F9F9F"; 
@@ -2106,8 +1905,7 @@ let styles = Array.of_list [
     color_border_of_top_buttons = "#5E5E5E"; 
     color_table_header_background = "#7F7F7F"; 
     color_mOver1_back = "#EAD040"; 
-    color_mOver2_back = "#DFBDBD"; 
-    color_mOver3_back = "#84A484";
+
     color_dl1_back = "#FFF"; 
     color_dl2_back = "#EEE"; 
     color_chunk0 = "#989898"; 
@@ -2143,7 +1941,6 @@ let style_codes = [
   "@color_input_button@";
   "@color_chunk3@";
   "@color_foreground_text_for_top_buttons@";
-  "@color_fbig_background@";
   "@color_bbig_background@";
   "@color_bsmall_back@";
   "@color_bsmall2@";
@@ -2151,8 +1948,6 @@ let style_codes = [
   "@color_border_of_top_buttons@";
   "@color_table_header_background@";
   "@color_mOver1_back@";
-  "@color_mOver2_back@";
-  "@color_mOver3_back@";
   "@color_dl1_back@";
   "@color_dl2_back@";
   "@color_chunk0@";
@@ -2179,9 +1974,9 @@ let style_codes = [
 (* legacy values *)
   "@C0@";"@C1@";"@C2@";"@C3@";
   "@C4@";"@C5@";"@C6@";"@C7@";
-  "@C8@";"@C9@";"@C10@";"@C11@";
+  "@C8@";"@C9@";"@C11@";
   "@C12@";"@C13@";"@C14@";"@C15@";
-  "@C16@";"@C17@";"@C18@";"@C19@";
+  "@C16@";"@C17@";
   "@C20@";"@C21@";"@C22@";"@C23@";
   "@C24@";"@C25@";"@C26@";"@C27@";
   "@C28@";"@C29@";"@C30@";"@C31@";
@@ -2202,7 +1997,6 @@ let color_from_style stylenum code =
   | "@color_input_button@" | "@C7@" -> style.color_input_button
   | "@color_chunk3@" | "@C8@" -> style.color_chunk3
   | "@color_foreground_text_for_top_buttons@" | "@C9@" -> style.color_foreground_text_for_top_buttons
-  | "@color_fbig_background@" | "@C10@" -> style.color_fbig_background
   | "@color_bbig_background@" | "@C11@" -> style.color_bbig_background
   | "@color_bsmall_back@" | "@C12@" -> style.color_bsmall_back
   | "@color_bsmall2@" | "@C13@" -> style.color_bsmall2
@@ -2210,8 +2004,6 @@ let color_from_style stylenum code =
   | "@color_border_of_top_buttons@" | "@C15@" -> style.color_border_of_top_buttons
   | "@color_table_header_background@" | "@C16@" -> style.color_table_header_background
   | "@color_mOver1_back@" | "@C17@" -> style.color_mOver1_back
-  | "@color_mOver2_back@" | "@C18@" -> style.color_mOver2_back
-  | "@color_mOver3_back@" | "@C19@" -> style.color_mOver3_back
   | "@color_dl1_back@" | "@C20@" -> style.color_dl1_back
   | "@color_dl2_back@" | "@C21@" -> style.color_dl2_back
   | "@color_chunk0@" | "@C22@" -> style.color_chunk0

@@ -137,7 +137,7 @@ type sort_kind = Num (* numeric, parse size suffixes (kMGT) *) | Str (* plain st
 
 let html_mods_table_header buf ?(total = "0") n c l =
     (* Name Class List *)
-    Printf.bprintf buf "\\<div class=\\\"%s\\\"\\>\\<table id=\\\"%s\\\" name=\\\"%s\\\" class=\\\"%s\\\" cellspacing=0 cellpadding=0\\>"
+    Printf.bprintf buf "\\<div id=\\\"container\\\" class=\\\"%s\\\"\\>\\<table id=\\\"%s\\\" name=\\\"%s\\\" class=\\\"%s\\\" cellspacing=0 cellpadding=0\\>"
     c n n c;
     if List.length l > 0 then begin
         Printf.bprintf buf "\\<tr\\>";
@@ -152,60 +152,59 @@ let html_mods_table_header buf ?(total = "0") n c l =
 (* Add colspan functionality to html_mods_table_header *)
 
 let html_mods_table_header_colspan buf ?(total="0") n c l =
-    (* Name Class List *)
-    Printf.bprintf buf "\\<div class=\\\"%s\\\"\\>\\<table id=\\\"%s\\\" name=\\\"%s\\\" class=\\\"%s\\\" cellspacing=0 cellpadding=0\\>\\<tr\\>"
-    c n n c;
-    List.iter (fun (v,w,x,y,z)  ->
-     (* Sort Class Title Value *)
-     Printf.bprintf buf "\\<td colspan=%s onClick=\\\"_tabSort(this,%s,%s);\\\" class=\\\"%s\\\" title=\\\"%s\\\"\\>%s\\</td\\>"
-     v w total x y z;
-    ) l;
-    Printf.bprintf buf "\\</tr\\>"
+	(* Name Class List *)
+	Printf.bprintf buf "\\<div id=\\\"container\\\" class=\\\"%s\\\"\\>\\<table id=\\\"%s\\\" name=\\\"%s\\\" class=\\\"%s\\\" cellspacing=0 cellpadding=0\\>\\<tr\\>"
+		c n n c;
+	List.iter (fun (v,w,x,y,z)  ->
+		(* Sort Class Title Value *)
+		Printf.bprintf buf "\\<td colspan=%s onClick=\\\"_tabSort(this,%s,%s);\\\" class=\\\"%s\\\" title=\\\"%s\\\"\\>%s\\</td\\>"
+		v w total x y z;
+		) l;
+	Printf.bprintf buf "\\</tr\\>"
 
 let html_mods_table_no_header buf n c l =
-    (* 1 row * n cols *)
-    (* Name Class List *)
-    Printf.bprintf buf "\\<div class=\\\"%s\\\"\\>\\<table id=\\\"%s\\\" name=\\\"%s\\\" class=\\\"%s\\\" cellspacing=0 cellpadding=0\\>\\<tr\\>"
-    c n n c;
-    List.iter (fun (t,c,d)  ->
-    (* Title Class Value *)
-     Printf.bprintf buf "\\<td class=\\\"%s\\\" %s\\>%s\\</td\\>"
-     c (if t <> "" then "title=\\\"" ^ t ^ "\\\"" else "") d;
-    ) l;
-    Printf.bprintf buf "\\</tr\\>\\</table\\>\\</div\\>"
+	(* 1 row * n cols *)
+	(* Name Class List *)
+	Printf.bprintf buf "\\<div id=\\\"container\\\" class=\\\"%s\\\"\\>\\<table id=\\\"%s\\\" name=\\\"%s\\\" class=\\\"%s\\\" cellspacing=0 cellpadding=0\\>\\<tr\\>"
+		c n n c;
+	List.iter (fun (t,c,d)  ->
+		(* Title Class Value *)
+		Printf.bprintf buf "\\<td class=\\\"%s\\\" %s\\>%s\\</td\\>"
+		c (if t <> "" then "title=\\\"" ^ t ^ "\\\"" else "") d;
+		) l;
+	Printf.bprintf buf "\\</tr\\>\\</table\\>\\</div\\>"
 
 let html_mods_table_one_row buf n c l =
-    (* 1 row * n cols *)
-    (* Name Class List *)
-    Printf.bprintf buf "\\<div class=\\\"%s\\\"\\>\\<table id=\\\"%s\\\" name=\\\"%s\\\" class=\\\"%s\\\" cellspacing=0 cellpadding=0\\>\\<tr\\>"
-    c n n c;
-    List.iter (fun (t,c,d)  ->
-    (* Title Class Value *)
-     Printf.bprintf buf "\\<td class=\\\"%s\\\" %s\\>%s\\</td\\>"
-     c (if t <> "" then "title=\\\"" ^ t ^ "\\\"" else "") d;
-    ) l;
-    Printf.bprintf buf "\\</tr\\>\\</table\\>\\</div\\>"
+	(* 1 row * n cols *)
+	(* Name Class List *)
+	Printf.bprintf buf "\\<div id=\\\"container\\\" class=\\\"%s\\\"\\>\\<table id=\\\"%s\\\" name=\\\"%s\\\" class=\\\"%s\\\" cellspacing=0 cellpadding=0\\>\\<tr\\>"
+		c n n c;
+	List.iter (fun (t,c,d)  ->
+		(* Title Class Value *)
+		Printf.bprintf buf "\\<td class=\\\"%s\\\" %s\\>%s\\</td\\>"
+		c (if t <> "" then "title=\\\"" ^ t ^ "\\\"" else "") d;
+		) l;
+	Printf.bprintf buf "\\</tr\\>\\</table\\>\\</div\\>"
 
 let html_mods_table_one_col buf n c l =
-    (* n rows * 1 col *)
-    (* Name Class List *)
-    Printf.bprintf buf "\\<div class=\\\"%s\\\"\\>\\<table id=\\\"%s\\\" name=\\\"%s\\\" class=\\\"%s\\\" cellspacing=0 cellpadding=0\\>\\<tr\\>"
-    c n n c;
-    List.iter (fun (t,c,d)  ->
-    (* Title Class Value *)
-     Printf.bprintf buf "\\<tr\\>\\<td class=\\\"%s\\\" %s\\>%s\\</td\\>\\</tr\\>"
-     c (if t <> "" then "title=\\\"" ^ t ^ "\\\"" else "") d;
-    ) l;
-    Printf.bprintf buf "\\</tr\\>\\</table\\>\\</div\\>"
+	(* n rows * 1 col *)
+	(* Name Class List *)
+	Printf.bprintf buf "\\<div id=\\\"container\\\" class=\\\"%s\\\"\\>\\<table id=\\\"%s\\\" name=\\\"%s\\\" class=\\\"%s\\\" cellspacing=0 cellpadding=0\\>\\<tr\\>"
+		c n n c;
+	List.iter (fun (t,c,d)  ->
+		(* Title Class Value *)
+		Printf.bprintf buf "\\<tr\\>\\<td class=\\\"%s\\\" %s\\>%s\\</td\\>\\</tr\\>"
+		c (if t <> "" then "title=\\\"" ^ t ^ "\\\"" else "") d;
+		) l;
+	Printf.bprintf buf "\\</tr\\>\\</table\\>\\</div\\>"
 
 let html_mods_td buf l =
-    (* List *)
-    List.iter (fun (t,c,d)  ->
-    (* Title Class Value *)
-     Printf.bprintf buf "\\<td class=\\\"%s\\\" %s\\>%s\\</td\\>"
-     c (if t <> "" then "title=\\\"" ^ t ^ "\\\"" else "") d;
-    ) l
-
+	(* List *)
+	List.iter (fun (t,c,d)  ->
+		(* Title Class Value *)
+		Printf.bprintf buf "\\<td class=\\\"%s\\\" %s\\>%s\\</td\\>"
+		c (if t <> "" then "title=\\\"" ^ t ^ "\\\"" else "") d;
+	) l
 
 let html_mods_big_header_start buf c l =
   Printf.bprintf buf "\\<div class=\\\"%s\\\"\\>\\<table class=main border=0 cellspacing=0 cellpadding=0\\>\\<tr\\>\\<td\\>" c;

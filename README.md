@@ -1,7 +1,8 @@
 # mldonkey
 crosscompile from cygwin to windows executables (32)
 
-Using **nano** or **Notepad++** for CRLF line endings problem. Pay attention to this.
+1) there is a problem in latest ocaml version. 
+2) Using **nano** or **Notepad++** for CRLF line endings problem. Pay attention to this.
 
 ## Installing
 
@@ -62,7 +63,7 @@ nano ~/.bashrc
 ```
 append (check your version)
 ```
-export PATH=/mingw/bin:/usr/i686-w64-mingw32/bin:/usr/local/bin:/usr/bin:/usr/lib/gcc/i686-w64-mingw32/5.4.0
+export PATH=/mingw/bin:/usr/i686-w64-mingw32/bin:/usr/local/bin:/usr/bin:/usr/lib/gcc/i686-w64-mingw32/5.4.0:/cygdrive/c/ocamlmgw/bin
 export CC=/usr/bin/i686-w64-mingw32-gcc
 export CXX=/usr/bin/i686-w64-mingw32-g++
 export PKG_CONFIG_PATH=/mingw/lib/pkgconfig
@@ -70,16 +71,16 @@ export PKG_CONFIG_PATH=/mingw/lib/pkgconfig
 
 ### 2) Installing ZLIB
 ```
-wget http://zlib.net/zlib-1.2.8.tar.gz
-tar xzvf zlib-1.2.8.tar.gz
-cd zlib-1.2.8
+wget http://zlib.net/zlib-1.2.11.tar.gz
+tar xzvf zlib-1.2.11.tar.gz
+cd zlib-1.2.11
 nano win32/Makefile.gcc
 ```
 Change **CC = $(PREFIX)gcc** in
 ```
 CC=/usr/bin/i686-w64-mingw32-gcc
 ```
-Change **RC = $(PREFIX)windres** in
+Change **RC = $(PREFIX)windres** (line 57) in
 ```
 RC = i686-w64-mingw32-windres
 ```
@@ -106,7 +107,7 @@ execute
 ```
 nano Makefile
 ```
-Change **CC=gcc** in
+Change **CC=gcc** (line 18) in
 ```
 CC=/usr/bin/i686-w64-mingw32-gcc
 ```
@@ -124,7 +125,7 @@ cd libiconv-1.14
 ./configure --build=i686-w64-mingw32 --prefix=/mingw --enable-static
 nano lib/Makefile
 ```
-Change **RC=windres** in
+Change **RC=windres** (line 34) in
 ```
 RC=i686-w64-mingw32-windres
 ```
@@ -132,7 +133,7 @@ execute
 ```
 nano src/Makefile
 ```
-change **WINDRES = windres** in
+change **WINDRES = windres** (line 30) in
 ```
 WINDRES = i686-w64-mingw32-windres
 ```
@@ -152,9 +153,9 @@ make install
 ```
 ### 6) Installing LIBPNG
 ```
-wget ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng16/libpng-1.6.26.tar.gz
-tar xzvf libpng-1.6.26.tar.gz
-cd libpng-1.6.26
+wget ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng16/libpng-1.6.28.tar.gz
+tar xzvf libpng-1.6.28.tar.gz
+cd libpng-1.6.28
 ./configure --build=i686-w64-mingw32 --prefix=/mingw
 make
 make install
@@ -208,6 +209,11 @@ cp -iv regex.h /mingw/include
 latest source on github: https://github.com/file/file.git
 
 ```
+libtoolize --force
+aclocal
+autoheader
+automake --force-missing --add-missing
+autoconf
 ./configure --build=i686-w64-mingw32 --prefix=/mingw
 nano config.h
 ```
@@ -227,6 +233,8 @@ make install
 ### 11) Installing OCAML
 latest source on github: https://github.com/ocaml/ocaml.git
 execute (will install in **C:/ocamlmgw** )
+(git checkout d2281a23770b68300351b0d40ff48e2b92db6683
+edit of 27/12/2016)
 ```
 cp config/m-nt.h config/m.h
 cp config/s-nt.h config/s.h
@@ -245,6 +253,7 @@ make install
 
 ### 13) Installing CAMLP4
 latest sources on github: https://github.com/ocaml/camlp4.git
+(git checkout 9020330105b28f0d6ef088665632df681fb7a412)
 ```
 ./configure
 make all

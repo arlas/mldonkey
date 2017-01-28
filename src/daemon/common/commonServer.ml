@@ -371,6 +371,10 @@ let server_banner s o =
   Printf.bprintf buf "%s"
       info.G.server_banner
 
+(*
+*	http://127.0.0.1:4080/submit?q=vma
+*	First Table with server list
+*)
 let server_print_html_header buf ext =
      if !!html_mods_use_js_tooltips then Printf.bprintf buf
 "\\<div id=\\\"object1\\\" style=\\\"position:absolute; background-color:#FFFFDD;color:black;border-color:black;border-width:20px;font-size:8pt; visibility:visible; left:25px; top:
@@ -428,7 +432,7 @@ let server_print s o =
     (html_mods_cntr ());
 
     if !!html_mods_use_js_tooltips then
-       Printf.bprintf buf " onMouseOver=\\\"mOvr(this);setTimeout('popLayer(\\\\\'%s %s<br>%s\\\\\')',%d);setTimeout('hideLayer()',%d);return true;\\\" onMouseOut=\\\"mOut(this);hideLayer();setTimeout('hideLayer()',%d)\\\"\\>"
+       Printf.bprintf buf " onMouseOver=\\\"setTimeout('popLayer(\\\\\'%s %s<br>%s\\\\\')',%d);setTimeout('hideLayer()',%d);return true;\\\" onMouseOut=\\\"mOut(this);hideLayer();setTimeout('hideLayer()',%d)\\\"\\>"
         info.G.server_name ip_port_string 
 	(match info.G.server_features with
 	| None -> ""

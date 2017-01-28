@@ -134,11 +134,13 @@ let list_options_html o list =
       Printf.bprintf buf "\\<tr class=\\\"dl-%d\\\"" (html_mods_cntr ());
     
         if !!html_mods_use_js_helptext then
-          Printf.bprintf buf " onMouseOver=\\\"mOvr(this);setTimeout('popLayer(\\\\\'%s\\\\\')',%d);setTimeout('hideLayer()',%d);return true;\\\" onMouseOut=\\\"mOut(this);hideLayer();setTimeout('hideLayer()',%d)\\\"\\>"
+          Printf.bprintf buf " onMouseOver=\\\"setTimeout('popLayer(\\\\\'%s\\\\\')',%d);setTimeout('hideLayer()',%d);return true;\\\" onMouseOut=\\\"hideLayer();setTimeout('hideLayer()',%d)\\\"\\>"
           (Str.global_replace (Str.regexp "\n") "\\<br\\>" (Http_server.html_real_escaped o.option_help)) !!html_mods_js_tooltips_wait !!html_mods_js_tooltips_timeout !!html_mods_js_tooltips_wait
         else
           Printf.bprintf buf "\\>";
 
+		  (* options sending *)
+		  (* http://127.0.0.1:4080/submit?setoption=q&option=max_hard_download_rate&value=0 *)
       if String.contains o.option_value '\n' then
         Printf.bprintf buf "\\<td class=\\\"sr\\\"\\>
 \\<a href=\\\"http://mldonkey.sourceforge.net/%s\\\"\\>%s\\</a\\>
@@ -151,18 +153,18 @@ let list_options_html o list =
         begin
         Printf.bprintf buf "\\<td class=\\\"sr\\\"\\>
 \\<a href=\\\"http://mldonkey.sourceforge.net/%s\\\"\\>%s\\</a\\>\\</td\\>
-\\<td class=\\\"sr\\\"\\>\\<form action=\\\"submit\\\" target=\\\"$S\\\" onsubmit=\\\"javascript: {setTimeout('window.location.replace(window.location.href)',500);}\\\"\\>
-\\<input type=hidden name=setoption value=q\\>\\<input type=hidden name=option value=%s\\>"
+\\<td class=\\\"sr\\\"\\>\\<form action=\\\"btnsubmit\\\" target=\\\"$S\\\" onkeypress=\\\"inputkp(event,'setoption=q&option=%s&value=');\\\"\\>"
                   (String2.upp_initial o.option_name) o.option_name o.option_name;
 
+			(* dropdown *)
           if o.option_value = "true" || o.option_value = "false" then
             Printf.bprintf buf "\\<select style=\\\"font-family: verdana; font-size: 10px;\\\"
-                                name=\\\"value\\\" onchange=\\\"this.form.submit()\\\"\\>
+                                name=\\\"value\\\" onchange=\\\"choose(event,'setoption=q&option=%s&value=')\\\"\\>
                                 \\<option selected\\>%s\\<option\\>%s\\</select\\>"
-                                o.option_value (if o.option_value="true" then "false" else "true")
+                                o.option_name o.option_value (if o.option_value="true" then "false" else "true")
           else
             Printf.bprintf buf "\\<input style=\\\"font-family: verdana; font-size: 10px;\\\"
-                                type=text name=value onchange=\\\"track_changed(this)\\\" size=20 value=\\\"%s\\\"\\>"
+                                type=text name=value size=20 value=\\\"%s\\\"\\>"
                                 o.option_value;
         end;
         Printf.bprintf buf "\\</td\\>\\</form\\>\\<td class=\\\"sr\\\"\\>%s\\</td\\>" (shorten o.option_default 40);
@@ -558,7 +560,7 @@ let _ =
         html_mods_cntr_init ();
 
         (match args with
-            [arg] ->
+          | [arg] ->
               let refresh_delay = int_of_string arg in
               if use_html_mods o && refresh_delay > 1 then
                 Printf.bprintf buf "\\<meta http-equiv=\\\"refresh\\\" content=\\\"%d\\\"\\>"
@@ -689,7 +691,7 @@ formID.msgText.value=\\\"\\\";
             \\<td\\>\\<input style=\\\"font-family: verdana; font-size: 12px;\\\" type=submit
             Value=\\\"Refresh\\\"\\>\\</td\\>\\</form\\>";
                 Printf.bprintf buf "\\<form style=\\\"margin: 0px;\\\" id=\\\"clear\\\" name=\\\"clear\\\"
-            action=\\\"javascript:window.location.href='submit?q=clear_message_log'\\\"\\>
+            action=\\\"mSub('#output_div','clear_message_log','#container');\\\"\\>
             \\<td\\>\\<input style=\\\"font-family: verdana; font-size: 12px;\\\" type=submit
             Value=\\\"Clear\\\"\\>\\</td\\>\\</form\\>\\</tr\\>\\</table\\>";
                 ""
@@ -741,34 +743,41 @@ formID.msgText.value=\\\"\\\";
 (*************************************************************************)
 
 let _ =
-  register_commands "Driver/Servers"
+	register_commands "Driver/Servers"
     [
-
+	(*
+	*	File -> Servers -> Connected Servers
+	*)
     "vm", Arg_none (fun o ->
         let buf = o.conn_buf in
-        if use_html_mods o then Printf.bprintf buf
-            "\\<div class=\\\"servers\\\"\\>\\<table align=center border=0 cellspacing=0 cellpadding=0\\>\\<tr\\>\\<td\\>";
+        if use_html_mods o then
+			Printf.bprintf buf "\\<div id=\\\"container\\\" class=\\\"servers\\\"\\>\\<table align=center border=0 cellspacing=0 cellpadding=0\\>\\<tr\\>\\<td\\>";
         CommonInteractive.print_connected_servers o;
         if use_html_mods o then Printf.bprintf buf "\\</td\\>\\</tr\\>\\</table\\>\\</div\\>";
         ""), ":\t\t\t\t\t$blist connected servers$n";
 
+	(*
+	*	File -> Servers -> All Servers
+	*)
     "vma", Arg_none (fun o ->
         let buf = o.conn_buf in
         html_mods_cntr_init ();
         let nb_servers = ref 0 in
-        if use_html_mods o then server_print_html_header buf "";
+        if use_html_mods o then begin
+			Printf.bprintf buf "\\<div id=\"container\"\\>";
+			server_print_html_header buf ""
+		end;
         Intmap.iter (fun _ s ->
             try
               server_print s o;
               incr nb_servers;
-            with e ->
-                lprintf "Exception %s in server_print\n"
-                  (Printexc2.to_string e);
+            with e -> lprintf "Exception %s in server_print\n" (Printexc2.to_string e);
         ) !!servers;
         if use_html_mods o then begin
             Printf.bprintf buf "\\</table\\>\\</div\\>";
             html_mods_table_one_row buf "serversTable" "servers" [
-              ("", "srh", Printf.sprintf "Servers: %d known" !nb_servers); ]
+              ("", "srh", Printf.sprintf "Servers: %d known" !nb_servers); ];
+			  Printf.bprintf buf "\\</div\\>";
           end
         else
           Printf.bprintf buf "Servers: %d known\n" !nb_servers;
@@ -1111,6 +1120,9 @@ let _ =
 
     ), ":\t\t\t\t\tview upload credits";
 
+	(*
+	*	Status bar
+	*)
     "bw_stats", Arg_multiple (fun args o ->
         let buf = o.conn_buf in
         if use_html_mods o then
@@ -1127,7 +1139,7 @@ let _ =
             let ulkbs =
               (( (float_of_int !udp_upload_rate) +. (float_of_int !control_upload_rate)) /. 1024.0) in
 
-            Printf.bprintf buf "\\</head\\>\\<body\\>\\<div class=\\\"bw_stats\\\"\\>";
+            Printf.bprintf buf "\\</head\\>\\<body\\>\\<div id=\\\"container\\\" class=\\\"bw_stats\\\"\\>";
             Printf.bprintf buf "\\<table class=\\\"bw_stats\\\" cellspacing=0 cellpadding=0\\>\\<tr\\>";
             Printf.bprintf buf "\\<td\\>\\<table border=0 cellspacing=0 cellpadding=0\\>\\<tr\\>";
 
@@ -1495,7 +1507,7 @@ let _ =
     );
     if use_html_mods o then
       print_command_result o "porttest started, use command
-        \\<u\\>\\<a onclick=\\\"javascript:window.location.href='submit?q=porttest'\\\"\\>porttest\\</a\\>\\</u\\> to see results"
+        \\<u\\>\\<a onclick=\\\"mSub('#output_div','porttest','#container');\\\"\\>porttest\\</a\\>\\</u\\> to see results"
     else
       print_command_result o "porttest started, use command 'porttest' to see results";
            ""
@@ -1523,7 +1535,7 @@ let _ =
                           \\<tr\\>\\<td\\>\\<table cellspacing=0 cellpadding=0  width=100%%\\>
                           \\<tr\\>\\<td class=downloaded width=100%%\\>\\</td\\>
                             \\<td nowrap class=\\\"fbig\\\"\\>
-                            \\<a onclick=\\\"javascript:window.location.href='submit?q=force_porttest'\\\"\\>Restart porttest\\</a\\>\\</td\\>
+                            \\<a onclick=\\\"mSub('#output_div','force_porttest','#container');\\\"\\>Restart porttest\\</a\\>\\</td\\>
                             \\<td nowrap class=\\\"fbig pr\\\"\\>
                             \\<a onclick=\\\"javascript:window.location.reload()\\\"\\>Refresh results\\</a\\>\\</td\\>
                           \\</tr\\>\\</table\\>\\</td\\>\\</tr\\>\\<tr\\>\\<td\\>";
@@ -1584,11 +1596,14 @@ let _ =
         ""
     ), "<num1> <num2> ... :\t\tforget searches <num1> <num2> ...";
 
+	(*
+	*	File -> Search -> Extended Search
+	*)
     "vr", Arg_multiple (fun args o ->
         let buf = o.conn_buf in
         let user = o.conn_user in
         match args with
-          num :: _ ->
+        | num :: _ ->
             List.iter (fun num ->
                 let num = int_of_string num in
                 let s = search_find num in
@@ -1597,7 +1612,7 @@ let _ =
         | [] ->
             begin
               match user.ui_user_searches with
-                [] ->
+              | [] ->
                   if o.conn_output = HTML then
                     html_mods_table_one_row buf "searchTable" "search" [
                       ("", "srh", "No search to print"); ]
@@ -1640,6 +1655,9 @@ let _ =
         ""
     ), "<query> :\t\t\t\tsearch for files locally\n\n\tWith special args:\n\t-network <netname>\n\t-minsize <size>\n\t-maxsize <size>\n\t-media <Video|Audio|...>\n\t-Video\n\t-Audio\n\t-format <format>\n\t-title <word in title>\n\t-album <word in album>\n\t-artist <word in artist>\n\t-field <field> <fieldvalue>\n\t-not <word>\n\t-and <word>\n\t-or <word>\n";
 
+	(*
+	*	File -> Search -> View Searches
+	*)
     "vs", Arg_none (fun o ->
         let buf = o.conn_buf in
         let user = o.conn_user in
@@ -1671,6 +1689,7 @@ let _ =
         ""
     ), ":\t\t\t\t\tview all queries";
 
+	(* deprecated 
     "view_custom_queries", Arg_none (fun o ->
         let buf = o.conn_buf in
         if o.conn_output <> HTML then
@@ -1707,7 +1726,7 @@ let _ =
              "parent.frames[_getFrameByName('output')].location.href='http://www.emugle.com/'", "eMugle");*)
           ]);
         ""
-    ), ":\t\t\tview custom queries";
+    ), ":\t\t\tview custom queries"; *)
 
     "d", Arg_multiple (fun args o ->
         List.iter (fun arg ->
@@ -1715,12 +1734,15 @@ let _ =
         ""
     ), "<num> :\t\t\t\t$bfile to download$n";
 
+	(*
+	*	File -> Search -> Force DL
+	*)
     "force_download", Arg_none (fun o ->
 	if !forceable_download = [] then
 	  begin
             let output = (if o.conn_output = HTML then begin
                 let buf = Buffer.create 100 in
-                Printf.bprintf buf "\\<div class=\\\"cs\\\"\\>";
+                Printf.bprintf buf "\\<div id=\\\"container\\\" class=\\\"cs\\\"\\>";
                 html_mods_table_header buf "dllinkTable" "results" [];
                 Printf.bprintf buf "\\<tr\\>";
                 html_mods_td buf [ ("", "srh", "No download to force"); ];
@@ -1819,17 +1841,17 @@ let _ =
 \\<tr\\>\\<td\\>
 \\<table cellspacing=0 cellpadding=0  width=100%%\\>\\<tr\\>
 \\<td class=downloaded width=100%%\\>\\</td\\>
-\\<td nowrap title=\\\"Show shares Tab (also related for incoming directory)\\\" class=\\\"fbig fbigpad\\\"\\>\\<a onclick=\\\"javascript:window.location.href='submit?q=shares'\\\"\\>Shares\\</a\\>\\</td\\>
+\\<td nowrap title=\\\"Show shares Tab (also related for incoming directory)\\\" class=\\\"fbig fbigpad\\\"\\>\\<a onclick=\\\"mSub('#output_div','shares','#container');\\\"\\>Shares\\</a\\>\\</td\\>
 %s
-\\<td nowrap title=\\\"Show Web_infos Tab where you can add/remove automatic downloads like serverlists\\\" class=\\\"fbig fbigpad\\\"\\>\\<a onclick=\\\"javascript:window.location.href='submit?q=vwi'\\\"\\>Web infos\\</a\\>\\</td\\>
-\\<td nowrap title=\\\"Show Calendar Tab, there are information about automatically jobs\\\" class=\\\"fbig fbigpad\\\"\\>\\<a onclick=\\\"javascript:window.location.href='submit?q=vcal'\\\"\\>Calendar\\</a\\>\\</td\\>
-\\<td nowrap title=\\\"Change to simple Webinterface without html_mods\\\" class=\\\"fbig fbigpad\\\"\\>\\<a onclick=\\\"javascript:window.location.href='submit?q=html_mods'\\\"\\>Toggle html_mods\\</a\\>\\</td\\>
-\\<td nowrap title=\\\"voo\\\" class=\\\"fbig pr fbigpad\\\"\\>\\<a onclick=\\\"javascript:window.location.href='submit?q=voo+1'\\\"\\>Full Options\\</a\\>\\</td\\>
+\\<td nowrap title=\\\"Show Web_infos Tab where you can add/remove automatic downloads like serverlists\\\" class=\\\"fbig fbigpad\\\"\\>\\<a onclick=\\\"mSub('#output_div','vwi','#container');\\\"\\>Web infos\\</a\\>\\</td\\>
+\\<td nowrap title=\\\"Show Calendar Tab, there are information about automatically jobs\\\" class=\\\"fbig fbigpad\\\"\\>\\<a onclick=\\\"mSub('#output_div','vcal','#container');\\\"\\>Calendar\\</a\\>\\</td\\>
+\\<td nowrap title=\\\"Change to simple Webinterface without html_mods\\\" class=\\\"fbig fbigpad\\\"\\>\\<a onclick=\\\"mSub('#output_div','html_mods','#container');\\\"\\>Toggle html_mods\\</a\\>\\</td\\>
+\\<td nowrap title=\\\"voo\\\" class=\\\"fbig pr fbigpad\\\"\\>\\<a onclick=\\\"mSub('#output_div','voo+1');\\\"\\>Full Options\\</a\\>\\</td\\>
 \\</tr\\>\\</table\\>
 \\</td\\>\\</tr\\>
 \\<tr\\>\\<td\\>"
 (if (user2_is_admin o.conn_user.ui_user) then
-  "\\<td nowrap title=\\\"Show users Tab where you can add/remove Users\\\" class=\\\"fbig fbigpad\\\"\\>\\<a onclick=\\\"javascript:window.location.href='submit?q=users'\\\"\\>Users\\</a\\>\\</td\\>"
+  "\\<td nowrap title=\\\"Show users Tab where you can add/remove Users\\\" class=\\\"fbig fbigpad\\\"\\>\\<a onclick=\\\"mSub('#output_div','users','#container');\\\"\\>Users\\</a\\>\\</td\\>"
  else "");
 
             list_options_html o  (
@@ -1876,9 +1898,6 @@ let _ =
         "\nUse '$rvoo$n' for all options"
     ), ":\t\t\t\t\t$bdisplay options$n";
 
-
-
-
     "voo", Arg_multiple (fun args o ->
         let buf = o.conn_buf in
         let put fmt = Printf.bprintf buf fmt in
@@ -1904,7 +1923,7 @@ if (\\\"0123456789.\\\".indexOf(v) == -1)
 //--\\>
 \\</script\\>";
 
-            let button ~title ~cls ~cmd content = put "\\<td nowrap title=\\\"%s\\\" class=\\\"%s\\\"\\>\\<a onclick=\\\"javascript:window.location.href='submit?q=%s';setTimeout('window.location.replace(window.location.href)',500)\\\"\\>%s\\</a\\>\\</td\\>" title cls cmd content
+            let button ~title ~cls ~cmd content = put "\\<td nowrap title=\\\"%s\\\" class=\\\"%s\\\"\\>\\<a onclick=\\\"mSub('#output_div','%s');\\\"\\>%s\\</a\\>\\</td\\>" title cls cmd content
             in
 
             let select name options =
@@ -1925,7 +1944,7 @@ style=\\\"padding: 0px; font-size: 10px; font-family: verdana\\\" onchange=\\\"t
             put "\\<div class=\\\"vo\\\"\\>";
             put "\\<table class=main cellspacing=0 cellpadding=0\\>";
             put "\\<tr\\>\\<td\\>";
-            put "\\<table cellspacing=0 cellpadding=0 class='hcenter'\\>\\<tr\\>";
+            put "\\<table id='container' cellspacing='0' cellpadding='0' class='hcenter'\\>\\<tr\\>";
 
             List.iter (fun (s,title) ->
                 incr tabnumber; incr mtabs;
@@ -2204,7 +2223,7 @@ action=\\\"javascript:pluginSubmit();\\\"\\>";
             put "\\</td\\>\\</tr\\>";
             put "\\<tr\\>\\<td\\>";
 
-            put "\\<table cellspacing=0 cellpadding=0 class='hcenter'\\>\\<tr\\>";
+            put "\\<table id='container' cellspacing='0' cellpadding='0' class='hcenter'\\>\\<tr\\>";
 
             button ~title:"Show shares Tab (also related for incoming directory)" ~cls:"fbig fbigb" ~cmd:"shares" "Shares";
             if (user2_is_admin o.conn_user.ui_user) then
@@ -2239,7 +2258,7 @@ action=\\\"javascript:submitHtmlModsStyle();\\\"\\>";
             put "\\</form\\>\\</td\\>\\</tr\\>\\</table\\>";
             put "\\</td\\>\\</tr\\>";
             put "\\<tr\\>\\<td\\>";
-            put "\\<table cellspacing=0 cellpadding=0 class='hcenter'\\>\\<tr\\>";
+            put "\\<table id='container' cellspacing='0' cellpadding='0' class='hcenter'\\>\\<tr\\>";
             button ~title:"Change to simple Webinterface without html_mods" ~cls:"fbig fbigb fbigpad" ~cmd:"html_mods" "toggle html_mods";
             put "\\<td nowrap title=\\\"Toggle option helptext from javascript popup to html table\\\" class=\\\"fbig fbigb pr fbigpad\\\"\\>
 \\<a onclick=\\\"javascript: {parent.fstatus.location.href='submit?q=set+html_mods_use_js_helptext+%s'; setTimeout('window.location.replace(window.location.href)',1000);return true;}\\\"\\>toggle js_helptext\\</a\\>" (if !!html_mods_use_js_helptext then "false" else "true");
@@ -4131,6 +4150,10 @@ let _ =
 
     ), ":\t\t\tselect html_mods_style <#>";
 
+	(*
+	*	File -> Search -> RSS
+	*	TODO: empty page?
+	*)
     "rss", Arg_none (fun o ->
         let buf = o.conn_buf in
         let module CW = CommonWeb in
@@ -4155,7 +4178,7 @@ let _ =
             html_mods_cntr_init ();
             List.iter (fun item ->
                 match item.Rss.item_title, item.Rss.item_link with
-                  None, _
+                | None, _
                 | _, None -> ()
                 | Some title, Some link ->
                   if o.conn_output = HTML then begin
@@ -4187,8 +4210,6 @@ let _ =
                 Printf.bprintf buf "\\</table\\>\\</div\\>\\</div\\>\\<pre\\>";
         ) CW.rss_feeds;
         ""
-
-
     ), ":\t\t\t\t\tprint RSS feeds";
 
     "html_theme", Arg_multiple (fun args o ->
